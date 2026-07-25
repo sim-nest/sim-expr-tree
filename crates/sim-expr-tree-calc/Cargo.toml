@@ -9,10 +9,10 @@ publish = false
 description = "Scaffold for SIM expression-tree calculation."
 
 [dependencies]
-sim-incremental-core = { version = "0.1.0", path = "../../../sim-runtime/crates/sim-incremental-core" }
+sim-incremental-core = { version = "0.1.0" }
 sim-expr-tree-core = { path = "../sim-expr-tree-core" }
-sim-kernel = { version = "0.1.2", path = "../../../sim-kernel" }
-sim-table-core = { version = "0.1.2", path = "../../../sim-foundation/crates/sim-table-core" }
+sim-kernel = { version = "0.1.2" }
+sim-table-core = { version = "0.1.2" }
 
 [lints]
 workspace = true
