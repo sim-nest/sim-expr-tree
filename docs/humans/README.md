@@ -25,6 +25,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 
 | Surface | Kind | Subject |
 | --- | --- | --- |
+| `cli/expr-tree` | `cli` | `crate/sim-lib-expr-tree-serve` |
 | `cli/sim-expr-tree` | `cli` | `crate/sim-expr-tree` |
 | `cli/xtask` | `cli` | `crate/xtask` |
 | `docs/sim-expr-tree/generated` | `docs` | `doc-set/sim-expr-tree/generated` |

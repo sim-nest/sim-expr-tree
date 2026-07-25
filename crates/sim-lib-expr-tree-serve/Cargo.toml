@@ -10,7 +10,10 @@ publish = false
 description = "Scaffold for the SIM expression-tree serve entrypoint library."
 
 [dependencies]
+sim-codec-lisp = { version = "0.1.2" }
+sim-kernel = { version = "0.1.5" }
 sim-lib-expr-tree-server = { path = "../sim-lib-expr-tree-server" }
+sim-run-core = { version = "0.1.7" }
 
 [lints]
 workspace = true
