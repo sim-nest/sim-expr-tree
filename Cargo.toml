@@ -1,0 +1,21 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/sim-expr-tree",
+  "crates/sim-expr-tree-calc",
+  "crates/sim-expr-tree-core",
+  "crates/sim-lib-expr-tree",
+  "crates/sim-lib-expr-tree-serve",
+  "crates/sim-lib-expr-tree-server",
+  "crates/sim-lib-view-expr-tree",
+  "xtask",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MPL-2.0"
+repository = "https://github.com/sim-nest/sim-expr-tree"
+homepage = "https://github.com/sim-nest/sim-expr-tree"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

@@ -1,0 +1,15 @@
+[package]
+name = "sim-lib-expr-tree-serve"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+description = "Scaffold for the SIM expression-tree serve entrypoint library."
+
+[dependencies]
+sim-lib-expr-tree-server = { path = "../sim-lib-expr-tree-server" }
+
+[lints]
+workspace = true

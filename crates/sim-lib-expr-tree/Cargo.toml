@@ -1,0 +1,16 @@
+[package]
+name = "sim-lib-expr-tree"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+description = "Scaffold for the loadable SIM expression-tree runtime library."
+
+[dependencies]
+sim-expr-tree-calc = { path = "../sim-expr-tree-calc" }
+sim-expr-tree-core = { path = "../sim-expr-tree-core" }
+
+[lints]
+workspace = true

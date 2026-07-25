@@ -1,0 +1,45 @@
+{
+  "generator": "xtask repo-contract v1",
+  "packages": [
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-expr-tree"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-expr-tree-calc"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-expr-tree-core"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-lib-expr-tree"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-lib-expr-tree-serve"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-lib-expr-tree-server"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "sim-lib-view-expr-tree"
+    },
+    {
+      "features": [],
+      "group": "workspace",
+      "package": "xtask"
+    }
+  ]
+}

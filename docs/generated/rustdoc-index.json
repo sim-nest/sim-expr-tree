@@ -1,0 +1,61 @@
+{
+  "generator": "xtask repo-contract v1",
+  "packages": [
+    {
+      "crate_name": "sim-expr-tree",
+      "group": "workspace",
+      "manifest": "crates/sim-expr-tree/Cargo.toml",
+      "package": "sim-expr-tree",
+      "summary": "Thin SIM expression-tree bootloader binary scaffold."
+    },
+    {
+      "crate_name": "sim_expr_tree_calc",
+      "group": "workspace",
+      "manifest": "crates/sim-expr-tree-calc/Cargo.toml",
+      "package": "sim-expr-tree-calc",
+      "summary": "Calculation layer scaffold for expression trees."
+    },
+    {
+      "crate_name": "sim_expr_tree_core",
+      "group": "workspace",
+      "manifest": "crates/sim-expr-tree-core/Cargo.toml",
+      "package": "sim-expr-tree-core",
+      "summary": "Core expression-tree record scaffold."
+    },
+    {
+      "crate_name": "sim_lib_expr_tree",
+      "group": "workspace",
+      "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
+      "package": "sim-lib-expr-tree",
+      "summary": "Loadable runtime library scaffold for expression trees."
+    },
+    {
+      "crate_name": "sim_lib_expr_tree_serve",
+      "group": "workspace",
+      "manifest": "crates/sim-lib-expr-tree-serve/Cargo.toml",
+      "package": "sim-lib-expr-tree-serve",
+      "summary": "Serve entrypoint scaffold for expression trees."
+    },
+    {
+      "crate_name": "sim_lib_expr_tree_server",
+      "group": "workspace",
+      "manifest": "crates/sim-lib-expr-tree-server/Cargo.toml",
+      "package": "sim-lib-expr-tree-server",
+      "summary": "Server composition scaffold for expression trees."
+    },
+    {
+      "crate_name": "sim_lib_view_expr_tree",
+      "group": "workspace",
+      "manifest": "crates/sim-lib-view-expr-tree/Cargo.toml",
+      "package": "sim-lib-view-expr-tree",
+      "summary": "View library scaffold for expression trees."
+    },
+    {
+      "crate_name": "xtask",
+      "group": "workspace",
+      "manifest": "xtask/Cargo.toml",
+      "package": "xtask",
+      "summary": "Repository automation wrapper for generated documentation and policy checks."
+    }
+  ]
+}
