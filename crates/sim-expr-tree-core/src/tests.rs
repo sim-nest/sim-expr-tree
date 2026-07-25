@@ -1,5 +1,7 @@
 //! conformance: finite expression-tree namespace records.
 
+use std::collections::BTreeMap;
+
 use sim_table_core::{TablePath, TablePathRef};
 
 use super::*;
@@ -271,4 +273,182 @@ fn policy_records_source_stamps_and_reuses_table_path_references() {
     let reference = TablePathRef::parse("../total").unwrap();
     let resolved = resolve_namespace_path(&base, &reference).unwrap();
     assert_eq!(resolved.to_string(), "/sheet/total");
+}
+
+fn absolute(path: &str) -> TablePath {
+    TablePath::parse_absolute(path).unwrap()
+}
+
+#[test]
+fn store_typed_adapters_keep_source_control_and_derived_lanes_separate() {
+    let root = DirId::new("root").unwrap();
+    let mut stores = ExprTreeStores::new(root.clone()).unwrap();
+    let cell = CellId::new("source-cell").unwrap();
+    let mut source = BTreeMap::new();
+    source.insert(
+        cell.clone(),
+        SourceEntry::new("(+ a b)").with_codec("codec:lisp"),
+    );
+    let mut control = BTreeMap::new();
+    control.insert("counter:/".to_owned(), ControlEntry::Counter(3));
+    let mut pending = ExprTreeStores::prepare_source_control_commit(source, control);
+
+    stores.recover_commit(&mut pending);
+    stores.put_derived(cell.clone(), DerivedEntry::CachedValue("42".to_owned()));
+    stores.put_control("ui:expanded", ControlEntry::UiPreference("true".to_owned()));
+
+    assert_eq!(stores.root_dir(), &root);
+    assert_eq!(stores.source_entry(&cell).unwrap().expr(), "(+ a b)");
+    assert_eq!(
+        stores.source_entry(&cell).unwrap().codec(),
+        Some("codec:lisp")
+    );
+    assert_eq!(
+        stores.control_entry("counter:/"),
+        Some(&ControlEntry::Counter(3))
+    );
+    assert_eq!(
+        stores.derived_entry(&cell),
+        Some(&DerivedEntry::CachedValue("42".to_owned()))
+    );
+    assert_eq!(crate::store::source_keys_for_test(&stores).len(), 1);
+}
+
+#[test]
+fn store_source_control_commit_recovers_from_partial_failure() {
+    let mut stores = ExprTreeStores::new(DirId::new("root").unwrap()).unwrap();
+    let cell = CellId::new("source-cell").unwrap();
+    let mut source = BTreeMap::new();
+    source.insert(cell.clone(), SourceEntry::new("(* subtotal tax)"));
+    let mut control = BTreeMap::new();
+    control.insert(
+        "policy:/sheet".to_owned(),
+        ControlEntry::Policy(EffectivePolicy::empty()),
+    );
+    let mut pending = ExprTreeStores::prepare_source_control_commit(source, control);
+
+    stores.commit_source(&mut pending);
+    assert!(pending.source_committed());
+    assert!(!pending.control_committed());
+    assert!(stores.source_entry(&cell).is_some());
+    assert!(stores.control_entry("policy:/sheet").is_none());
+
+    stores.recover_commit(&mut pending);
+    assert!(pending.control_committed());
+    assert!(stores.control_entry("policy:/sheet").is_some());
+}
+
+#[test]
+fn store_reopen_validates_filesystem_database_and_read_only_mounts() {
+    let mounts = vec![
+        MountDescriptor::dir(
+            absolute("/files"),
+            BackendKind::Filesystem,
+            MountEpoch::new(10),
+        ),
+        MountDescriptor::dir(absolute("/db"), BackendKind::Database, MountEpoch::new(11)),
+        MountDescriptor::table(
+            absolute("/catalog"),
+            BackendKind::ReadOnly,
+            MountEpoch::new(12),
+        ),
+    ];
+
+    let stores = ExprTreeStores::reopen(
+        DirId::new("root").unwrap(),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        mounts,
+    )
+    .unwrap();
+
+    let observed: Vec<_> = stores
+        .mounts()
+        .map(|mount| (mount.path().to_string(), mount.resource(), mount.backend()))
+        .collect();
+    assert_eq!(
+        observed,
+        vec![
+            (
+                "/catalog".to_owned(),
+                MountResource::Table,
+                BackendKind::ReadOnly
+            ),
+            ("/db".to_owned(), MountResource::Dir, BackendKind::Database),
+            (
+                "/files".to_owned(),
+                MountResource::Dir,
+                BackendKind::Filesystem
+            ),
+        ]
+    );
+}
+
+#[test]
+fn mount_requires_explicit_operation_and_never_flattens_table_leaves() {
+    let mut stores = ExprTreeStores::new(DirId::new("root").unwrap()).unwrap();
+    assert_eq!(
+        stores.return_value_without_mounting(MountResource::Table),
+        0
+    );
+
+    stores
+        .mount(MountDescriptor::table(
+            absolute("/results"),
+            BackendKind::Memory,
+            MountEpoch::new(1),
+        ))
+        .unwrap();
+    assert_eq!(stores.mounts().count(), 1);
+    assert_eq!(
+        stores.mount(MountDescriptor::dir(
+            absolute("/results/detail"),
+            BackendKind::Database,
+            MountEpoch::new(1),
+        )),
+        Err(StoreError::TableMountIsLeaf(absolute("/results")))
+    );
+}
+
+#[test]
+fn mount_epochs_are_control_state_and_survive_reopen() {
+    let mut stores = ExprTreeStores::new(DirId::new("root").unwrap()).unwrap();
+    stores
+        .mount(MountDescriptor::dir(
+            absolute("/remote"),
+            BackendKind::MountedNamespace,
+            MountEpoch::new(1),
+        ))
+        .unwrap();
+    stores
+        .observe_mount_epoch(&absolute("/remote"), MountEpoch::new(2))
+        .unwrap();
+
+    assert_eq!(
+        stores.control_entry("mount-epoch:/remote"),
+        Some(&ControlEntry::MountEpoch(MountEpoch::new(2)))
+    );
+    assert_eq!(stores.mounts().next().unwrap().epoch(), MountEpoch::new(2));
+}
+
+#[test]
+fn mount_corruption_and_root_mounts_fail_closed() {
+    let mut stores = ExprTreeStores::new(DirId::new("root").unwrap()).unwrap();
+    assert_eq!(
+        stores.mount(MountDescriptor::dir(
+            TablePath::root(),
+            BackendKind::Memory,
+            MountEpoch::new(0),
+        )),
+        Err(StoreError::InvalidMount(
+            "root is supplied as the required root Dir, not as a mount".to_owned()
+        ))
+    );
+    assert_eq!(
+        stores.observe_mount_epoch(&absolute("/missing"), MountEpoch::new(2)),
+        Err(StoreError::CorruptMount(
+            "missing mount /missing".to_owned()
+        ))
+    );
 }

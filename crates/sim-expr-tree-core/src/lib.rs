@@ -9,6 +9,7 @@ mod node;
 mod path;
 mod policy;
 mod stamp;
+mod store;
 
 pub use error::NamespaceError;
 pub use id::{CellId, DirId, TreeId};
@@ -18,6 +19,10 @@ pub use node::{CellRecord, DirRecord, NodeKind, SourceRecord};
 pub use path::resolve_namespace_path;
 pub use policy::{CodecPolicy, EffectivePolicy, PolicyPatch};
 pub use stamp::{RevisionTick, Stamp, WallTimeMs};
+pub use store::{
+    BackendKind, ControlEntry, DerivedEntry, ExprTreeStores, MountDescriptor, MountEpoch,
+    MountResource, PendingCommit, SourceEntry, StoreError,
+};
 
 /// Returns the crate's public identity.
 pub fn crate_identity() -> &'static str {

@@ -339,10 +339,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "6775fec5dcd7d26d9c06f8624edcb255b48c7b53",
+    "git_commit": "28133b265eb00c8b593a55a440001e34a0fe0bff",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "6775fec5dcd7d26d9c06f8624edcb255b48c7b53",
+    "source_commit": "28133b265eb00c8b593a55a440001e34a0fe0bff",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -355,9 +355,9 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "0f073968e9927efe",
+    "workspace_hash": "e7fd2a031143f565",
     "workspace_hash_algorithm": "fnv1a64",
-    "workspace_hash_input_count": 32,
+    "workspace_hash_input_count": 33,
     "workspace_hash_inputs": [
       "Cargo.toml",
       "crates/sim-expr-tree/Cargo.toml",
@@ -378,6 +378,7 @@
       "crates/sim-expr-tree-core/src/path.rs",
       "crates/sim-expr-tree-core/src/policy.rs",
       "crates/sim-expr-tree-core/src/stamp.rs",
+      "crates/sim-expr-tree-core/src/store.rs",
       "crates/sim-expr-tree-core/src/tests.rs",
       "crates/sim-lib-expr-tree/Cargo.toml",
       "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/recipe.toml",
