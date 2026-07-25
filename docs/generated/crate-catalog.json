@@ -1,0 +1,102 @@
+{
+  "generator": "xtask crate-catalog v1",
+  "package_count": 8,
+  "packages": [
+    {
+      "description": "Scaffold for SIM expression-tree calculation.",
+      "generated_readme": false,
+      "manifest": "crates/sim-expr-tree-calc/Cargo.toml",
+      "name": "sim-expr-tree-calc",
+      "publish": "false",
+      "readme": "crates/sim-expr-tree-calc/README.md",
+      "root": "crates/sim-expr-tree-calc",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Scaffold for SIM expression-tree core records.",
+      "generated_readme": false,
+      "manifest": "crates/sim-expr-tree-core/Cargo.toml",
+      "name": "sim-expr-tree-core",
+      "publish": "false",
+      "readme": "crates/sim-expr-tree-core/README.md",
+      "root": "crates/sim-expr-tree-core",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Thin SIM expression-tree bootloader binary scaffold.",
+      "generated_readme": false,
+      "manifest": "crates/sim-expr-tree/Cargo.toml",
+      "name": "sim-expr-tree",
+      "publish": "false",
+      "readme": "crates/sim-expr-tree/README.md",
+      "root": "crates/sim-expr-tree",
+      "target_kinds": [
+        "bin"
+      ]
+    },
+    {
+      "description": "Scaffold for the SIM expression-tree serve entrypoint library.",
+      "generated_readme": false,
+      "manifest": "crates/sim-lib-expr-tree-serve/Cargo.toml",
+      "name": "sim-lib-expr-tree-serve",
+      "publish": "false",
+      "readme": "crates/sim-lib-expr-tree-serve/README.md",
+      "root": "crates/sim-lib-expr-tree-serve",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Scaffold for the SIM expression-tree server library.",
+      "generated_readme": false,
+      "manifest": "crates/sim-lib-expr-tree-server/Cargo.toml",
+      "name": "sim-lib-expr-tree-server",
+      "publish": "false",
+      "readme": "crates/sim-lib-expr-tree-server/README.md",
+      "root": "crates/sim-lib-expr-tree-server",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Scaffold for the loadable SIM expression-tree runtime library.",
+      "generated_readme": false,
+      "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
+      "name": "sim-lib-expr-tree",
+      "publish": "false",
+      "readme": "crates/sim-lib-expr-tree/README.md",
+      "root": "crates/sim-lib-expr-tree",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Scaffold for the SIM expression-tree view library.",
+      "generated_readme": false,
+      "manifest": "crates/sim-lib-view-expr-tree/Cargo.toml",
+      "name": "sim-lib-view-expr-tree",
+      "publish": "false",
+      "readme": "crates/sim-lib-view-expr-tree/README.md",
+      "root": "crates/sim-lib-view-expr-tree",
+      "target_kinds": [
+        "lib"
+      ]
+    },
+    {
+      "description": "Repository automation wrapper for generated documentation and policy checks.",
+      "generated_readme": false,
+      "manifest": "xtask/Cargo.toml",
+      "name": "xtask",
+      "publish": "false",
+      "readme": "xtask/README.md",
+      "root": "xtask",
+      "target_kinds": [
+        "bin"
+      ]
+    }
+  ]
+}
