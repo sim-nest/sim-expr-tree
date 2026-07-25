@@ -1,5 +1,11 @@
 #![forbid(unsafe_code)]
-//! Calculation layer scaffold for expression trees.
+//! Incremental calculation support for expression trees.
+
+mod calc;
+mod policy;
+
+pub use calc::{CalcQuery, CellExpr, ExprTreeCalc};
+pub use policy::{EXPR_TREE_REF, ExprTreeRefPolicy};
 
 /// Returns the crate's public scaffold identity.
 pub fn crate_identity() -> &'static str {
@@ -12,10 +18,4 @@ pub fn core_identity() -> &'static str {
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn identity_names_the_calc_crate() {
-        assert_eq!(super::crate_identity(), "sim-expr-tree-calc");
-        assert_eq!(super::core_identity(), "sim-expr-tree-core");
-    }
-}
+mod tests;

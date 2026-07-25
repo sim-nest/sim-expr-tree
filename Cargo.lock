@@ -32,6 +32,9 @@ name = "sim-expr-tree-calc"
 version = "0.1.0"
 dependencies = [
  "sim-expr-tree-core",
+ "sim-incremental-core",
+ "sim-kernel 0.1.5",
+ "sim-table-core",
 ]
 
 [[package]]
@@ -39,6 +42,17 @@ name = "sim-expr-tree-core"
 version = "0.1.0"
 dependencies = [
  "sim-table-core",
+]
+
+[[package]]
+name = "sim-incremental-core"
+version = "0.1.0"
+
+[[package]]
+name = "sim-kernel"
+version = "0.1.5"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]
@@ -84,7 +98,7 @@ dependencies = [
 name = "sim-table-core"
 version = "0.1.2"
 dependencies = [
- "sim-kernel",
+ "sim-kernel 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "sim-value",
 ]
 
@@ -92,7 +106,7 @@ dependencies = [
 name = "sim-value"
 version = "0.1.2"
 dependencies = [
- "sim-kernel",
+ "sim-kernel 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -13,7 +13,7 @@
       "group": "workspace",
       "manifest": "crates/sim-expr-tree-calc/Cargo.toml",
       "package": "sim-expr-tree-calc",
-      "summary": "Calculation layer scaffold for expression trees."
+      "summary": "Incremental calculation support for expression trees."
     },
     {
       "crate_name": "sim_expr_tree_core",
