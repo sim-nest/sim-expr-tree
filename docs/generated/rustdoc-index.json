@@ -20,7 +20,7 @@
       "group": "workspace",
       "manifest": "crates/sim-expr-tree-core/Cargo.toml",
       "package": "sim-expr-tree-core",
-      "summary": "Core expression-tree record scaffold."
+      "summary": "Backend-neutral expression-tree namespace records."
     },
     {
       "crate_name": "sim_lib_expr_tree",

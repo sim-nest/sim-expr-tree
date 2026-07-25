@@ -8,5 +8,8 @@ homepage.workspace = true
 publish = false
 description = "Scaffold for SIM expression-tree core records."
 
+[dependencies]
+sim-table-core = { version = "0.1.2", path = "../../../sim-foundation/crates/sim-table-core" }
+
 [lints]
 workspace = true

@@ -1,19 +1,28 @@
 #![forbid(unsafe_code)]
-//! Core expression-tree record scaffold.
+//! Backend-neutral expression-tree namespace records.
 
-/// Current implementation posture for the core crate.
-pub const SCAFFOLD_STATUS: &str = "planned";
+mod error;
+mod id;
+mod name;
+mod namespace;
+mod node;
+mod path;
+mod policy;
+mod stamp;
 
-/// Returns the crate's public scaffold identity.
+pub use error::NamespaceError;
+pub use id::{CellId, DirId, TreeId};
+pub use name::{GeneratedNameKind, NamespaceName};
+pub use namespace::{CellCreate, Namespace, NamespaceEntry, WriterLane};
+pub use node::{CellRecord, DirRecord, NodeKind, SourceRecord};
+pub use path::resolve_namespace_path;
+pub use policy::{CodecPolicy, EffectivePolicy, PolicyPatch};
+pub use stamp::{RevisionTick, Stamp, WallTimeMs};
+
+/// Returns the crate's public identity.
 pub fn crate_identity() -> &'static str {
     "sim-expr-tree-core"
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn identity_names_the_core_crate() {
-        assert_eq!(super::crate_identity(), "sim-expr-tree-core");
-        assert_eq!(super::SCAFFOLD_STATUS, "planned");
-    }
-}
+mod tests;

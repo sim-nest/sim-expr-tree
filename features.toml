@@ -17,3 +17,18 @@ code = "advisory"
 [enforcement.route]
 major_entrypoints = "advisory"
 frameworks = "advisory"
+
+[[feature]]
+id = "feature/sim-expr-tree/finite-namespace"
+title = "Expression-tree finite namespace records"
+summary = "Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations."
+owner = "crate/sim-expr-tree-core"
+audiences = ["code", "framework"]
+guidance = "Use this row when expression-tree storage needs immutable TreeId, DirId, and CellId records, durable-before-create generated-name reservation, inherited codec policy resolution, or canonical Table path reference reuse. Namespace mutation goes through one serialized writer lane; reads inspect finite maps without allocating names."
+claims_anchors = [
+  "anchor/crate/sim-expr-tree-core",
+  "anchor/rustdoc/sim-expr-tree-core/crate-root",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-expr-tree-core/src/tests",
+]

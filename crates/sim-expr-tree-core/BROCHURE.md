@@ -1,3 +1,4 @@
 # sim-expr-tree-core
 
-Reserved core crate for expression-tree records and namespace policy.
+Finite expression-tree namespace records with immutable ids, inherited policy,
+and crash-safe generated-name reservation.
