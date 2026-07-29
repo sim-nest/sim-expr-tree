@@ -36,10 +36,10 @@ claims_specimens = [
 [[feature]]
 id = "feature/sim-expr-tree/incremental-calculation"
 title = "Expression-tree incremental calculation"
-summary = "Record dynamic expression-tree references and structural dependencies from runtime evaluation over the generic incremental query engine."
+summary = "Pull-verify ordinary Expr sources into ordinary Value results with dynamic dependencies, deterministic cycles, canonical value cutoff, volatile noncanonical values, bounded evaluation, failure memos, and labelled last-good recovery."
 owner = "crate/sim-expr-tree-calc"
 audiences = ["code", "framework"]
-guidance = "Use this row when calculated expression-tree cells must depend on the cells, missing names, lookup steps, listings, mount epochs, effective policy, codec registry revision, and authority ceiling actually observed while evaluating. The calc layer wraps the active EvalPolicy for explicit expr-tree/ref and unbound bare symbols, preserving lexical/runtime bindings before tree lookup and reusing sim-incremental-core for memoization."
+guidance = "Use this row when calculated expression-tree cells must depend on the cells, missing names, lookup steps, listings, mount epochs, effective policy, codec registry revision, and authority ceiling actually observed while evaluating. The calc layer evaluates ordinary Expr through a fresh Cx and retains ordinary Value, preserving lexical/runtime bindings before tree lookup and reusing sim-incremental-core for dependency-first verification, reverse invalidation, cycle paths, failure memos, and canonical cutoff. Citizen/read-construct and other canonical as_expr projections receive stable fingerprints; valid opaque, callable, and noncanonical Dir values remain ordinary Value but are volatile. Hard work, observation, query-depth, expression-depth, and output ceilings clamp every requested policy. The claimed calculation specimen covers diamonds, changing and unchanged branches against full recomputation, dynamic-cycle recovery, deep chains, macro and callable/lambda evaluation, Table, Dir, opaque values, failure/last-good recovery, cancellation, and lock-free SIM evaluation."
 supports = [
   "feature/sim-expr-tree/finite-namespace",
   "feature/sim-expr-tree/mixed-backend-storage",

@@ -7,7 +7,7 @@ readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
 publish = false
-description = "Scaffold for SIM expression-tree calculation."
+description = "Bounded incremental calculation of ordinary SIM expressions and values."
 
 [dependencies]
 sim-incremental-core = { version = "0.1.0" }
