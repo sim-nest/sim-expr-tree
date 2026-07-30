@@ -6,11 +6,11 @@ license.workspace = true
 readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
-publish = false
+publish = true
 description = "Bootloader-composed SIM expression-tree product."
 
 [dependencies]
-sim-lib-expr-tree-serve = { path = "../sim-lib-expr-tree-serve" }
+sim-lib-expr-tree-serve = { version = "0.1.0", path = "../sim-lib-expr-tree-serve" }
 
 [lints]
 workspace = true
