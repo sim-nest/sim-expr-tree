@@ -18,7 +18,7 @@ use super::support::{full_cx, read_cx, realize_expr, runtime_call};
 
 const ADDRESS_THREAD: u64 = 17_025;
 const STORAGE: &str = "recipe-server-backed-web-session";
-const FIXTURE_ROOT: &str = "../../recipes/03-server/web-session/fixtures";
+const FIXTURE_ROOT: &str = "tests/fixtures/web-session";
 
 fn registry() -> LensRegistry {
     let mut registry = LensRegistry::new();

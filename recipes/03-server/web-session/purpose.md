@@ -25,8 +25,8 @@ SIM_UPDATE_EXPR_TREE_WEB_FIXTURES=1 \
 cargo test -p sim-lib-expr-tree-server \
   recipe_server_backed_web_session_runs_desktop_phone_and_failure_paths
 node ../sim-web/crates/sim-web-shell/web/tests/e2e.test.mjs \
-  recipes/03-server/web-session/fixtures/desktop.json \
-  recipes/03-server/web-session/fixtures/phone.json
+  crates/sim-lib-expr-tree-server/tests/fixtures/web-session/desktop.json \
+  crates/sim-lib-expr-tree-server/tests/fixtures/web-session/phone.json
 ```
 
 The committed fixture data comes from the final authoritative revision after
@@ -43,12 +43,12 @@ google-chrome --headless --no-sandbox --disable-gpu --hide-scrollbars \
   --run-all-compositor-stages-before-draw --virtual-time-budget=2000 \
   --window-size=1440,900 \
   --screenshot=sim-expr-tree/recipes/03-server/web-session/screenshots/desktop.png \
-  'http://127.0.0.1:8765/sim-web/crates/sim-web-shell/web/tests/scene-fixture.html?scene=/sim-expr-tree/recipes/03-server/web-session/fixtures/desktop.json'
+  'http://127.0.0.1:8765/sim-web/crates/sim-web-shell/web/tests/scene-fixture.html?scene=/sim-expr-tree/crates/sim-lib-expr-tree-server/tests/fixtures/web-session/desktop.json'
 google-chrome --headless --no-sandbox --disable-gpu --hide-scrollbars \
   --run-all-compositor-stages-before-draw --virtual-time-budget=2000 \
   --window-size=390,844 \
   --screenshot=sim-expr-tree/recipes/03-server/web-session/screenshots/phone.png \
-  'http://127.0.0.1:8765/sim-web/crates/sim-web-shell/web/tests/scene-fixture.html?scene=/sim-expr-tree/recipes/03-server/web-session/fixtures/phone.json'
+  'http://127.0.0.1:8765/sim-web/crates/sim-web-shell/web/tests/scene-fixture.html?scene=/sim-expr-tree/crates/sim-lib-expr-tree-server/tests/fixtures/web-session/phone.json'
 ```
 
 Two consecutive captures produced the byte-identical digests recorded in
