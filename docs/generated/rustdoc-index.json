@@ -48,7 +48,7 @@
       "group": "workspace",
       "manifest": "crates/sim-lib-view-expr-tree/Cargo.toml",
       "package": "sim-lib-view-expr-tree",
-      "summary": "View library scaffold for expression trees."
+      "summary": "Bounded, reversible expression-tree outline over SIM's standard view stack."
     },
     {
       "crate_name": "xtask",

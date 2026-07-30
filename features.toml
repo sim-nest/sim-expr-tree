@@ -63,6 +63,28 @@ claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
 ]
 
+[[feature]]
+id = "feature/sim-expr-tree/expression-tree-view"
+title = "Bounded reversible expression-tree outline"
+summary = "Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations."
+owner = "crate/sim-lib-view-expr-tree"
+audiences = ["code", "framework"]
+guidance = "Use ExpressionTreeSurfaceCodec when a surface session needs to inspect and operate on a finite expression tree without inventing a domain view/edit or wire protocol. The snapshot value carries one authoritative tree target and revision. Collapsed directories and cells omit descendant and face payloads; expanded directories carry complete or explicitly truncated child pages; expanded cells carry already bounded source/result faces, all seven freshness states, revisions, optional human timestamps, inherited policy badges, and bounded receipt summaries. Scene projection uses standard tree, box, stack, field, badge, text, and button nodes. Dense and compact arrangements derive from open SurfaceCaps metadata, not a device enum. Disclosure, continuation, edits, cell/directory creation, movement, deletion, calculation, recursive/nonrecursive recalculation, cancellation, calculation/codec policy, and explanation all decode through the one SurfaceCodec. Every target includes the rendered revision, stale revisions fail closed, explicit continuation tokens are mandatory, and committed operations declare the existing expr-tree.read, expr-tree.write, or expr-tree.calculate capability. The claimed spec module covers every freshness state, arbitrary binary/unsupported/failed/truncated and oversized faces, hostile collapsed descendants, explicit continuation, stale revisions, accessibility labels, large trees, both layout classes, standard Intent coverage, and authorization."
+supports = [
+  "feature/sim-expr-tree/expression-tree",
+  "feature/sim-expr-tree/codec-policy",
+]
+claims_anchors = [
+  "anchor/crate/sim-lib-view-expr-tree",
+  "anchor/rustdoc/sim-lib-view-expr-tree/crate-root",
+]
+claims_surfaces = [
+  "view/sim-lib-view-expr-tree",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-lib-view-expr-tree/src/tests",
+]
+
 [[route]]
 id = "route/build-expression-tree"
 task = "Build an expression tree"
@@ -74,6 +96,15 @@ steps = [
   { feature = "feature/sim-expr-tree/codec-policy", why = "The codec policy feature applies installed general-purpose codecs with inherited read and output bounds instead of creating a tree-specific codec." },
   { specimen = "recipe/sim-expr-tree/crates/sim-lib-expr-tree/01-basics/finite-tree", why = "The checked Lisp recipe creates generated names, mixes backend kinds, and resolves bare, relative, and absolute paths." },
   { specimen = "recipe/sim-expr-tree/crates/sim-lib-expr-tree/02-calculation/automatic-and-directed", why = "The checked Lisp recipe combines automatic and manual work, inspects receipt evidence, repairs a cycle, and reopens named storage." },
+]
+
+[[route]]
+id = "route/expose-expression-tree-view"
+task = "Expose an expression tree view"
+audiences = ["code", "framework"]
+steps = [
+  { feature = "feature/sim-expr-tree/expression-tree-view", why = "The expression-tree view row owns the bounded reversible outline over standard Scene, Intent, SurfaceCodec, and SurfaceCaps contracts." },
+  { specimen = "spec-test/sim-expr-tree/crates/sim-lib-view-expr-tree/src/tests", why = "The focused conformance module proves full rendering, intent reversal, lazy disclosure, continuation, freshness, hostile values, stale revisions, accessibility, large trees, layout projection, and authorization." },
 ]
 
 [[feature]]

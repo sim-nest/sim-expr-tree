@@ -464,7 +464,13 @@ dependencies = [
 name = "sim-lib-view-expr-tree"
 version = "0.1.0"
 dependencies = [
+ "sim-expr-tree-calc",
+ "sim-kernel",
  "sim-lib-expr-tree",
+ "sim-lib-intent",
+ "sim-lib-scene",
+ "sim-lib-view",
+ "sim-value",
 ]
 
 [[package]]
