@@ -16,7 +16,7 @@ sim-kernel = { version = "0.1.5" }
 sim-lib-expr-tree = { version = "0.1.0", path = "../sim-lib-expr-tree" }
 sim-lib-expr-tree-server = { version = "0.1.0", path = "../sim-lib-expr-tree-server" }
 sim-lib-server = { version = "0.1.10" }
-sim-run-core = { version = "0.1.7" }
+sim-run-core = { version = "0.2.0" }
 sim-web-shell = { version = "0.1.11" }
 
 [dev-dependencies]

@@ -601,7 +601,7 @@ dependencies = [
  "sim-lib-expr-tree",
  "sim-lib-expr-tree-server",
  "sim-lib-server",
- "sim-run-core",
+ "sim-run-core 0.2.0",
  "sim-web-shell",
 ]
 
@@ -985,7 +985,7 @@ dependencies = [
  "sim-kernel",
  "sim-lib-server",
  "sim-lib-stream-core",
- "sim-run-core",
+ "sim-run-core 0.1.7",
  "sim-value",
 ]
 
@@ -1085,7 +1085,19 @@ dependencies = [
  "sim-kernel",
  "sim-lib-net-core",
  "sim-lib-stream-host",
- "sim-run-loaders",
+ "sim-run-loaders 0.1.4",
+]
+
+[[package]]
+name = "sim-run-core"
+version = "0.2.0"
+dependencies = [
+ "sim-codec-config",
+ "sim-config",
+ "sim-kernel",
+ "sim-lib-net-core",
+ "sim-lib-stream-host",
+ "sim-run-loaders 0.1.5",
 ]
 
 [[package]]
@@ -1093,6 +1105,14 @@ name = "sim-run-loaders"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4226bd95af1eeb7c227b3bd18d82425f168a9bea1d47f6c6e984b43453c4b2b"
+dependencies = [
+ "sim-kernel",
+ "sim-value",
+]
+
+[[package]]
+name = "sim-run-loaders"
+version = "0.1.5"
 dependencies = [
  "sim-kernel",
  "sim-value",
@@ -1155,7 +1175,7 @@ dependencies = [
  "sim-lib-stream-core",
  "sim-lib-view",
  "sim-lib-web-bridge",
- "sim-run-core",
+ "sim-run-core 0.1.7",
 ]
 
 [[package]]

@@ -212,6 +212,24 @@ fn appended_product_verb_does_not_shadow_standard_help() {
     assert_eq!(command, CliCommand::Help);
 }
 
+#[test]
+fn product_callable_owns_help_and_rejects_unknown_arguments() {
+    let help = expr_tree_bootloader()
+        .run(["sim", "expr-tree", "--help"])
+        .unwrap();
+    assert_eq!(help, 0);
+
+    let error = expr_tree_bootloader()
+        .run(["sim", "expr-tree", "--tree-parser"])
+        .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("unknown expression-tree argument: --tree-parser"),
+        "{error}"
+    );
+}
+
 fn temp_config_path(label: &str) -> PathBuf {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)

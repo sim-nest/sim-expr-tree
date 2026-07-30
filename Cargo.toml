@@ -21,6 +21,7 @@ homepage = "https://github.com/sim-nest/sim-expr-tree"
 unsafe_code = "forbid"
 
 [patch.crates-io]
+sim-run-core = { path = "../sim-run/crates/sim-run-core" }
 sim-lib-server = { path = "../sim-agent-net/crates/sim-lib-server" }
 sim-lib-intent = { path = "../sim-web/crates/sim-lib-intent" }
 sim-lib-scene = { path = "../sim-web/crates/sim-lib-scene" }
