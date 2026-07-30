@@ -122,7 +122,20 @@ impl ExprTreeCalc {
             .active_request = Some(request.clone());
         self.emit_progress("running", &key, request.id);
         let raw = match continuation {
-            Some(token) => self.engine.resume(token, limits.clamped()),
+            Some(token) => match self.engine.resume(token, limits.clamped()) {
+                Err(IncrementalError::UnknownContinuation { token: unknown })
+                    if unknown == token && self.restored_continuations.remove(&token) =>
+                {
+                    // Incremental continuation ids are process-local engine
+                    // handles. A persisted automatic continuation still owns
+                    // the same root, so after restart it safely re-enters that
+                    // root and reuses every restored dependency memo that
+                    // remains current.
+                    self.engine
+                        .verify_with_budgets(CalcQuery::Cell(key.clone()), limits.clamped())
+                }
+                other => other,
+            },
             None => self
                 .engine
                 .verify_with_budgets(CalcQuery::Cell(key.clone()), limits.clamped()),

@@ -35,6 +35,13 @@ pub use policy::{
     EffectiveAuthority, EffectiveCalcPolicy, ErrorMode, PolicyDigest,
 };
 use policy::{effective_authority, effective_calc_policy, is_descendant_or_same};
+mod persistence;
+pub use persistence::{
+    DERIVED_SNAPSHOT_KEY, DerivedPersistReport, DerivedRestoreDisposition, DerivedRestoreReport,
+    DerivedSnapshotError, DerivedTableAdapter, GRAPH_SCHEMA_VERSION,
+};
+mod refresh;
+pub use refresh::{BackendRefreshSample, MountRefreshSource, RefreshError, RefreshReport};
 mod receipt;
 pub use receipt::{
     CalcExplanation, CalcOutcome, CalcReason, CalcReceipt, CalcRequestMode, CalcStatus,
@@ -72,6 +79,9 @@ pub struct ExprTreeCalc {
     next_queue_sequence: u64,
     watches: Vec<CalcWatch>,
     next_watch_id: u64,
+    refresh_sources: BTreeMap<String, Arc<dyn MountRefreshSource>>,
+    refresh_samples: BTreeMap<String, BackendRefreshSample>,
+    restored_continuations: BTreeSet<ContinuationToken>,
 }
 
 #[derive(Default)]
@@ -96,6 +106,8 @@ pub(crate) struct CalcState {
     last_good: BTreeMap<String, Value>,
     volatile: BTreeSet<String>,
     failed_cells: BTreeSet<String>,
+    source_generation: u64,
+    control_generation: u64,
 }
 
 #[derive(Clone)]
@@ -169,6 +181,9 @@ impl ExprTreeCalc {
             next_queue_sequence: 1,
             watches: Vec::new(),
             next_watch_id: 1,
+            refresh_sources: BTreeMap::new(),
+            refresh_samples: BTreeMap::new(),
+            restored_continuations: BTreeSet::new(),
         }
     }
 
@@ -198,6 +213,7 @@ impl ExprTreeCalc {
         let (replaced, failed) = {
             let mut state = self.state.write().expect("calc state poisoned");
             let replaced = state.cells.insert(key.clone(), source).is_some();
+            bump_generation(&mut state.source_generation);
             state.current.remove(&key);
             state.volatile.remove(&key);
             (
@@ -220,6 +236,7 @@ impl ExprTreeCalc {
         let failed = {
             let mut state = self.state.write().expect("calc state poisoned");
             state.cells.remove(&key);
+            bump_generation(&mut state.source_generation);
             state.current.remove(&key);
             state.volatile.remove(&key);
             state.failed_cells.iter().cloned().collect::<Vec<_>>()
@@ -241,6 +258,7 @@ impl ExprTreeCalc {
             if let Some(source) = moved.clone() {
                 state.cells.insert(to_key.clone(), source);
             }
+            bump_generation(&mut state.source_generation);
             state.current.remove(&from_key);
             state.current.remove(&to_key);
             state.volatile.remove(&from_key);
@@ -266,21 +284,21 @@ impl ExprTreeCalc {
     /// should prefer [`Self::bind_value`].
     pub fn bind_name(&mut self, name: impl Into<String>) {
         let name = name.into();
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .bound_names
-            .insert(name.clone());
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.bound_names.insert(name.clone());
+            bump_generation(&mut state.source_generation);
+        }
         self.engine.invalidate(&CalcQuery::NameSlot(name));
     }
 
     /// Binds an arbitrary ordinary SIM value ahead of tree-name lookup.
     pub fn bind_value(&mut self, name: Symbol, value: Value) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .bound_values
-            .insert(name.clone(), value);
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.bound_values.insert(name.clone(), value);
+            bump_generation(&mut state.source_generation);
+        }
         self.engine
             .invalidate(&CalcQuery::NameSlot(name.to_string()));
     }
@@ -339,4 +357,8 @@ fn incremental_failure(
         | IncrementalError::Cancelled
         | IncrementalError::UnknownContinuation { .. } => Err(error),
     }
+}
+
+pub(super) fn bump_generation(generation: &mut u64) {
+    *generation = generation.saturating_add(1);
 }

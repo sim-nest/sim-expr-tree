@@ -40,3 +40,17 @@ outcome, and reason evidence. `explain` reads that evidence without evaluating.
 Progress and changes flow through `sim-lib-stream-core::StreamValue` with an
 explicit `BufferPolicy`, observable overflow, ordinary stream `next`, and
 cancellation.
+
+Derived calculation state is a versioned ordinary `Table` record. It includes
+source/control generations and identities, dependency observations, reverse
+edges, memos, receipts, backend refresh observations, and pending automatic
+continuations. Reopen validates the complete record before rehydrating the
+incremental graph. A missing, corrupt, incompatible, or mismatched record is
+deleted and rebuilt without modifying authored source or operational control
+state, so damage costs performance rather than semantics.
+
+Mounted backends without a watch contract can install a `MountRefreshSource`.
+Only an explicit `refresh` samples those backends; it compares epochs, directory
+listings, and entry stamps and invalidates the corresponding observed query
+keys. Ordinary current reads, verification, and explanation never poll all
+backends, and watch-managed mounts are never polled by refresh.

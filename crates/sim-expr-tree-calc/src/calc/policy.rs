@@ -231,6 +231,10 @@ impl EffectiveAuthority {
 pub struct PolicyDigest(u64);
 
 impl PolicyDigest {
+    pub(super) const fn from_persisted(value: u64) -> Self {
+        Self(value)
+    }
+
     /// Returns the digest bits.
     #[must_use]
     pub const fn get(self) -> u64 {
@@ -243,6 +247,10 @@ impl PolicyDigest {
 pub struct AuthorityDigest(u64);
 
 impl AuthorityDigest {
+    pub(super) const fn from_persisted(value: u64) -> Self {
+        Self(value)
+    }
+
     /// Returns the digest bits.
     #[must_use]
     pub const fn get(self) -> u64 {

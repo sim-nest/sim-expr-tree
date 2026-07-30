@@ -15,6 +15,7 @@ finite reads safe without allocating new namespace state.
 - Preserve identity while names move through a tree.
 - Recover cleanly from gaps created by crashes or partial writes.
 - Keep policy and mount changes observable to higher calculation layers.
+- Keep source/control recovery separate from safely rebuildable derived graphs.
 - Reuse the standard table substrate instead of inventing a storage island.
 
 ## Where it fits

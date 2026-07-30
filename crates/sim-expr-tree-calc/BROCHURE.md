@@ -18,6 +18,9 @@ parallel store.
 - Direct verification, root forcing, and recursive forcing through one engine.
 - Keep authority below an immutable open-time ceiling, with effect evidence.
 - Resume bounded fair automatic work from explicit queue continuations.
+- Reopen a validated Table-backed graph without repeating current dependency work.
+- Rebuild safely when derived state is absent, corrupt, incompatible, or stale.
+- Refresh non-watch mounts explicitly from epochs, listings, and entry stamps.
 - Consume progress and changes through standard bounded stream operations.
 - Explain every attempt from compact revision, authority, dependency, and time receipts.
 - Keep dependency tracking outside the kernel while still using SIM policy.

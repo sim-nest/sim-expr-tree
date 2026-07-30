@@ -4,10 +4,11 @@ use super::*;
 impl ExprTreeCalc {
     /// Replaces the tree-level calculation policy patch.
     pub fn set_tree_calc_policy(&mut self, patch: CalcPolicyPatch) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .tree_calc_policy = patch;
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.tree_calc_policy = patch;
+            bump_generation(&mut state.control_generation);
+        }
         self.invalidate_calc_policy_matching(|_| true);
         self.schedule_dirty_automatic();
     }
@@ -15,11 +16,11 @@ impl ExprTreeCalc {
     /// Replaces one directory-level calculation policy patch.
     pub fn set_dir_calc_policy(&mut self, directory: TablePath, patch: CalcPolicyPatch) {
         let key = path_key(&directory);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .dir_calc_policies
-            .insert(key, patch);
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.dir_calc_policies.insert(key, patch);
+            bump_generation(&mut state.control_generation);
+        }
         self.invalidate_calc_policy_matching(|cell| is_descendant_or_same(&directory, cell));
         self.schedule_dirty_automatic();
     }
@@ -27,11 +28,11 @@ impl ExprTreeCalc {
     /// Replaces one cell-level calculation policy patch.
     pub fn set_cell_calc_policy(&mut self, cell: TablePath, patch: CalcPolicyPatch) {
         let key = path_key(&cell);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .cell_calc_policies
-            .insert(key.clone(), patch);
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.cell_calc_policies.insert(key.clone(), patch);
+            bump_generation(&mut state.control_generation);
+        }
         self.engine
             .invalidate(&CalcQuery::EffectivePolicy(key.clone()));
         self.emit_change("calculation-policy", &key);
@@ -52,10 +53,11 @@ impl ExprTreeCalc {
 
     /// Replaces the tree-level authority policy patch.
     pub fn set_tree_authority_policy(&mut self, patch: AuthorityPolicyPatch) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .tree_authority_policy = patch;
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.tree_authority_policy = patch;
+            bump_generation(&mut state.control_generation);
+        }
         self.invalidate_authority_policy_matching(|_| true);
         self.schedule_dirty_automatic();
     }
@@ -63,11 +65,11 @@ impl ExprTreeCalc {
     /// Replaces one directory-level authority policy patch.
     pub fn set_dir_authority_policy(&mut self, directory: TablePath, patch: AuthorityPolicyPatch) {
         let key = path_key(&directory);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .dir_authority_policies
-            .insert(key, patch);
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.dir_authority_policies.insert(key, patch);
+            bump_generation(&mut state.control_generation);
+        }
         self.invalidate_authority_policy_matching(|cell| is_descendant_or_same(&directory, cell));
         self.schedule_dirty_automatic();
     }
@@ -75,11 +77,11 @@ impl ExprTreeCalc {
     /// Replaces one cell-level authority policy patch.
     pub fn set_cell_authority_policy(&mut self, cell: TablePath, patch: AuthorityPolicyPatch) {
         let key = path_key(&cell);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .cell_authority_policies
-            .insert(key.clone(), patch);
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.cell_authority_policies.insert(key.clone(), patch);
+            bump_generation(&mut state.control_generation);
+        }
         self.engine
             .invalidate(&CalcQuery::AuthorityPolicy(key.clone()));
         self.emit_change("authority-policy", &key);
@@ -101,10 +103,11 @@ impl ExprTreeCalc {
 
     /// Updates the observed codec registry revision.
     pub fn set_codec_registry_revision(&mut self, revision: u64) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .codec_registry_revision = revision;
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.codec_registry_revision = revision;
+            bump_generation(&mut state.control_generation);
+        }
         self.engine.invalidate(&CalcQuery::CodecRegistry);
     }
 
@@ -117,11 +120,9 @@ impl ExprTreeCalc {
         epoch: MountEpoch,
     ) {
         let key = path_key(&path);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .mounts
-            .insert(
+        {
+            let mut state = self.state.write().expect("calc state poisoned");
+            state.mounts.insert(
                 key.clone(),
                 MountState {
                     resource,
@@ -129,21 +130,27 @@ impl ExprTreeCalc {
                     epoch,
                 },
             );
+            bump_generation(&mut state.control_generation);
+        }
+        self.refresh_samples
+            .insert(key.clone(), BackendRefreshSample::new(epoch));
         self.engine.invalidate(&CalcQuery::MountEpoch(key));
     }
 
     /// Advances a mounted backend epoch.
     pub fn observe_mount_epoch(&mut self, path: &TablePath, epoch: MountEpoch) {
         let key = path_key(path);
-        if let Some(mount) = self
-            .state
-            .write()
-            .expect("calc state poisoned")
-            .mounts
-            .get_mut(&key)
         {
-            mount.epoch = epoch;
+            let mut state = self.state.write().expect("calc state poisoned");
+            if let Some(mount) = state.mounts.get_mut(&key) {
+                mount.epoch = epoch;
+                bump_generation(&mut state.control_generation);
+            }
         }
+        self.refresh_samples
+            .entry(key.clone())
+            .and_modify(|sample| sample.epoch = epoch)
+            .or_insert_with(|| BackendRefreshSample::new(epoch));
         self.engine.invalidate(&CalcQuery::MountEpoch(key));
     }
 

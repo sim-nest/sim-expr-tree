@@ -462,4 +462,8 @@ fn stream_progress_changes_are_bounded_observable_and_cancellable() {
 
 mod receipt;
 
+mod refresh;
+
+mod restart;
+
 mod verification;
