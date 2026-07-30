@@ -1,0 +1,45 @@
+{
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-finite-tree")
+    (expr-tree/new-dir (expr-tree/open "recipe-finite-tree") "/" nil)
+    "base"
+    "ordinary-value")
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-finite-tree")
+    "/dir-1"
+    nil
+    (expr-tree/ref "base"))
+  (expr-tree/new-dir
+    (expr-tree/open "recipe-finite-tree")
+    "/dir-1"
+    "nested")
+  (expr-tree/ref
+    (expr-tree/open "recipe-finite-tree")
+    "cell-1"
+    "/dir-1")
+  (expr-tree/ref
+    (expr-tree/open "recipe-finite-tree")
+    "../base"
+    "/dir-1/nested")
+  (expr-tree/mount
+    (expr-tree/open "recipe-finite-tree")
+    "/measurements"
+    "database"
+    "dir"
+    "1")
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-finite-tree")
+    "/measurements"
+    "trial-0001"
+    "measured-value")
+  (expr-tree/ref
+    (expr-tree/open "recipe-finite-tree")
+    "/measurements/trial-0001")
+  (expr-tree/mount
+    (expr-tree/open "recipe-finite-tree")
+    "/catalog"
+    "read-only"
+    "table"
+    "1")
+  (expr-tree/list (expr-tree/open "recipe-finite-tree") "/")
+}

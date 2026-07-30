@@ -52,4 +52,6 @@ pub enum NamespaceError {
         /// The requested new parent.
         new_parent: DirId,
     },
+    /// A directory must be empty before it can be deleted.
+    DirNotEmpty(DirId),
 }

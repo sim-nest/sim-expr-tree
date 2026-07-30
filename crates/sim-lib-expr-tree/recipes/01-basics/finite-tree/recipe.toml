@@ -1,0 +1,12 @@
+id = "finite-tree"
+title = "Build a finite mixed-backend tree"
+codec = "lisp"
+setup = "setup.siml"
+purpose = "purpose.md"
+order = 10
+tags = ["expression-tree", "framework", "storage", "shape-checked", "citizen", "runnable"]
+requires = ["codec/lisp", "lib/expr-tree"]
+harness = "cargo-test"
+package = "sim-lib-expr-tree"
+test = "tests::recipe_finite_tree_runs_checked_lisp_surface"
+expected = "expected.txt"

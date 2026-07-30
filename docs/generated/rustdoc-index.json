@@ -27,7 +27,7 @@
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
       "package": "sim-lib-expr-tree",
-      "summary": "Loadable runtime library scaffold for expression trees."
+      "summary": "Loadable expression-tree runtime and Lisp surface."
     },
     {
       "crate_name": "sim_lib_expr_tree_serve",

@@ -1,0 +1,12 @@
+id = "automatic-and-directed"
+title = "Calculate automatically and recover with directed work"
+codec = "lisp"
+setup = "setup.siml"
+purpose = "purpose.md"
+order = 10
+tags = ["expression-tree", "incremental", "automatic", "directed", "receipts", "reopen", "runnable"]
+requires = ["codec/lisp", "lib/expr-tree"]
+harness = "cargo-test"
+package = "sim-lib-expr-tree"
+test = "tests::recipe_automatic_and_directed_runs_checked_lisp_surface"
+expected = "expected.txt"

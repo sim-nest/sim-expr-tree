@@ -14,10 +14,15 @@
     "crates/sim-expr-tree-core/recipes/01-basics/scaffold/setup.siml",
     "crates/sim-expr-tree-core/recipes/book.toml",
     "crates/sim-lib-expr-tree/recipes/01-basics/chapter.toml",
-    "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/expected.txt",
-    "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/purpose.md",
-    "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/recipe.toml",
-    "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/setup.siml",
+    "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/expected.txt",
+    "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/purpose.md",
+    "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/recipe.toml",
+    "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/setup.siml",
+    "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/expected.txt",
+    "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/purpose.md",
+    "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/recipe.toml",
+    "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/setup.siml",
+    "crates/sim-lib-expr-tree/recipes/02-calculation/chapter.toml",
     "crates/sim-lib-expr-tree/recipes/book.toml"
   ]
 }

@@ -1,0 +1,5 @@
+automatic=automatic-value
+manual-directed=automatic-value
+cycle-before=failed cycle-after=recovered
+receipt=bounded
+reopen-status=fresh

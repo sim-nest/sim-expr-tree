@@ -3,7 +3,7 @@
   "package_count": 8,
   "packages": [
     {
-      "description": "Scaffold for SIM expression-tree calculation.",
+      "description": "Bounded incremental calculation of ordinary SIM expressions and values.",
       "generated_readme": false,
       "manifest": "crates/sim-expr-tree-calc/Cargo.toml",
       "name": "sim-expr-tree-calc",
@@ -63,7 +63,7 @@
       ]
     },
     {
-      "description": "Scaffold for the loadable SIM expression-tree runtime library.",
+      "description": "Loadable, Shape-checked SIM expression-tree runtime library.",
       "generated_readme": false,
       "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
       "name": "sim-lib-expr-tree",
@@ -71,6 +71,7 @@
       "readme": "crates/sim-lib-expr-tree/README.md",
       "root": "crates/sim-lib-expr-tree",
       "target_kinds": [
+        "custom-build",
         "lib"
       ]
     },

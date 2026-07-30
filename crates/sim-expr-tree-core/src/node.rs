@@ -112,6 +112,10 @@ impl CellRecord {
         self.parent = parent;
         self.name = name;
     }
+
+    pub(crate) fn set_policy_patch(&mut self, policy_patch: CodecPolicyPatch) {
+        self.policy_patch = policy_patch;
+    }
 }
 
 /// Durable directory record with immutable identity and movable parent/name.
@@ -179,5 +183,9 @@ impl DirRecord {
     pub(crate) fn rename(&mut self, parent: DirId, name: NamespaceName) {
         self.parent = Some(parent);
         self.name = Some(name);
+    }
+
+    pub(crate) fn set_policy_patch(&mut self, policy_patch: CodecPolicyPatch) {
+        self.policy_patch = policy_patch;
     }
 }

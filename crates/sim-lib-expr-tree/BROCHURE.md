@@ -1,24 +1,30 @@
 # sim-lib-expr-tree
 
-In one line: `sim-lib-expr-tree` is the loadable runtime library for expression-tree operations.
+In one line: `sim-lib-expr-tree` gives any SIM runtime a checked, loadable
+expression-tree engine.
 
 ## What it gives you
 
-It gives the expression-tree family a runtime crate where callable exports,
-library claims, and object-facing behavior can live without moving core records
-into the kernel. The library is intentionally separate from the server and view
-crates, so local runtime use can stay small while served and projected surfaces
-compose it.
+Load one library and receive the stable `expr-tree/*` operation family,
+per-operation Shapes and Cards, explicit read/write/calculate/mount
+capabilities, durable source and policy Citizens, bounded receipts, and a
+standard change stream. The same surface creates finite namespaces, composes
+mixed storage, calculates dependencies, applies inherited codec policy, and
+reopens named trees.
 
 ## Why you will be glad
 
-- Load expression-tree behavior as an ordinary SIM library.
-- Keep reusable runtime exports independent of command and server code.
-- Share the same core namespace and calculation substrate as every surface.
-- Give framework rows a clear owner for callable behavior.
+- Keep ordinary `Expr` sources and ordinary `Value` results.
+- Use one canonical path syntax for bare, relative, and absolute references.
+- Retain raw Lisp source calls as dependencies instead of evaluating them on
+  entry.
+- Inspect operation contracts and capability requirements before invocation.
+- Reconstruct durable records without serializing live handles or backend
+  authority.
+- Verify real workflows through the embedded, cargo-checked Lisp recipes.
 
 ## Where it fits
 
-Use this crate above `sim-expr-tree-core` and `sim-expr-tree-calc` when a SIM
-runtime needs expression-tree operations. Server, serve, view, and binary crates
-should delegate here instead of duplicating runtime behavior.
+Compose this library above `sim-expr-tree-core` and `sim-expr-tree-calc`.
+Views, servers, and product entry points load or delegate to it instead of
+reimplementing namespace or calculation behavior.

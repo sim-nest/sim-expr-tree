@@ -1,1 +1,3 @@
 title = "Basics"
+order = 10
+summary = "Create a finite tree over mixed Table and Dir backends."

@@ -1,1 +1,5 @@
-title = "sim-lib-expr-tree Recipes"
+book = "sim-expr-tree"
+title = "Expression Trees"
+summary = "Build finite live calculation trees from ordinary SIM operations."
+order = 65
+chapters = ["01-basics", "02-calculation"]

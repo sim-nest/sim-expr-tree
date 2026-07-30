@@ -6,11 +6,11 @@ Generated from Cargo metadata by `xtask crate-catalog v1`.
 
 | Package | Publish | Targets | Description |
 | --- | --- | --- | --- |
-| `sim-expr-tree-calc` | `false` | `lib` | Scaffold for SIM expression-tree calculation. |
+| `sim-expr-tree-calc` | `false` | `lib` | Bounded incremental calculation of ordinary SIM expressions and values. |
 | `sim-expr-tree-core` | `false` | `lib` | Scaffold for SIM expression-tree core records. |
 | `sim-expr-tree` | `false` | `bin` | Thin SIM expression-tree bootloader binary scaffold. |
 | `sim-lib-expr-tree-serve` | `false` | `lib` | Scaffold for the SIM expression-tree serve entrypoint library. |
 | `sim-lib-expr-tree-server` | `false` | `lib` | Scaffold for the SIM expression-tree server library. |
-| `sim-lib-expr-tree` | `false` | `lib` | Scaffold for the loadable SIM expression-tree runtime library. |
+| `sim-lib-expr-tree` | `false` | `custom-build, lib` | Loadable, Shape-checked SIM expression-tree runtime library. |
 | `sim-lib-view-expr-tree` | `false` | `lib` | Scaffold for the SIM expression-tree view library. |
 | `xtask` | `false` | `bin` | Repository automation wrapper for generated documentation and policy checks. |

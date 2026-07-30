@@ -1,0 +1,4 @@
+generated-dir=/dir-1 generated-cell=/dir-1/cell-1
+mounts=/measurements:database-dir,/catalog:read-only-table
+refs=bare:ordinary-value,relative:ordinary-value,absolute:measured-value
+root-entries=3

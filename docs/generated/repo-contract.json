@@ -8,6 +8,12 @@
       "summary": "root browse catalog"
     },
     {
+      "id": "cookbook/sim-expr-tree",
+      "kind": "cookbook-recipe",
+      "owner": "sim-lib-expr-tree",
+      "summary": "Build finite live calculation trees from ordinary SIM operations."
+    },
+    {
       "id": "cookbook/sim-expr-tree-calc",
       "kind": "cookbook-recipe",
       "owner": "sim-expr-tree-calc",
@@ -17,12 +23,6 @@
       "id": "cookbook/sim-expr-tree-core",
       "kind": "cookbook-recipe",
       "owner": "sim-expr-tree-core",
-      "summary": ""
-    },
-    {
-      "id": "cookbook/sim-lib-expr-tree",
-      "kind": "cookbook-recipe",
-      "owner": "sim-lib-expr-tree",
       "summary": ""
     },
     {
@@ -170,15 +170,16 @@
           "target": null
         }
       ],
-      "description": "Scaffold for the loadable SIM expression-tree runtime library.",
+      "description": "Loadable, Shape-checked SIM expression-tree runtime library.",
       "features": [],
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
       "name": "sim-lib-expr-tree",
       "publish": "false",
       "root": "crates/sim-lib-expr-tree",
-      "rustdoc_summary": "Loadable runtime library scaffold for expression trees.",
+      "rustdoc_summary": "Loadable expression-tree runtime and Lisp surface.",
       "target_kinds": [
+        "custom-build",
         "lib"
       ],
       "targets": [
@@ -191,6 +192,16 @@
           ],
           "name": "sim_lib_expr_tree",
           "src": "crates/sim-lib-expr-tree/src/lib.rs"
+        },
+        {
+          "crate_types": [
+            "bin"
+          ],
+          "kind": [
+            "custom-build"
+          ],
+          "name": "build-script-build",
+          "src": "crates/sim-lib-expr-tree/build.rs"
         }
       ]
     },
@@ -339,10 +350,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "b0ca1ad4024b4cf1a8a177a3aca1d999cb0b8541",
+    "git_commit": "b5e757b82401f84f47df6fe594c6940a55df1bdf",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "b0ca1ad4024b4cf1a8a177a3aca1d999cb0b8541",
+    "source_commit": "b5e757b82401f84f47df6fe594c6940a55df1bdf",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -355,9 +366,9 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "ee21f22f9fdcf184",
+    "workspace_hash": "08ba6e971a944c7d",
     "workspace_hash_algorithm": "fnv1a64",
-    "workspace_hash_input_count": 63,
+    "workspace_hash_input_count": 79,
     "workspace_hash_inputs": [
       "Cargo.toml",
       "crates/sim-expr-tree/Cargo.toml",
@@ -411,9 +422,25 @@
       "crates/sim-expr-tree-core/src/store.rs",
       "crates/sim-expr-tree-core/src/tests.rs",
       "crates/sim-lib-expr-tree/Cargo.toml",
-      "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/recipe.toml",
+      "crates/sim-lib-expr-tree/build.rs",
+      "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/recipe.toml",
+      "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/recipe.toml",
       "crates/sim-lib-expr-tree/recipes/book.toml",
+      "crates/sim-lib-expr-tree/src/capability.rs",
+      "crates/sim-lib-expr-tree/src/citizen.rs",
+      "crates/sim-lib-expr-tree/src/dispatch.rs",
+      "crates/sim-lib-expr-tree/src/handle.rs",
       "crates/sim-lib-expr-tree/src/lib.rs",
+      "crates/sim-lib-expr-tree/src/operation.rs",
+      "crates/sim-lib-expr-tree/src/parse.rs",
+      "crates/sim-lib-expr-tree/src/projection.rs",
+      "crates/sim-lib-expr-tree/src/runtime/calculation.rs",
+      "crates/sim-lib-expr-tree/src/runtime/path.rs",
+      "crates/sim-lib-expr-tree/src/runtime.rs",
+      "crates/sim-lib-expr-tree/src/runtime_support.rs",
+      "crates/sim-lib-expr-tree/src/shape.rs",
+      "crates/sim-lib-expr-tree/src/source.rs",
+      "crates/sim-lib-expr-tree/src/tests.rs",
       "crates/sim-lib-expr-tree-serve/Cargo.toml",
       "crates/sim-lib-expr-tree-serve/src/lib.rs",
       "crates/sim-lib-expr-tree-server/Cargo.toml",
@@ -467,24 +494,32 @@
       "title": "sim-expr-tree-core Recipes"
     },
     {
-      "book": "sim-lib-expr-tree",
+      "book": "sim-expr-tree",
       "book_toml": "crates/sim-lib-expr-tree/recipes/book.toml",
-      "card_id": "cookbook/sim-lib-expr-tree",
+      "card_id": "cookbook/sim-expr-tree",
       "group": "workspace",
       "package": "sim-lib-expr-tree",
-      "recipe_count": 1,
+      "recipe_count": 2,
       "recipes": [
         {
-          "card_id": "sim-lib-expr-tree/01-basics/scaffold",
-          "codec": "",
-          "id": "scaffold",
+          "card_id": "sim-expr-tree/01-basics/finite-tree",
+          "codec": "lisp",
+          "id": "finite-tree",
           "package": "sim-lib-expr-tree",
-          "recipe_toml": "crates/sim-lib-expr-tree/recipes/01-basics/scaffold/recipe.toml",
-          "title": "runtime library scaffold"
+          "recipe_toml": "crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/recipe.toml",
+          "title": "Build a finite mixed-backend tree"
+        },
+        {
+          "card_id": "sim-expr-tree/02-calculation/automatic-and-directed",
+          "codec": "lisp",
+          "id": "automatic-and-directed",
+          "package": "sim-lib-expr-tree",
+          "recipe_toml": "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/recipe.toml",
+          "title": "Calculate automatically and recover with directed work"
         }
       ],
-      "summary": "",
-      "title": "sim-lib-expr-tree Recipes"
+      "summary": "Build finite live calculation trees from ordinary SIM operations.",
+      "title": "Expression Trees"
     }
   ]
 }

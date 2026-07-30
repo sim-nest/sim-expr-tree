@@ -173,6 +173,25 @@ impl ExprTreeCalc {
         self.engine.invalidate(&CalcQuery::MountEpoch(key));
     }
 
+    /// Removes a mounted backend observation and its refresh state.
+    pub fn unmount(&mut self, path: &TablePath) -> bool {
+        let key = path_key(path);
+        let removed = {
+            let mut state = self.state.write().expect("calc state poisoned");
+            let removed = state.mounts.remove(&key).is_some();
+            if removed {
+                bump_generation(&mut state.control_generation);
+            }
+            removed
+        };
+        self.refresh_sources.remove(&key);
+        self.refresh_samples.remove(&key);
+        if removed {
+            self.engine.invalidate(&CalcQuery::MountEpoch(key));
+        }
+        removed
+    }
+
     /// Advances a mounted backend epoch.
     pub fn observe_mount_epoch(&mut self, path: &TablePath, epoch: MountEpoch) {
         let key = path_key(path);

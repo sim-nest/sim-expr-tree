@@ -143,6 +143,22 @@ impl Namespace {
         self.children.get(&(parent.clone(), name.clone())).cloned()
     }
 
+    /// Lists a directory's named children in deterministic name order.
+    pub fn children(
+        &self,
+        parent: &DirId,
+    ) -> Result<Vec<(NamespaceName, NamespaceEntry)>, NamespaceError> {
+        self.ensure_parent(parent)?;
+        let mut children = self
+            .children
+            .iter()
+            .filter(|((entry_parent, _), _)| entry_parent == parent)
+            .map(|((_, name), entry)| (name.clone(), entry.clone()))
+            .collect::<Vec<_>>();
+        children.sort_by(|left, right| left.0.cmp(&right.0));
+        Ok(children)
+    }
+
     /// Reserve an explicit child name before creating the durable node.
     pub fn reserve_name(
         &mut self,
@@ -328,6 +344,87 @@ impl Namespace {
             .rename(new_parent.clone(), new_name);
         self.next_stamp();
         Ok(())
+    }
+
+    /// Replaces a cell's local codec-policy patch.
+    pub fn set_cell_policy(
+        &mut self,
+        lane: WriterLane,
+        id: &CellId,
+        policy_patch: CodecPolicyPatch,
+    ) -> Result<(), NamespaceError> {
+        self.require_writer(lane)?;
+        let cell = self
+            .cells
+            .get_mut(id)
+            .ok_or_else(|| NamespaceError::MissingCell(id.clone()))?;
+        cell.set_policy_patch(policy_patch);
+        self.next_stamp();
+        Ok(())
+    }
+
+    /// Replaces a directory's local codec-policy patch.
+    pub fn set_dir_policy(
+        &mut self,
+        lane: WriterLane,
+        id: &DirId,
+        policy_patch: CodecPolicyPatch,
+    ) -> Result<(), NamespaceError> {
+        self.require_writer(lane)?;
+        let dir = self
+            .dirs
+            .get_mut(id)
+            .ok_or_else(|| NamespaceError::MissingDirRecord(id.clone()))?;
+        dir.set_policy_patch(policy_patch);
+        self.next_stamp();
+        Ok(())
+    }
+
+    /// Deletes one cell while preserving its generated-name reservation history.
+    pub fn delete_cell(
+        &mut self,
+        lane: WriterLane,
+        id: &CellId,
+    ) -> Result<CellRecord, NamespaceError> {
+        self.require_writer(lane)?;
+        let record = self
+            .cells
+            .remove(id)
+            .ok_or_else(|| NamespaceError::MissingCell(id.clone()))?;
+        self.children
+            .remove(&(record.parent().clone(), record.name().clone()));
+        self.next_stamp();
+        Ok(record)
+    }
+
+    /// Deletes one empty non-root directory.
+    pub fn delete_dir(
+        &mut self,
+        lane: WriterLane,
+        id: &DirId,
+    ) -> Result<DirRecord, NamespaceError> {
+        self.require_writer(lane)?;
+        if id == &self.root_dir {
+            return Err(NamespaceError::RootDirCannotMove);
+        }
+        if self.children.keys().any(|(parent, _)| parent == id) {
+            return Err(NamespaceError::DirNotEmpty(id.clone()));
+        }
+        let record = self
+            .dirs
+            .remove(id)
+            .ok_or_else(|| NamespaceError::MissingDirRecord(id.clone()))?;
+        let parent = record
+            .parent()
+            .cloned()
+            .expect("non-root directory has a parent");
+        let name = record
+            .name()
+            .cloned()
+            .expect("non-root directory has a name");
+        self.children.remove(&(parent, name));
+        self.next_stamp();
+        Ok(record)
     }
 
     /// Resolve the inherited policy for a directory.

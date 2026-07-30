@@ -1,25 +1,36 @@
 # sim-expr-tree
 
-In one line: `sim-expr-tree` gives SIM a durable expression-tree product family for named source objects, dependency-aware refresh, and served tree sessions.
+In one line: `sim-expr-tree` turns named SIM expressions into a durable,
+inspectable calculation tree that remains ordinary SIM all the way through.
 
 ## What it gives you
 
-The repository groups the core namespace records, calculation layer, runtime
-library, serve library, server surface, view projection, and thin product binary
-for expression-tree work. Its current crates already carry checked namespace and
-policy behavior, generated documentation lanes, recipe coverage, and package
-floor checks so later phases can add richer behavior without moving ownership.
+The framework combines a finite hierarchical namespace, generated names,
+heterogeneous Table/Dir mounts, inherited calculation and codec policy, and a
+bounded incremental engine. Its loadable runtime library presents those
+capabilities as normal `expr-tree/*` operations with Shapes, Cards,
+capabilities, receipts, and standard streams.
+
+Sources remain ordinary `Expr` values and calculated results remain ordinary
+`Value` values. General-purpose codecs edit and render them; Citizen records
+reconstruct durable source and policy data; live handles keep storage and
+authority opaque.
 
 ## Why you will be glad
 
-- Keep expression-tree identity, naming, and policy in one discoverable family.
-- Reuse the same records from local libraries, served sessions, and views.
-- Run validation before new behavior grows around the tree substrate.
-- Let the public Index and brochure surfaces point agents to the right crate.
+- Build tree-shaped calculated data without adding a private evaluator or
+  value model.
+- Mix memory, filesystem, database, read-only, and composed mounts behind one
+  canonical Table path contract.
+- Choose automatic, on-demand, manual, or frozen calculation per subtree.
+- Inspect bounded dependency, policy, authority, and receipt evidence without
+  triggering evaluation.
+- Reopen a named tree and continue from its durable source and control state.
+- Discover the complete framework through checked Index claims and runnable
+  Lisp recipes.
 
 ## Where it fits
 
-This family sits between the table substrate, runtime incremental machinery, and
-served user-facing expression-tree sessions. It is not a kernel feature; it is a
-loadable product stack that builds on the ordinary SIM table, policy, and view
-contracts.
+Use `sim-lib-expr-tree` whenever a runtime, view, service, or application needs
+named calculations with durable policy and explicit storage. Higher product
+surfaces delegate to this library; the kernel remains unchanged.

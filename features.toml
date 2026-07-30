@@ -19,6 +19,30 @@ major_entrypoints = "advisory"
 frameworks = "advisory"
 
 [[feature]]
+id = "feature/sim-expr-tree/expression-tree"
+title = "Loadable expression-tree framework"
+summary = "Build finite named source trees over mixed Table/Dir storage and calculate them through a capability-gated runtime library with Shape and Card contracts, durable Citizens, bounded receipts, and standard streams."
+owner = "crate/sim-lib-expr-tree"
+audiences = ["code", "framework"]
+guidance = "Use sim-lib-expr-tree when a runtime needs durable named calculations rather than a flat ephemeral cell. Load ExprTreeLib with codec/lisp, grant only expr-tree.read, expr-tree.write, expr-tree.calculate, and expr-tree.mount capabilities required by the caller, then use the ordinary expr-tree/* callables. Sources remain ordinary unevaluated Expr values and results remain ordinary Value values. Bare, relative, and absolute references reuse canonical Table paths; mixed backends reuse the core store and mount contracts; calculation reuses sim-expr-tree-calc and sim-incremental-core. Every operation publishes argument/result Shapes and a Card with its capability. DurableSourceRecord and DurablePolicyRecord reconstruct authored data, while TreeHandle remains opaque because it carries a live writer lane, backend access, and authority. The claimed tests exercise the complete operation inventory, bounded errors, capabilities, Shapes, Cards, Citizens, paths, mounts, calculation, receipts, streams, and reopen behavior. The two exact Lisp recipes demonstrate finite mixed-backend construction and automatic/manual cycle recovery without introducing a domain codec or evaluator."
+supports = [
+  "feature/sim-expr-tree/finite-namespace",
+  "feature/sim-expr-tree/mixed-backend-storage",
+  "feature/sim-expr-tree/incremental-calculation",
+  "feature/sim-expr-tree/codec-policy",
+]
+claims_anchors = [
+  "anchor/crate/sim-lib-expr-tree",
+  "anchor/runtime-lib/sim-lib-expr-tree/expr-tree-lib",
+  "anchor/rustdoc/sim-lib-expr-tree/crate-root",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-lib-expr-tree/src/tests",
+  "recipe/sim-expr-tree/crates/sim-lib-expr-tree/01-basics/finite-tree",
+  "recipe/sim-expr-tree/crates/sim-lib-expr-tree/02-calculation/automatic-and-directed",
+]
+
+[[feature]]
 id = "feature/sim-expr-tree/codec-policy"
 title = "Inherited codec policy and bounded value faces"
 summary = "Decode edited source and encode source/result faces through installed codecs with field-wise tree/directory/cell policy, explicit positions, trusted diminished read policy, and independent hard-clamped byte/depth/item budgets."
@@ -37,6 +61,19 @@ claims_anchors = [
 claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-expr-tree-core/src/tests",
   "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
+]
+
+[[route]]
+id = "route/build-expression-tree"
+task = "Build an expression tree"
+audiences = ["user", "code", "framework"]
+steps = [
+  { feature = "feature/sim-expr-tree/expression-tree", why = "The loadable framework exposes the stable capability-gated operation family, Shapes, Cards, durable Citizens, and ordinary Expr/Value behavior." },
+  { feature = "feature/sim-expr-tree/mixed-backend-storage", why = "The storage feature composes authored source, operational control, rebuildable derived state, and explicit Table/Dir mounts." },
+  { feature = "feature/sim-expr-tree/incremental-calculation", why = "The calculation feature supplies bounded automatic and directed dependency-aware work, receipts, refresh, and standard streams." },
+  { feature = "feature/sim-expr-tree/codec-policy", why = "The codec policy feature applies installed general-purpose codecs with inherited read and output bounds instead of creating a tree-specific codec." },
+  { specimen = "recipe/sim-expr-tree/crates/sim-lib-expr-tree/01-basics/finite-tree", why = "The checked Lisp recipe creates generated names, mixes backend kinds, and resolves bare, relative, and absolute paths." },
+  { specimen = "recipe/sim-expr-tree/crates/sim-lib-expr-tree/02-calculation/automatic-and-directed", why = "The checked Lisp recipe combines automatic and manual work, inspects receipt evidence, repairs a cycle, and reopens named storage." },
 ]
 
 [[feature]]

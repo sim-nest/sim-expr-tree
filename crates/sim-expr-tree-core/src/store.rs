@@ -316,6 +316,17 @@ impl ExprTreeStores {
         Ok(())
     }
 
+    /// Removes and returns one explicit mount descriptor.
+    pub fn unmount(&mut self, path: &TablePath) -> Result<MountDescriptor, StoreError> {
+        let key = mount_key(path);
+        let descriptor = self
+            .mounts
+            .remove(&key)
+            .ok_or_else(|| StoreError::InvalidMount(format!("missing mount point {path}")))?;
+        self.control.remove(&format!("mount-epoch:{path}"));
+        Ok(descriptor)
+    }
+
     /// Record a mounted backend epoch in the control store.
     pub fn observe_mount_epoch(
         &mut self,
@@ -376,6 +387,11 @@ impl ExprTreeStores {
     /// Store an operational control value outside source entries.
     pub fn put_control(&mut self, key: impl Into<String>, entry: ControlEntry) {
         self.control.insert(key.into(), entry);
+    }
+
+    /// Removes authored source for a deleted cell.
+    pub fn remove_source(&mut self, id: &CellId) -> Option<SourceEntry> {
+        self.source.remove(id)
     }
 }
 

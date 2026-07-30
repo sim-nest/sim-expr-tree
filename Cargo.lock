@@ -306,8 +306,17 @@ dependencies = [
 name = "sim-lib-expr-tree"
 version = "0.1.0"
 dependencies = [
+ "sim-citizen",
+ "sim-citizen-derive",
+ "sim-codec",
+ "sim-codec-lisp",
+ "sim-cookbook",
  "sim-expr-tree-calc",
  "sim-expr-tree-core",
+ "sim-kernel",
+ "sim-lib-stream-core",
+ "sim-shape",
+ "sim-table-core",
 ]
 
 [[package]]

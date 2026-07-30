@@ -1,0 +1,46 @@
+{
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/"
+    "automatic"
+    "automatic-value")
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/"
+    "manual"
+    "initial")
+  (expr-tree/set-calc-policy
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/manual"
+    "manual")
+  (expr-tree/set-expr
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/manual"
+    (expr-tree/ref "/automatic"))
+  (expr-tree/calculate
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/manual")
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/"
+    "cycle-a"
+    (expr-tree/ref "/cycle-b"))
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/"
+    "cycle-b"
+    (expr-tree/ref "/cycle-a"))
+  (expr-tree/explain
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/cycle-a")
+  (expr-tree/set-expr
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/cycle-b"
+    "recovered")
+  (expr-tree/recalculate-recursive
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/cycle-a")
+  (expr-tree/explain
+    (expr-tree/open "recipe-automatic-and-directed")
+    "/cycle-a")
+}

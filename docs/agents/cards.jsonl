@@ -11,8 +11,13 @@
 {"kind":"recipe","path":"crates/sim-expr-tree-core/recipes/01-basics/scaffold/setup.siml"}
 {"kind":"recipe","path":"crates/sim-expr-tree-core/recipes/book.toml"}
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/chapter.toml"}
-{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/scaffold/expected.txt"}
-{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/scaffold/purpose.md"}
-{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/scaffold/recipe.toml"}
-{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/scaffold/setup.siml"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/expected.txt"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/purpose.md"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/recipe.toml"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/01-basics/finite-tree/setup.siml"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/expected.txt"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/purpose.md"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/recipe.toml"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/setup.siml"}
+{"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/chapter.toml"}
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/book.toml"}
