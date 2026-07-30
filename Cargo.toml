@@ -19,3 +19,6 @@ homepage = "https://github.com/sim-nest/sim-expr-tree"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+
+[patch.crates-io]
+sim-lib-server = { path = "../sim-agent-net/crates/sim-lib-server" }

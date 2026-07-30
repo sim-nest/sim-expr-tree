@@ -1,4 +1,6 @@
 mod calculation;
+mod creation;
+mod inspection;
 mod path;
 
 use std::collections::BTreeMap;
@@ -7,7 +9,7 @@ use sim_expr_tree_calc::{CodecPolicyPatch, ExprTreeCalc};
 use sim_expr_tree_core::{
     BackendKind, CellCreate, CellId, ControlEntry, DirId, ExprTreeStores, GeneratedNameKind,
     MountDescriptor, MountEpoch, MountResource, Namespace, NamespaceName, NodeKind, SourceEntry,
-    TreeId, WriterLane,
+    WriterLane,
 };
 use sim_kernel::Expr;
 use sim_table_core::TablePath;
@@ -46,28 +48,6 @@ pub(crate) struct TreeState {
 }
 
 impl TreeState {
-    pub(crate) fn new(storage_name: String) -> std::result::Result<Self, String> {
-        let tree_id = TreeId::new(format!("tree:{storage_name}")).map_err(debug_error)?;
-        let root_dir = DirId::new(format!("dir:{storage_name}:root")).map_err(debug_error)?;
-        let namespace = Namespace::new(tree_id, root_dir.clone());
-        let stores = ExprTreeStores::new(root_dir.clone()).map_err(debug_error)?;
-        Ok(Self {
-            storage_name,
-            namespace,
-            stores,
-            calc: ExprTreeCalc::new(),
-            entries: BTreeMap::from([("/".to_owned(), EntryIdentity::Dir(root_dir))]),
-            cells: BTreeMap::new(),
-            next_cell_id: 0,
-            next_dir_id: 0,
-            source_revision: 0,
-        })
-    }
-
-    pub(crate) fn storage_name(&self) -> &str {
-        &self.storage_name
-    }
-
     pub(crate) fn new_cell(
         &mut self,
         parent: &str,

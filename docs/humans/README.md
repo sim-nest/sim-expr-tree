@@ -20,6 +20,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `feature/sim-expr-tree/expression-tree` | `crate/sim-lib-expr-tree` | 3 | Build finite named source trees over mixed Table/Dir storage and calculate them through a capability-gated runtime library with Shape and Card contracts, durable Citizens, bounded receipts, and standard streams. |
 | `feature/sim-expr-tree/codec-policy` | `crate/sim-expr-tree-calc` | 2 | Decode edited source and encode source/result faces through installed codecs with field-wise tree/directory/cell policy, explicit positions, trusted diminished read policy, and independent hard-clamped byte/depth/item budgets. |
 | `feature/sim-expr-tree/expression-tree-view` | `crate/sim-lib-view-expr-tree` | 1 | Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations. |
+| `feature/sim-expr-tree/expression-tree-server` | `crate/sim-lib-expr-tree-server` | 1 | Serve bounded opaque expression tree sessions through one loadable EvalSite and EvalFabric, preserving caller authority, optimistic revisions, logical-time lifecycle policy, reversible surface operations, structured errors, and backpressured watches. |
 | `feature/sim-expr-tree/finite-namespace` | `crate/sim-expr-tree-core` | 1 | Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations. |
 | `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Calculate ordinary Expr sources into ordinary Value results through one bounded incremental engine with validated Table-backed restarts, explicit backend refresh, inherited triggers, immutable authority ceilings, restartable automatic work, standard progress streams, and inspectable receipts. |
 | `feature/sim-expr-tree/mixed-backend-storage` | `crate/sim-expr-tree-core` | 2 | Compose authored source, operational control, versioned rebuildable derived graphs, and explicit Table/Dir mounts without flattening mounted backend behavior. |
@@ -32,6 +33,8 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `cli/sim-expr-tree` | `cli` | `crate/sim-expr-tree` |
 | `cli/xtask` | `cli` | `crate/xtask` |
 | `docs/sim-expr-tree/generated` | `docs` | `doc-set/sim-expr-tree/generated` |
+| `site/sim-lib-expr-tree-server` | `site` | `crate/sim-lib-expr-tree-server` |
+| `view-edit/sim-lib-expr-tree-server` | `view-edit` | `crate/sim-lib-expr-tree-server` |
 | `view-edit/sim-lib-view-expr-tree` | `view-edit` | `crate/sim-lib-view-expr-tree` |
 | `view/sim-lib-view-expr-tree` | `view` | `crate/sim-lib-view-expr-tree` |
 
@@ -1732,6 +1735,20 @@ fn surface_codec_is_the_one_reversible_contract() {
         .expect("surface codec encodes through Scene");
     sim_lib_scene::validate_scene(&scene).expect("encoded value is a standard Scene");
 }
+```
+
+### `feature/sim-expr-tree/expression-tree-server`
+
+Specimen `spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests` is checked by `cargo test`.
+
+Source `crates/sim-lib-expr-tree-server/src/tests.rs`:
+
+```rust
+//! conformance: authoritative expression-tree EvalSite sessions and lifecycle.
+
+mod conformance;
+mod lifecycle;
+mod support;
 ```
 
 ### `feature/sim-expr-tree/finite-namespace`

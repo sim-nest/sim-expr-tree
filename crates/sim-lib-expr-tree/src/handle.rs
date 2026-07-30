@@ -52,7 +52,11 @@ impl TreeRuntime {
         }
     }
 
-    pub(crate) fn open(&self, storage_name: &str) -> std::result::Result<TreeHandle, String> {
+    pub(crate) fn open(
+        &self,
+        cx: &Cx,
+        storage_name: &str,
+    ) -> std::result::Result<TreeHandle, String> {
         if storage_name.is_empty() || storage_name.len() > MAX_STORAGE_NAME_BYTES {
             return Err(format!(
                 "storage name must contain 1..={MAX_STORAGE_NAME_BYTES} bytes"
@@ -65,7 +69,7 @@ impl TreeRuntime {
         let state = match stores.get(storage_name) {
             Some(state) => Arc::clone(state),
             None => {
-                let state = Arc::new(Mutex::new(TreeState::new(storage_name.to_owned())?));
+                let state = Arc::new(Mutex::new(TreeState::new(cx, storage_name.to_owned())?));
                 stores.insert(storage_name.to_owned(), Arc::clone(&state));
                 state
             }

@@ -62,7 +62,7 @@ pub(crate) fn bounded_error(operation: &str, detail: impl std::fmt::Display) -> 
 
 fn open(runtime: &TreeRuntime, cx: &mut Cx, args: &[Value]) -> std::result::Result<Value, String> {
     let storage = string_arg(cx, &args[0], "storage name")?;
-    let handle = runtime.open(&storage)?;
+    let handle = runtime.open(cx, &storage)?;
     cx.factory()
         .opaque(Arc::new(handle))
         .map_err(|error| error.to_string())

@@ -85,6 +85,37 @@ claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-lib-view-expr-tree/src/tests",
 ]
 
+[[feature]]
+id = "feature/sim-expr-tree/expression-tree-server"
+title = "Authoritative expression tree EvalSite"
+summary = "Serve bounded opaque expression tree sessions through one loadable EvalSite and EvalFabric, preserving caller authority, optimistic revisions, logical-time lifecycle policy, reversible surface operations, structured errors, and backpressured watches."
+owner = "crate/sim-lib-expr-tree-server"
+audiences = ["code", "framework"]
+guidance = "Use ExpressionTreeServer when source, inherited policy, calculation, receipts, and live authority must remain authoritative across reconnecting clients. Load site/sim-lib-expr-tree-server, create a bounded opaque session, and send ordinary EvalRequest or ServerFrame requests through the existing EvalFabric and transport adapters. The site evaluates expr-tree/* calls in the caller Cx, accepts operations produced by ExpressionTreeSurfaceCodec, and implements generic web-session read, commit, realize, and change requests without adding a product transport. Snapshot revisions and mandatory logical ticks govern optimistic commits, event order, and idle expiry. The injected sim-lib-server WallClock contributes optional human observations only and may move backward or fail without affecting correctness. Per-server session, idle, page, depth, watch-count, and watch-buffer limits fail closed; slow consumers receive explicit lifetime overflow evidence; session and watch cancellation are explicit; restart invalidates old ids. The claimed specimen covers two clients, isolation, reconnect, standard frame correlation, direct SurfaceCodec intent handling, authority diminution, stale commits, slow consumers, cancellation, backward wall observations, idle expiry, and restart."
+supports = [
+  "feature/sim-expr-tree/expression-tree",
+  "feature/sim-expr-tree/expression-tree-view",
+]
+claims_anchors = [
+  "anchor/crate/sim-lib-expr-tree-server",
+  "anchor/rustdoc/sim-lib-expr-tree-server/crate-root",
+]
+claims_surfaces = [
+  "site/sim-lib-expr-tree-server",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests",
+]
+
+[[route]]
+id = "route/serve-authoritative-expression-tree"
+task = "Serve an authoritative expression tree"
+audiences = ["code", "framework"]
+steps = [
+  { feature = "feature/sim-expr-tree/expression-tree-server", why = "The server row owns bounded authoritative sessions, EvalSite and EvalFabric routing, caller authority, logical-time lifecycle policy, optimistic revisions, and backpressured watches." },
+  { specimen = "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests", why = "The checked server specimen proves multi-client isolation, reconnect, cancellation, backpressure, authority diminution, stale commits, wall observations, idle expiry, and restart behavior." },
+]
+
 [[route]]
 id = "route/build-expression-tree"
 task = "Build an expression tree"

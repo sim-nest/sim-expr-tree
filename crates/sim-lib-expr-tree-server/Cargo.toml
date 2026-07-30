@@ -7,11 +7,20 @@ readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
 publish = false
-description = "Scaffold for the SIM expression-tree server library."
+description = "Authoritative bounded EvalSite server for SIM expression-tree sessions."
 
 [dependencies]
+sim-kernel = { version = "0.1.5" }
 sim-lib-expr-tree = { path = "../sim-lib-expr-tree" }
+sim-lib-server = { version = "0.1.10" }
+sim-lib-view = { version = "0.1.4" }
 sim-lib-view-expr-tree = { path = "../sim-lib-view-expr-tree" }
+sim-value = { version = "0.1.2" }
+
+[dev-dependencies]
+sim-codec-lisp = { version = "0.1.2" }
+sim-kernel = { version = "0.1.5", features = ["test-support"] }
+sim-lib-intent = { version = "0.1.3" }
 
 [lints]
 workspace = true

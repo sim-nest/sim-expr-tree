@@ -17,6 +17,7 @@ mod capability;
 mod citizen;
 mod dispatch;
 mod handle;
+mod inspect;
 mod operation;
 mod parse;
 mod projection;
@@ -34,6 +35,7 @@ pub use citizen::{
     durable_source_class_symbol, expr_tree_citizen_registry,
 };
 pub use handle::TreeHandle;
+pub use inspect::{TreeCellInspection, TreeEntryInspection, TreeEntryKind};
 pub use operation::{
     ExprTreeLib, expr_tree_exports, expr_tree_lib_symbol, expr_tree_operation_cards_symbol,
     expr_tree_operation_symbols, install_expr_tree_lib,

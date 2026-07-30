@@ -10,9 +10,44 @@ use sim_lib_stream_core::{BufferPolicy, StreamValue};
 use sim_table_core::TablePath;
 
 use super::{EntryIdentity, TreeState, resolve_path};
+use crate::TreeCellInspection;
 use crate::{DurablePolicyRecord, DurableSourceRecord, runtime_support::trigger_name};
 
 impl TreeState {
+    pub(crate) fn set_wall_clock<F>(&mut self, clock: F)
+    where
+        F: Fn() -> Option<u64> + Send + Sync + 'static,
+    {
+        self.calc.set_wall_clock(clock);
+    }
+
+    pub(crate) fn inspect_cell(
+        &self,
+        path: &str,
+    ) -> std::result::Result<TreeCellInspection, String> {
+        let path = resolve_path(path, &TablePath::root())?;
+        let cell = self.cell(&path)?;
+        let explanation = self.calc.explain(&path);
+        let policy = self.calc.effective_calc_policy(&path);
+        let codec = self.calc.effective_codec_policy(&path);
+        let mut policy_badges = vec![trigger_name(policy.trigger).to_owned()];
+        if let Some(source_codec) = codec.source_codec() {
+            policy_badges.push(format!("source:{source_codec}"));
+        }
+        if let Some(result_codec) = codec.result_codec() {
+            policy_badges.push(format!("result:{result_codec}"));
+        }
+        Ok(TreeCellInspection {
+            path: path.to_absolute_reference(),
+            source: self.calc.source_face(&path),
+            result: self.calc.result_face(&path),
+            status: explanation.status,
+            source_revision: cell.revision,
+            receipt: explanation.receipt,
+            policy_badges,
+        })
+    }
+
     pub(crate) fn set_calc_policy(
         &mut self,
         path: &str,
