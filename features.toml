@@ -116,6 +116,35 @@ steps = [
   { specimen = "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests", why = "The checked server specimen proves multi-client isolation, reconnect, cancellation, backpressure, authority diminution, stale commits, wall observations, idle expiry, and restart behavior." },
 ]
 
+[[feature]]
+id = "feature/sim-expr-tree/server-backed-web-ui"
+title = "Server-backed expression-tree web UI"
+summary = "Compose the expression-tree SurfaceCodec and authoritative server site with RemoteTransport, isolated generic browser sessions, and desktop or phone Scene projections."
+owner = "crate/sim-lib-expr-tree-server"
+audiences = ["user", "code", "framework"]
+guidance = "Use ExpressionTreeWebSurfaceFactory when the generic SIM web shell should open one authoritative expression-tree resource. The factory maps one opaque browser alias to one server session, creates a fresh caller Cx and RemoteTransport for every browser id, registers the product SurfaceCodec, and injects that reversible surface through sim-web-shell's object-safe factory seam. The browser continues to run the one generic Scene interpreter and Intent emitter: there is no expression-tree JavaScript, transport, cache, or widget. Choose open SurfaceCaps for desktop or phone projection. Collapsed directories stay lazy, remote changes are scoped by resource, stale rendered revisions fail visibly, reconnect refreshes server state without widening caller authority, and the PWA cache remains shell-only. The checked recipe drives create, edit, automatic calculation, explanation, collapse, reconnect, stale failure, authority denial, session isolation, desktop and phone projection, generic browser painting, and deterministic review screenshots."
+supports = [
+  "feature/sim-expr-tree/expression-tree-server",
+  "feature/sim-expr-tree/expression-tree-view",
+]
+claims_anchors = [
+  "anchor/crate/sim-lib-expr-tree-server",
+  "anchor/rustdoc/sim-lib-expr-tree-server/expression-tree-web-surface",
+  "anchor/rustdoc/sim-lib-expr-tree-server/expression-tree-web-surface-factory",
+]
+claims_specimens = [
+  "recipe/sim-expr-tree/03-server/web-session",
+]
+
+[[route]]
+id = "route/open-expression-tree"
+task = "Open an authoritative expression tree in a desktop or phone browser"
+audiences = ["user", "code", "framework"]
+steps = [
+  { feature = "feature/sim-expr-tree/server-backed-web-ui", why = "The product composition binds one expression-tree SurfaceCodec and server resource to fresh authority-preserving RemoteTransport browser sessions." },
+  { specimen = "recipe/sim-expr-tree/03-server/web-session", why = "The checked recipe exercises create, edit, calculation, explanation, lazy collapse, progress, stale failure, reconnect, authority isolation, phone projection, and deterministic browser fixtures." },
+]
+
 [[route]]
 id = "route/build-expression-tree"
 task = "Build an expression tree"

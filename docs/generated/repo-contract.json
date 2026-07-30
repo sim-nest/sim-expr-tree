@@ -1,5 +1,5 @@
 {
-  "card_count": 5,
+  "card_count": 6,
   "cards": [
     {
       "id": "browse/catalog",
@@ -24,6 +24,12 @@
       "kind": "cookbook-recipe",
       "owner": "sim-expr-tree-core",
       "summary": ""
+    },
+    {
+      "id": "cookbook/sim-expr-tree-server",
+      "kind": "cookbook-recipe",
+      "owner": "sim-expr-tree",
+      "summary": "Open authoritative expression trees through standard SIM server and browser surfaces."
     },
     {
       "id": "registry/catalog",
@@ -357,10 +363,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "23684dfe1027128df87224ea324b4de5f2b616ef",
+    "git_commit": "80ab83879838d5aa35ee5f32b743657c19f7a3b0",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "23684dfe1027128df87224ea324b4de5f2b616ef",
+    "source_commit": "80ab83879838d5aa35ee5f32b743657c19f7a3b0",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -373,9 +379,9 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "befd7a47453a3ea2",
+    "workspace_hash": "854396f15fb6b620",
     "workspace_hash_algorithm": "fnv1a64",
-    "workspace_hash_input_count": 104,
+    "workspace_hash_input_count": 108,
     "workspace_hash_inputs": [
       "Cargo.toml",
       "crates/sim-expr-tree/Cargo.toml",
@@ -465,7 +471,9 @@
       "crates/sim-lib-expr-tree-server/src/tests/conformance.rs",
       "crates/sim-lib-expr-tree-server/src/tests/lifecycle.rs",
       "crates/sim-lib-expr-tree-server/src/tests/support.rs",
+      "crates/sim-lib-expr-tree-server/src/tests/web.rs",
       "crates/sim-lib-expr-tree-server/src/tests.rs",
+      "crates/sim-lib-expr-tree-server/src/web.rs",
       "crates/sim-lib-view-expr-tree/Cargo.toml",
       "crates/sim-lib-view-expr-tree/src/budget.rs",
       "crates/sim-lib-view-expr-tree/src/codec.rs",
@@ -480,10 +488,12 @@
       "crates/sim-lib-view-expr-tree/src/tests/support.rs",
       "crates/sim-lib-view-expr-tree/src/tests.rs",
       "features.toml",
+      "recipes/03-server/web-session/recipe.toml",
+      "recipes/book.toml",
       "xtask/Cargo.toml"
     ]
   },
-  "recipe_book_count": 3,
+  "recipe_book_count": 4,
   "recipes": [
     {
       "book": "sim-expr-tree-calc",
@@ -552,6 +562,26 @@
       ],
       "summary": "Build finite live calculation trees from ordinary SIM operations.",
       "title": "Expression Trees"
+    },
+    {
+      "book": "sim-expr-tree-server",
+      "book_toml": "recipes/book.toml",
+      "card_id": "cookbook/sim-expr-tree-server",
+      "group": "workspace",
+      "package": "sim-expr-tree",
+      "recipe_count": 1,
+      "recipes": [
+        {
+          "card_id": "sim-expr-tree-server/03-server/web-session",
+          "codec": "lisp",
+          "id": "web-session",
+          "package": "sim-expr-tree",
+          "recipe_toml": "recipes/03-server/web-session/recipe.toml",
+          "title": "Open one authoritative tree on desktop and phone"
+        }
+      ],
+      "summary": "Open authoritative expression trees through standard SIM server and browser surfaces.",
+      "title": "Expression Tree Server"
     }
   ]
 }

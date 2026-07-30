@@ -27,8 +27,16 @@ expiry. Source, policy, calculation, receipts, and live authority remain in the
 server-owned expression-tree runtime. Browser and transport adapters carry
 only bounded snapshots, Intents, operations, and change records.
 
+`ExpressionTreeWebSurfaceFactory` is the product composition point for the
+generic SIM browser shell. It gives each opaque browser id a fresh caller
+context, negotiated `RemoteTransport`, codec registry, and reversible session,
+while mapping the browser alias to exactly one authoritative tree resource.
+The shell keeps ownership of HTTP lifecycle, session expiry, PWA policy, and
+the generic Scene interpreter.
+
 Run the focused conformance specimen with:
 
 ```sh
 cargo test -p sim-lib-expr-tree-server
+cargo run -p xtask -- check-recipes
 ```

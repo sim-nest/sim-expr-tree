@@ -1,5 +1,5 @@
 {
-  "card_count": 5,
+  "card_count": 6,
   "cards": [
     {
       "id": "browse/catalog",
@@ -24,6 +24,12 @@
       "kind": "cookbook-recipe",
       "owner": "sim-expr-tree-core",
       "summary": ""
+    },
+    {
+      "id": "cookbook/sim-expr-tree-server",
+      "kind": "cookbook-recipe",
+      "owner": "sim-expr-tree",
+      "summary": "Open authoritative expression trees through standard SIM server and browser surfaces."
     },
     {
       "id": "registry/catalog",

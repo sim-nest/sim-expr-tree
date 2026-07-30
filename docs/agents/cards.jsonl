@@ -21,3 +21,14 @@
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/setup.siml"}
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/02-calculation/chapter.toml"}
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/book.toml"}
+{"kind":"recipe","path":"recipes/03-server/chapter.toml"}
+{"kind":"recipe","path":"recipes/03-server/web-session/expected.txt"}
+{"kind":"recipe","path":"recipes/03-server/web-session/fixtures/desktop.json"}
+{"kind":"recipe","path":"recipes/03-server/web-session/fixtures/phone.json"}
+{"kind":"recipe","path":"recipes/03-server/web-session/purpose.md"}
+{"kind":"recipe","path":"recipes/03-server/web-session/recipe.toml"}
+{"kind":"recipe","path":"recipes/03-server/web-session/screenshots/SHA256SUMS"}
+{"kind":"recipe","path":"recipes/03-server/web-session/screenshots/desktop.png"}
+{"kind":"recipe","path":"recipes/03-server/web-session/screenshots/phone.png"}
+{"kind":"recipe","path":"recipes/03-server/web-session/setup.siml"}
+{"kind":"recipe","path":"recipes/book.toml"}

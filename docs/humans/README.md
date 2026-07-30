@@ -21,6 +21,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `feature/sim-expr-tree/codec-policy` | `crate/sim-expr-tree-calc` | 2 | Decode edited source and encode source/result faces through installed codecs with field-wise tree/directory/cell policy, explicit positions, trusted diminished read policy, and independent hard-clamped byte/depth/item budgets. |
 | `feature/sim-expr-tree/expression-tree-view` | `crate/sim-lib-view-expr-tree` | 1 | Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations. |
 | `feature/sim-expr-tree/expression-tree-server` | `crate/sim-lib-expr-tree-server` | 1 | Serve bounded opaque expression tree sessions through one loadable EvalSite and EvalFabric, preserving caller authority, optimistic revisions, logical-time lifecycle policy, reversible surface operations, structured errors, and backpressured watches. |
+| `feature/sim-expr-tree/server-backed-web-ui` | `crate/sim-lib-expr-tree-server` | 1 | Compose the expression-tree SurfaceCodec and authoritative server site with RemoteTransport, isolated generic browser sessions, and desktop or phone Scene projections. |
 | `feature/sim-expr-tree/finite-namespace` | `crate/sim-expr-tree-core` | 1 | Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations. |
 | `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Calculate ordinary Expr sources into ordinary Value results through one bounded incremental engine with validated Table-backed restarts, explicit backend refresh, inherited triggers, immutable authority ceilings, restartable automatic work, standard progress streams, and inspectable receipts. |
 | `feature/sim-expr-tree/mixed-backend-storage` | `crate/sim-expr-tree-core` | 2 | Compose authored source, operational control, versioned rebuildable derived graphs, and explicit Table/Dir mounts without flattening mounted backend behavior. |
@@ -36,6 +37,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `site/sim-lib-expr-tree-server` | `site` | `crate/sim-lib-expr-tree-server` |
 | `view-edit/sim-lib-expr-tree-server` | `view-edit` | `crate/sim-lib-expr-tree-server` |
 | `view-edit/sim-lib-view-expr-tree` | `view-edit` | `crate/sim-lib-view-expr-tree` |
+| `view/sim-lib-expr-tree-server` | `view` | `crate/sim-lib-expr-tree-server` |
 | `view/sim-lib-view-expr-tree` | `view` | `crate/sim-lib-view-expr-tree` |
 
 ## Recipes
@@ -63,6 +65,17 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 - `crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/setup.siml`
 - `crates/sim-lib-expr-tree/recipes/02-calculation/chapter.toml`
 - `crates/sim-lib-expr-tree/recipes/book.toml`
+- `recipes/03-server/chapter.toml`
+- `recipes/03-server/web-session/expected.txt`
+- `recipes/03-server/web-session/fixtures/desktop.json`
+- `recipes/03-server/web-session/fixtures/phone.json`
+- `recipes/03-server/web-session/purpose.md`
+- `recipes/03-server/web-session/recipe.toml`
+- `recipes/03-server/web-session/screenshots/SHA256SUMS`
+- `recipes/03-server/web-session/screenshots/desktop.png`
+- `recipes/03-server/web-session/screenshots/phone.png`
+- `recipes/03-server/web-session/setup.siml`
+- `recipes/book.toml`
 
 ## Worked Examples
 
@@ -1749,6 +1762,34 @@ Source `crates/sim-lib-expr-tree-server/src/tests.rs`:
 mod conformance;
 mod lifecycle;
 mod support;
+mod web;
+```
+
+### `feature/sim-expr-tree/server-backed-web-ui`
+
+Specimen `recipe/sim-expr-tree/03-server/web-session` is checked by `xtask check-recipes`.
+
+Source `recipes/03-server/web-session/recipe.toml`:
+
+```toml
+id = "web-session"
+title = "Open one authoritative tree on desktop and phone"
+codec = "lisp"
+setup = "setup.siml"
+purpose = "purpose.md"
+order = 10
+tags = ["expression-tree", "server", "web", "phone", "reconnect", "runnable"]
+requires = [
+  "codec/lisp",
+  "lib/expr-tree",
+  "site/sim-lib-expr-tree-server",
+  "feature/sim-web/server-backed-web-sessions",
+  "feature/sim-web/web-shell-host",
+]
+harness = "cargo-test"
+package = "sim-lib-expr-tree-server"
+test = "tests::web::recipe_server_backed_web_session_runs_desktop_phone_and_failure_paths"
+expected = "expected.txt"
 ```
 
 ### `feature/sim-expr-tree/finite-namespace`

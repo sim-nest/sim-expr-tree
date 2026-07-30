@@ -25,7 +25,10 @@ pub fn run() -> Result<(), String> {
         validate_balanced_lisp(&setup)
             .map_err(|error| format!("{}: {error}", recipe_dir.display()))?;
 
-        if quoted_value(&metadata, "package").as_deref() == Some("sim-lib-expr-tree") {
+        if matches!(
+            quoted_value(&metadata, "package").as_deref(),
+            Some("sim-lib-expr-tree" | "sim-lib-expr-tree-server")
+        ) {
             validate_runtime_recipe(&root, recipe_dir, &metadata, &setup, &expected)?;
             runnable += 1;
         }
@@ -73,10 +76,20 @@ fn validate_runtime_recipe(
             recipe_dir.display()
         ));
     }
+    let package = quoted_value(metadata, "package").expect("validated package");
     let test = quoted_value(metadata, "test").expect("validated test");
     let test_name = test.rsplit("::").next().expect("nonempty test name");
-    let tests_source = required_text(&root.join("crates/sim-lib-expr-tree/src"), "tests.rs")?;
-    if !tests_source.contains(&format!("fn {test_name}(")) {
+    let mut rust_sources = Vec::new();
+    collect_extension(
+        &root.join("crates").join(&package).join("src"),
+        "rs",
+        &mut rust_sources,
+    )?;
+    if !rust_sources.iter().any(|source| {
+        fs::read_to_string(source)
+            .map(|text| text.contains(&format!("fn {test_name}(")))
+            .unwrap_or(false)
+    }) {
         return Err(format!(
             "{} names missing cargo test {test}",
             recipe_dir.display()
@@ -151,9 +164,26 @@ fn validate_balanced_lisp(source: &str) -> Result<(), String> {
 
 fn recipe_files(root: &Path) -> Result<Vec<PathBuf>, String> {
     let mut files = Vec::new();
+    collect(&root.join("recipes"), &mut files)?;
     collect(&root.join("crates"), &mut files)?;
     files.sort();
     Ok(files)
+}
+
+fn collect_extension(path: &Path, extension: &str, files: &mut Vec<PathBuf>) -> Result<(), String> {
+    if !path.exists() {
+        return Ok(());
+    }
+    for entry in fs::read_dir(path).map_err(|err| format!("read {}: {err}", path.display()))? {
+        let entry = entry.map_err(|err| format!("read {} entry: {err}", path.display()))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_extension(&path, extension, files)?;
+        } else if path.extension().and_then(|value| value.to_str()) == Some(extension) {
+            files.push(path);
+        }
+    }
+    Ok(())
 }
 
 fn collect(path: &Path, files: &mut Vec<PathBuf>) -> Result<(), String> {

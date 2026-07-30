@@ -20,6 +20,8 @@ human timestamps useful without making clock rollback a correctness event.
 - Keep source, calculation, policy, receipts, and authority on the server.
 - Reuse `EvalSite`, `EvalFabric`, `ServerFrame`, `SurfaceCodec`, and transport
   adapters instead of owning a product protocol.
+- Inject an expression-tree live surface into the generic web shell without
+  product JavaScript or a forked Scene interpreter.
 - Share a session across reconnecting clients while isolating unrelated trees.
 - Reject stale edits and diminished authority without disconnecting the client.
 - Bound every session and watch lifecycle with visible overflow evidence.

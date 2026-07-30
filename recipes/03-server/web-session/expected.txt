@@ -1,0 +1,7 @@
+desktop=create edit calculate explain
+phone=compact-authoritative-projection
+collapsed=descendants-not-fetched
+progress=fresh-with-bounded-receipt
+stale-commit=visible-error
+reconnect=authority-preserved
+pwa-cache=browser-shell-only

@@ -16,6 +16,7 @@ mod protocol;
 mod server;
 mod session;
 mod site;
+mod web;
 
 pub use error::ExpressionTreeServerError;
 pub use model::{ChangeEvent, ExpressionTreeServerLimits, SessionId, WatchBatch, WatchId};
@@ -24,6 +25,7 @@ pub use site::{
     ExpressionTreeServerLib, expr_tree_server_lib_symbol, expr_tree_server_site_symbol,
     install_expr_tree_server_lib,
 };
+pub use web::{ExpressionTreeWebSurface, ExpressionTreeWebSurfaceFactory};
 
 /// Returns the crate's public server-library identity.
 pub const fn crate_identity() -> &'static str {

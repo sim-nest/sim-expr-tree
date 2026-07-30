@@ -28,6 +28,9 @@ Start with the checked recipes:
   paths, and combines local, database Dir, and read-only Table backends.
 - `automatic-and-directed` combines automatic work, manual calculation,
   receipts, cycle recovery, and reopening a named store.
+- `web-session` connects the product codec and authoritative server to the
+  generic desktop and phone browser stack, including reconnect and failure
+  proofs plus deterministic review screenshots.
 
 Run the repository gate with the validation command declared in the SIM
 constellation manifest. For focused runtime work:

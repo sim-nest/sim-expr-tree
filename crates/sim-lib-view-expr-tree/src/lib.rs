@@ -17,6 +17,10 @@ mod intent;
 mod model;
 mod scene;
 
+use std::sync::Arc;
+
+use sim_lib_view::LensRegistry;
+
 pub use codec::{
     EXPRESSION_TREE_SURFACE_CODEC_ID, ExpressionTreeSurfaceCodec,
     expression_tree_surface_codec_symbol,
@@ -37,4 +41,16 @@ pub const fn crate_identity() -> &'static str {
 /// Returns the runtime library identity composed by this view.
 pub fn runtime_identity() -> &'static str {
     sim_lib_expr_tree::crate_identity()
+}
+
+/// Registers the canonical expression-tree reversible surface in a view
+/// registry.
+///
+/// Browser, phone, and other hosts call this once and then select the stable
+/// [`expression_tree_surface_codec_symbol`] through their generic session bus.
+pub fn register_expression_tree_surface_codec(registry: &mut LensRegistry) {
+    registry.register_surface_codec(
+        expression_tree_surface_codec_symbol(),
+        Arc::new(ExpressionTreeSurfaceCodec::new()),
+    );
 }

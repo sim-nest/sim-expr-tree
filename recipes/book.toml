@@ -1,0 +1,5 @@
+book = "sim-expr-tree-server"
+title = "Expression Tree Server"
+summary = "Open authoritative expression trees through standard SIM server and browser surfaces."
+order = 66
+chapters = ["03-server"]

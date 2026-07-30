@@ -1,0 +1,223 @@
+{
+  "profile": "phone",
+  "scene": {
+    "aria-label": "Expression tree outline",
+    "budget": {
+      "depth": 16,
+      "encoded-bytes": 65536,
+      "face-bytes": 4096,
+      "nodes": 128
+    },
+    "children": [
+      {
+        "aria-expanded": true,
+        "aria-label": "root, directory, expanded",
+        "disclosure-target": {
+          "path": "/",
+          "revision": 12,
+          "tree": "expr-tree/session/fixture"
+        },
+        "kind": "scene/tree",
+        "label": "root — directory",
+        "nodes": [
+          {
+            "aria-expanded": true,
+            "aria-label": "model, directory, expanded",
+            "disclosure-target": {
+              "path": "/model",
+              "revision": 12,
+              "tree": "expr-tree/session/fixture"
+            },
+            "kind": "scene/tree",
+            "label": "model — directory",
+            "nodes": [
+              {
+                "aria-expanded": true,
+                "aria-label": "answer, cell, expanded",
+                "disclosure-target": {
+                  "path": "/model/answer",
+                  "revision": 12,
+                  "tree": "expr-tree/session/fixture"
+                },
+                "kind": "scene/tree",
+                "label": "answer — cell",
+                "nodes": [
+                  {
+                    "badges": [
+                      {
+                        "aria-label": "Calculation status: fresh",
+                        "kind": "scene/badge",
+                        "label": "Fresh",
+                        "status": "ok"
+                      },
+                      {
+                        "aria-label": "Policy: automatic",
+                        "kind": "scene/badge",
+                        "label": "automatic",
+                        "status": "policy"
+                      },
+                      {
+                        "aria-label": "Policy: source:codec/lisp",
+                        "kind": "scene/badge",
+                        "label": "source:codec/lisp",
+                        "status": "policy"
+                      },
+                      {
+                        "aria-label": "Policy: result:codec/lisp",
+                        "kind": "scene/badge",
+                        "label": "result:codec/lisp",
+                        "status": "policy"
+                      }
+                    ],
+                    "kind": "scene/badge-cluster"
+                  },
+                  {
+                    "aria-label": "answer source and result",
+                    "children": [
+                      {
+                        "aria-label": "source face for answer",
+                        "children": [
+                          {
+                            "aria-label": "Edit source for answer",
+                            "kind": "scene/field",
+                            "name": "source",
+                            "path": [
+                              "source"
+                            ],
+                            "readonly": false,
+                            "target": {
+                              "path": "/model/answer",
+                              "request-id": "4",
+                              "revision": 12,
+                              "tree": "expr-tree/session/fixture"
+                            },
+                            "value": "\"42\"",
+                            "value-codec": "codec/lisp"
+                          }
+                        ],
+                        "kind": "scene/box",
+                        "role": "source"
+                      },
+                      {
+                        "aria-label": "result face for answer",
+                        "children": [
+                          {
+                            "aria-label": "result face for answer",
+                            "kind": "scene/text",
+                            "text": "\"42\""
+                          }
+                        ],
+                        "kind": "scene/box",
+                        "role": "result"
+                      }
+                    ],
+                    "dir": "column",
+                    "kind": "scene/stack"
+                  },
+                  {
+                    "kind": "scene/text",
+                    "text": "source r3 · result r7"
+                  },
+                  {
+                    "kind": "scene/text",
+                    "text": "source changed 1700000000170 ms · result checked 1700000000120 ms"
+                  },
+                  {
+                    "kind": "scene/text",
+                    "text": "receipt #4: succeeded, 6 dependencies (+0 omitted), ticks 5–6"
+                  },
+                  {
+                    "aria-label": "Expression-tree actions",
+                    "children": [
+                      {
+                        "aria-label": "Calculate",
+                        "control": "calculate",
+                        "kind": "scene/button",
+                        "label": "Calculate",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      },
+                      {
+                        "aria-label": "Recalculate",
+                        "control": "recalculate",
+                        "kind": "scene/button",
+                        "label": "Recalculate",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      },
+                      {
+                        "aria-label": "Recalculate recursively",
+                        "control": "recalculate-recursive",
+                        "kind": "scene/button",
+                        "label": "Recalculate recursively",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      },
+                      {
+                        "aria-label": "Policy",
+                        "control": "policy",
+                        "kind": "scene/button",
+                        "label": "Policy",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      },
+                      {
+                        "aria-label": "Explain",
+                        "control": "explain",
+                        "kind": "scene/button",
+                        "label": "Explain",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      },
+                      {
+                        "aria-label": "Cancel",
+                        "control": "cancel",
+                        "kind": "scene/button",
+                        "label": "Cancel",
+                        "target": {
+                          "path": "/model/answer",
+                          "request-id": "4",
+                          "revision": 12,
+                          "tree": "expr-tree/session/fixture"
+                        }
+                      }
+                    ],
+                    "dir": "row",
+                    "kind": "scene/stack"
+                  }
+                ],
+                "open": true
+              }
+            ],
+            "open": true
+          }
+        ],
+        "open": true
+      }
+    ],
+    "kind": "scene/box",
+    "role": "expression-tree"
+  },
+  "schema": "sim.browser-scene-fixture/v1",
+  "title": "Expression tree - phone"
+}

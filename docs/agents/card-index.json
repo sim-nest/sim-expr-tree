@@ -23,6 +23,17 @@
     "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/recipe.toml",
     "crates/sim-lib-expr-tree/recipes/02-calculation/automatic-and-directed/setup.siml",
     "crates/sim-lib-expr-tree/recipes/02-calculation/chapter.toml",
-    "crates/sim-lib-expr-tree/recipes/book.toml"
+    "crates/sim-lib-expr-tree/recipes/book.toml",
+    "recipes/03-server/chapter.toml",
+    "recipes/03-server/web-session/expected.txt",
+    "recipes/03-server/web-session/fixtures/desktop.json",
+    "recipes/03-server/web-session/fixtures/phone.json",
+    "recipes/03-server/web-session/purpose.md",
+    "recipes/03-server/web-session/recipe.toml",
+    "recipes/03-server/web-session/screenshots/SHA256SUMS",
+    "recipes/03-server/web-session/screenshots/desktop.png",
+    "recipes/03-server/web-session/screenshots/phone.png",
+    "recipes/03-server/web-session/setup.siml",
+    "recipes/book.toml"
   ]
 }

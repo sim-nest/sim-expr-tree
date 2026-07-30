@@ -1,0 +1,25 @@
+{
+  (expr-tree/new-dir
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/"
+    "model")
+  (expr-tree/new-cell
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/model"
+    "answer"
+    "1")
+  (expr-tree/set-codec-policy
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/model/answer"
+    "codec/lisp")
+  (expr-tree/set-expr
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/model/answer"
+    "41")
+  (expr-tree/calculate
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/model/answer")
+  (expr-tree/explain
+    (expr-tree/open "recipe-server-backed-web-session")
+    "/model/answer")
+}
