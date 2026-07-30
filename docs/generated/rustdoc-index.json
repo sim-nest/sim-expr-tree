@@ -6,7 +6,7 @@
       "group": "workspace",
       "manifest": "crates/sim-expr-tree/Cargo.toml",
       "package": "sim-expr-tree",
-      "summary": "Thin SIM expression-tree bootloader binary scaffold."
+      "summary": "Bootloader-composed SIM expression-tree product."
     },
     {
       "crate_name": "sim_expr_tree_calc",
@@ -34,7 +34,7 @@
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree-serve/Cargo.toml",
       "package": "sim-lib-expr-tree-serve",
-      "summary": "Serve entrypoint scaffold for expression trees."
+      "summary": "Bootloader-loaded expression-tree product recipe."
     },
     {
       "crate_name": "sim_lib_expr_tree_server",

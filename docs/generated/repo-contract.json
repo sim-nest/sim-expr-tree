@@ -72,16 +72,17 @@
           "target": null
         }
       ],
-      "description": "Thin SIM expression-tree bootloader binary scaffold.",
+      "description": "Bootloader-composed SIM expression-tree product.",
       "features": [],
       "group": "workspace",
       "manifest": "crates/sim-expr-tree/Cargo.toml",
       "name": "sim-expr-tree",
       "publish": "false",
       "root": "crates/sim-expr-tree",
-      "rustdoc_summary": "Thin SIM expression-tree bootloader binary scaffold.",
+      "rustdoc_summary": "Bootloader-composed SIM expression-tree product.",
       "target_kinds": [
-        "bin"
+        "bin",
+        "test"
       ],
       "targets": [
         {
@@ -93,6 +94,16 @@
           ],
           "name": "sim-expr-tree",
           "src": "crates/sim-expr-tree/src/main.rs"
+        },
+        {
+          "crate_types": [
+            "bin"
+          ],
+          "kind": [
+            "test"
+          ],
+          "name": "boot",
+          "src": "crates/sim-expr-tree/tests/boot.rs"
         }
       ]
     },
@@ -217,19 +228,26 @@
         {
           "kind": "normal",
           "optional": false,
+          "package": "sim-lib-expr-tree",
+          "rename": null,
+          "target": null
+        },
+        {
+          "kind": "normal",
+          "optional": false,
           "package": "sim-lib-expr-tree-server",
           "rename": null,
           "target": null
         }
       ],
-      "description": "Scaffold for the SIM expression-tree serve entrypoint library.",
+      "description": "Bootloader-loaded product recipe for SIM expression-tree sessions.",
       "features": [],
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree-serve/Cargo.toml",
       "name": "sim-lib-expr-tree-serve",
       "publish": "false",
       "root": "crates/sim-lib-expr-tree-serve",
-      "rustdoc_summary": "Serve entrypoint scaffold for expression trees.",
+      "rustdoc_summary": "Bootloader-loaded expression-tree product recipe.",
       "target_kinds": [
         "lib"
       ],
@@ -363,10 +381,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "80ab83879838d5aa35ee5f32b743657c19f7a3b0",
+    "git_commit": "6a04ba76c7f5298699b17e7fd2cdb2fd5de488f1",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "80ab83879838d5aa35ee5f32b743657c19f7a3b0",
+    "source_commit": "6a04ba76c7f5298699b17e7fd2cdb2fd5de488f1",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -379,13 +397,14 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "854396f15fb6b620",
+    "workspace_hash": "6adf3ea7f04648a9",
     "workspace_hash_algorithm": "fnv1a64",
-    "workspace_hash_input_count": 108,
+    "workspace_hash_input_count": 112,
     "workspace_hash_inputs": [
       "Cargo.toml",
       "crates/sim-expr-tree/Cargo.toml",
       "crates/sim-expr-tree/src/main.rs",
+      "crates/sim-expr-tree/tests/boot.rs",
       "crates/sim-expr-tree-calc/Cargo.toml",
       "crates/sim-expr-tree-calc/recipes/01-basics/scaffold/recipe.toml",
       "crates/sim-expr-tree-calc/recipes/book.toml",
@@ -458,7 +477,10 @@
       "crates/sim-lib-expr-tree/src/source.rs",
       "crates/sim-lib-expr-tree/src/tests.rs",
       "crates/sim-lib-expr-tree-serve/Cargo.toml",
+      "crates/sim-lib-expr-tree-serve/src/config.rs",
       "crates/sim-lib-expr-tree-serve/src/lib.rs",
+      "crates/sim-lib-expr-tree-serve/src/recipe.rs",
+      "crates/sim-lib-expr-tree-serve/src/tests.rs",
       "crates/sim-lib-expr-tree-server/Cargo.toml",
       "crates/sim-lib-expr-tree-server/src/error.rs",
       "crates/sim-lib-expr-tree-server/src/lib.rs",

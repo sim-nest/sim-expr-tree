@@ -145,6 +145,44 @@ steps = [
   { specimen = "recipe/sim-expr-tree/03-server/web-session", why = "The checked recipe exercises create, edit, calculation, explanation, lazy collapse, progress, stale failure, reconnect, authority isolation, phone projection, and deterministic browser fixtures." },
 ]
 
+[[feature]]
+id = "feature/sim-expr-tree/expression-tree-product"
+title = "Bootloader-composed expression-tree product"
+summary = "Run the expression-tree engine, reversible view, authoritative server, and generic web host as one loadable recipe dispatched by the standard SIM bootloader."
+owner = "crate/sim-lib-expr-tree-serve"
+audiences = ["user", "code", "framework"]
+guidance = "Use the sim-expr-tree executable for the ready-to-run expression-tree product, or load ExprTreeServeLib when a host needs the same composition. The thin executable only appends the expr-tree verb to untouched standard bootloader arguments; sim-run-core owns configuration discovery, capability setup, runtime construction, and cli/main/expr-tree dispatch. ExpressionTreeRecipe installs the existing engine, opens configured storage through the existing EvalFabric request contract, injects ExpressionTreeWebSurfaceFactory into the generic sim-web-shell host, and closes the authoritative session and in-process transport on shutdown. Runtime configuration under lib/expr-tree-serve selects either an owned in-process ExpressionTreeServer or an already loaded external EvalFabric site. The default trusted host grants expression-tree read, write, and calculate only; mount and network remain denied. There is no product-specific CLI parser, ambient Cx construction, device enum, transport, server protocol, view protocol, or browser implementation."
+supports = [
+  "feature/sim-expr-tree/expression-tree",
+  "feature/sim-expr-tree/expression-tree-view",
+  "feature/sim-expr-tree/expression-tree-server",
+  "feature/sim-expr-tree/server-backed-web-ui",
+]
+claims_anchors = [
+  "anchor/crate/sim-lib-expr-tree-serve",
+  "anchor/rustdoc/sim-lib-expr-tree-serve/expression-tree-recipe",
+  "anchor/rustdoc/sim-lib-expr-tree-serve/expression-tree-product",
+  "anchor/export/sim-lib-expr-tree-serve/cli/main/expr-tree",
+  "anchor/cli/sim-expr-tree",
+]
+claims_surfaces = [
+  "cli/sim-expr-tree",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-serve/src/tests",
+  "spec-test/sim-expr-tree/crates/sim-expr-tree/tests/boot",
+]
+
+[[route]]
+id = "route/find-expression-tree-command"
+task = "Find code behind the expression tree command"
+audiences = ["user", "code", "framework"]
+steps = [
+  { feature = "feature/sim-expr-tree/expression-tree-product", why = "The product row identifies the thin bootloader binary, loadable serve entrypoint, standard runtime configuration, and component recipe behind the command." },
+  { specimen = "spec-test/sim-expr-tree/crates/sim-expr-tree/tests/boot", why = "The product smoke test proves standard help and a configured dry-run boot through the real executable." },
+  { specimen = "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-serve/src/tests", why = "The serve specimen proves capabilities, in-process and external EvalFabric placement, configured storage, web-surface injection, and graceful shutdown." },
+]
+
 [[route]]
 id = "route/build-expression-tree"
 task = "Build an expression tree"

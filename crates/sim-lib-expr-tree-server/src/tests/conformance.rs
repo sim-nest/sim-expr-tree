@@ -18,7 +18,7 @@ use super::support::{
 #[test]
 fn loadable_export_is_both_eval_site_and_eval_fabric() {
     let mut cx = full_cx();
-    let manifest = sim_kernel::Lib::manifest(&ExpressionTreeServerLib);
+    let manifest = sim_kernel::Lib::manifest(&ExpressionTreeServerLib::default());
     assert!(manifest.exports.iter().any(
         |export| matches!(export, sim_kernel::Export::Site { symbol, .. }
             if symbol == &expr_tree_server_site_symbol())

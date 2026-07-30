@@ -17,6 +17,28 @@ The repository contains:
 - view, server, serve, and bootloader crates that compose the framework into
   user-facing surfaces without duplicating its engine.
 
+The `sim-expr-tree` executable is the ready-to-run default recipe. It boots
+through `sim-run-core`, dispatches the loadable `cli/main/expr-tree` entrypoint,
+and composes the existing engine, reversible view, authoritative server, and
+generic web shell. Standard runtime configuration selects either an in-process
+server or an already loaded external `EvalFabric` site:
+
+```toml
+[lib/expr-tree-serve]
+placement = "in-process"
+storage = "expression-tree"
+browser-resource = "tree"
+web-addr = "127.0.0.1:8787"
+atelier-root = ".sim/atelier"
+```
+
+Run it with the standard bootloader envelope:
+
+```sh
+cargo run -p sim-expr-tree -- --help
+cargo run -p sim-expr-tree -- --config-file expr-tree.toml
+```
+
 The loadable library is the reusable entry point. It exposes a checked Lisp
 surface, a Shape and Card contract for every operation, reconstructable source
 and policy Citizens, and opaque live handles whose authority is never

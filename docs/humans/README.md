@@ -22,6 +22,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `feature/sim-expr-tree/expression-tree-view` | `crate/sim-lib-view-expr-tree` | 1 | Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations. |
 | `feature/sim-expr-tree/expression-tree-server` | `crate/sim-lib-expr-tree-server` | 1 | Serve bounded opaque expression tree sessions through one loadable EvalSite and EvalFabric, preserving caller authority, optimistic revisions, logical-time lifecycle policy, reversible surface operations, structured errors, and backpressured watches. |
 | `feature/sim-expr-tree/server-backed-web-ui` | `crate/sim-lib-expr-tree-server` | 1 | Compose the expression-tree SurfaceCodec and authoritative server site with RemoteTransport, isolated generic browser sessions, and desktop or phone Scene projections. |
+| `feature/sim-expr-tree/expression-tree-product` | `crate/sim-lib-expr-tree-serve` | 2 | Run the expression-tree engine, reversible view, authoritative server, and generic web host as one loadable recipe dispatched by the standard SIM bootloader. |
 | `feature/sim-expr-tree/finite-namespace` | `crate/sim-expr-tree-core` | 1 | Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations. |
 | `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Calculate ordinary Expr sources into ordinary Value results through one bounded incremental engine with validated Table-backed restarts, explicit backend refresh, inherited triggers, immutable authority ceilings, restartable automatic work, standard progress streams, and inspectable receipts. |
 | `feature/sim-expr-tree/mixed-backend-storage` | `crate/sim-expr-tree-core` | 2 | Compose authored source, operational control, versioned rebuildable derived graphs, and explicit Table/Dir mounts without flattening mounted backend behavior. |
@@ -1790,6 +1791,315 @@ harness = "cargo-test"
 package = "sim-lib-expr-tree-server"
 test = "tests::web::recipe_server_backed_web_session_runs_desktop_phone_and_failure_paths"
 expected = "expected.txt"
+```
+
+### `feature/sim-expr-tree/expression-tree-product`
+
+Specimen `spec-test/sim-expr-tree/crates/sim-lib-expr-tree-serve/src/tests` is checked by `cargo test`.
+
+Source `crates/sim-lib-expr-tree-serve/src/tests.rs`:
+
+```rust
+use std::{
+    fs,
+    path::PathBuf,
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
+};
+
+// conformance: default expression-tree product composition and boot behavior
+
+use sim_config::{ConfigDir, ConfigLayer, ConfigSource};
+use sim_kernel::{CapabilityName, Expr, Lib, Symbol};
+use sim_lib_expr_tree_server::{
+    ExpressionTreeServer, ExpressionTreeServerLib, SessionId, expr_tree_server_site_symbol,
+};
+use sim_run_core::{CliCommand, RuntimeConfigState, parse_args};
+use sim_web_shell::LiveSurfaceFactory;
+
+use super::{
+    ExprTreeServeLib, ExpressionTreeRecipe, ExpressionTreeServeConfig, ServerPlacement,
+    component_identities, expr_tree_boot_args, expr_tree_bootloader, expr_tree_entrypoint_symbol,
+    serve_config_symbol,
+};
+
+fn runtime_cx(capabilities: &[CapabilityName]) -> sim_kernel::Cx {
+    let mut cx = sim_kernel::testing::eager_cx();
+    let codec_id = cx.registry_mut().fresh_codec_id();
+    cx.load_lib(&sim_codec_lisp::LispCodecLib::new(codec_id).unwrap())
+        .unwrap();
+    for capability in capabilities {
+        cx.grant(capability.clone());
+    }
+    cx
+}
+
+fn product_cx() -> sim_kernel::Cx {
+    runtime_cx(&[
+        sim_lib_expr_tree::expr_tree_read_capability(),
+        sim_lib_expr_tree::expr_tree_write_capability(),
+        sim_lib_expr_tree::expr_tree_calculate_capability(),
+    ])
+}
+
+fn config_state(entries: Vec<(&str, Expr)>) -> RuntimeConfigState {
+    let dir = ConfigDir::one(
+        serve_config_symbol(),
+        Expr::Map(
+            entries
+                .into_iter()
+                .map(|(key, value)| (Expr::String(key.to_owned()), value))
+                .collect(),
+        ),
+    )
+    .unwrap();
+    let mut state = RuntimeConfigState::default();
+    state.push_layer(ConfigLayer::new(
+        ConfigSource::SingleFile {
+            path: PathBuf::from("expr-tree-test.toml"),
+        },
+        dir,
+    ));
+    state
+}
+
+#[test]
+fn manifest_and_recipe_name_the_existing_components() {
+    let manifest = Lib::manifest(&ExprTreeServeLib::default());
+
+    assert_eq!(manifest.id, serve_config_symbol());
+    assert_eq!(manifest.exports[0].symbol(), &expr_tree_entrypoint_symbol());
+    assert_eq!(
+        component_identities(),
+        [
+            "sim-lib-expr-tree",
+            "sim-lib-view-expr-tree",
+            "sim-lib-expr-tree-server",
+            "sim-web-shell",
+        ]
+    );
+}
+
+#[test]
+fn runtime_config_selects_external_fabric_and_backend_state() {
+    let state = config_state(vec![
+        ("placement", Expr::String("external".to_owned())),
+        (
+            "server-site",
+            Expr::String("site/external-expression-tree".to_owned()),
+        ),
+        ("storage", Expr::String("configured-backend".to_owned())),
+        (
+            "browser-resource",
+            Expr::String("configured-tree".to_owned()),
+        ),
+        ("web-addr", Expr::String("127.0.0.1:9876".to_owned())),
+        ("atelier-root", Expr::String(".sim/product".to_owned())),
+        ("dry-run", Expr::Bool(true)),
+    ]);
+
+    let config = ExpressionTreeServeConfig::from_runtime_config(&state).unwrap();
+
+    assert_eq!(
+        config.placement,
+        ServerPlacement::External {
+            site: Symbol::new("site/external-expression-tree")
+        }
+    );
+    assert_eq!(config.storage, "configured-backend");
+    assert_eq!(config.browser_resource, "configured-tree");
+    assert_eq!(config.web_addr, "127.0.0.1:9876");
+    assert_eq!(config.atelier_root, PathBuf::from(".sim/product"));
+    assert!(config.dry_run);
+}
+
+#[test]
+fn recipe_fails_closed_without_expression_tree_authority() {
+    let mut cx = runtime_cx(&[]);
+    let config = ExpressionTreeServeConfig {
+        bridge_thread: Some(81_001),
+        dry_run: true,
+        ..ExpressionTreeServeConfig::default()
+    };
+
+    let error = ExpressionTreeRecipe::new(config)
+        .start(&mut cx)
+        .err()
+        .expect("missing read authority must reject session creation");
+
+    assert!(error.to_string().contains("authority-denied"), "{error}");
+    assert!(error.to_string().contains("expr-tree.read"), "{error}");
+}
+
+#[test]
+fn in_process_recipe_opens_configured_storage_and_injects_the_web_surface() {
+    let mut cx = product_cx();
+    let config = ExpressionTreeServeConfig {
+        storage: "configured-in-process-backend".to_owned(),
+        browser_resource: "configured-browser-tree".to_owned(),
+        bridge_thread: Some(81_002),
+        dry_run: true,
+        ..ExpressionTreeServeConfig::default()
+    };
+    let mut product = ExpressionTreeRecipe::new(config.clone())
+        .start(&mut cx)
+        .unwrap();
+
+    assert!(product.owns_server());
+    assert_eq!(product.config().storage, "configured-in-process-backend");
+    let mut surface = product.surface_factory().create().unwrap();
+    let scene = surface
+        .open(&config.browser_resource, "main")
+        .expect("generic web surface opens the configured tree");
+    assert!(matches!(scene, Expr::Map(_)));
+
+    product.shutdown(&mut cx).unwrap();
+    product.shutdown(&mut cx).unwrap();
+    assert!(product.is_shutdown());
+}
+
+#[test]
+fn external_eval_fabric_smoke_and_graceful_shutdown() {
+    let mut cx = product_cx();
+    sim_lib_expr_tree::install_expr_tree_lib(&mut cx).unwrap();
+    let external = Arc::new(ExpressionTreeServer::local());
+    cx.load_lib(&ExpressionTreeServerLib::new(external.clone()))
+        .unwrap();
+    let config = ExpressionTreeServeConfig {
+        placement: ServerPlacement::External {
+            site: expr_tree_server_site_symbol(),
+        },
+        storage: "configured-external-backend".to_owned(),
+        bridge_thread: Some(81_003),
+        dry_run: true,
+        ..ExpressionTreeServeConfig::default()
+    };
+    let mut product = ExpressionTreeRecipe::new(config).start(&mut cx).unwrap();
+    let session = SessionId::from_resource(product.resource()).unwrap();
+
+    assert!(!product.owns_server());
+    assert!(external.snapshot(&session).is_ok());
+    let mut surface = product.surface_factory().create().unwrap();
+    assert!(surface.open("tree", "main").is_ok());
+
+    product.shutdown(&mut cx).unwrap();
+    assert!(product.is_shutdown());
+    assert!(external.snapshot(&session).is_err());
+}
+
+#[test]
+fn bootloader_uses_standard_config_flags_and_dispatches_the_product_verb() {
+    let path = temp_config_path("boot");
+    fs::write(
+        &path,
+        "[lib/expr-tree-serve]\ndry-run = true\nstorage = \"boot-configured\"\nbridge-thread = 81004\n",
+    )
+    .unwrap();
+    let args = expr_tree_boot_args([
+        "sim-expr-tree".into(),
+        "--config-file".into(),
+        path.as_os_str().to_owned(),
+    ]);
+
+    let code = expr_tree_bootloader().run(args).unwrap();
+
+    let _ = fs::remove_file(&path);
+    assert_eq!(code, 0);
+}
+
+#[test]
+fn appended_product_verb_does_not_shadow_standard_help() {
+    let command = parse_args(expr_tree_boot_args(["sim-expr-tree", "--help"])).unwrap();
+
+    assert_eq!(command, CliCommand::Help);
+}
+
+fn temp_config_path(label: &str) -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    std::env::temp_dir().join(format!(
+        "sim-expr-tree-serve-{label}-{}-{nonce}.toml",
+        std::process::id()
+    ))
+}
+```
+
+Specimen `spec-test/sim-expr-tree/crates/sim-expr-tree/tests/boot` is checked by `cargo test`.
+
+Source `crates/sim-expr-tree/tests/boot.rs`:
+
+```rust
+use std::{
+    fs,
+    path::PathBuf,
+    process::Command,
+    time::{SystemTime, UNIX_EPOCH},
+};
+
+// conformance: bootloader-owned expression-tree executable envelope
+
+#[test]
+fn product_binary_reports_standard_bootloader_help() {
+    let output = Command::new(env!("CARGO_BIN_EXE_sim-expr-tree"))
+        .arg("--help")
+        .output()
+        .expect("run sim-expr-tree help");
+
+    assert!(
+        output.status.success(),
+        "help failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Usage: sim"), "{stdout}");
+    assert!(stdout.contains("--config-file"), "{stdout}");
+}
+
+#[test]
+fn product_binary_boots_configured_backend_and_shuts_down() {
+    let path = temp_config_path();
+    fs::write(
+        &path,
+        "[lib/expr-tree-serve]\n\
+         dry-run = true\n\
+         storage = \"process-smoke-backend\"\n\
+         browser-resource = \"process-smoke-tree\"\n\
+         bridge-thread = 82001\n",
+    )
+    .expect("write product config");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_sim-expr-tree"))
+        .arg("--config-file")
+        .arg(&path)
+        .output()
+        .expect("run configured sim-expr-tree product");
+    let _ = fs::remove_file(&path);
+
+    assert!(
+        output.status.success(),
+        "configured boot failed: stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("sim-web-shell: dry-run OK"),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+}
+
+fn temp_config_path() -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock after epoch")
+        .as_nanos();
+    std::env::temp_dir().join(format!(
+        "sim-expr-tree-product-{}-{nonce}.toml",
+        std::process::id()
+    ))
+}
 ```
 
 ### `feature/sim-expr-tree/finite-namespace`

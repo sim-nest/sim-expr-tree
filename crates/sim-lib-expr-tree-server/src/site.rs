@@ -139,9 +139,24 @@ impl ObjectCompat for ExpressionTreeServer {
     }
 }
 
-/// Loadable library exporting the authoritative expression-tree site.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct ExpressionTreeServerLib;
+/// Loadable library exporting one authoritative expression-tree site.
+#[derive(Clone)]
+pub struct ExpressionTreeServerLib {
+    server: Arc<ExpressionTreeServer>,
+}
+
+impl ExpressionTreeServerLib {
+    /// Builds a loadable site around an explicitly configured server.
+    pub fn new(server: Arc<ExpressionTreeServer>) -> Self {
+        Self { server }
+    }
+}
+
+impl Default for ExpressionTreeServerLib {
+    fn default() -> Self {
+        Self::new(Arc::new(ExpressionTreeServer::local()))
+    }
+}
 
 impl Lib for ExpressionTreeServerLib {
     fn manifest(&self) -> LibManifest {
@@ -165,7 +180,7 @@ impl Lib for ExpressionTreeServerLib {
     fn load(&self, _cx: &mut sim_kernel::LoadCx, linker: &mut Linker<'_>) -> Result<()> {
         linker.site_value(
             expr_tree_server_site_symbol(),
-            DefaultFactory.opaque(Arc::new(ExpressionTreeServer::local()))?,
+            DefaultFactory.opaque(self.server.clone())?,
         )?;
         Ok(())
     }
@@ -174,7 +189,7 @@ impl Lib for ExpressionTreeServerLib {
 /// Installs the expression-tree server library exactly once.
 pub fn install_expr_tree_server_lib(cx: &mut Cx) -> Result<()> {
     if cx.registry().lib(&expr_tree_server_lib_symbol()).is_none() {
-        cx.load_lib(&ExpressionTreeServerLib)?;
+        cx.load_lib(&ExpressionTreeServerLib::default())?;
     }
     Ok(())
 }

@@ -7,13 +7,20 @@ readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
 publish = false
-description = "Scaffold for the SIM expression-tree serve entrypoint library."
+description = "Bootloader-loaded product recipe for SIM expression-tree sessions."
 
 [dependencies]
 sim-codec-lisp = { version = "0.1.2" }
+sim-config = { version = "0.1.2" }
 sim-kernel = { version = "0.1.5" }
+sim-lib-expr-tree = { path = "../sim-lib-expr-tree" }
 sim-lib-expr-tree-server = { path = "../sim-lib-expr-tree-server" }
+sim-lib-server = { version = "0.1.10" }
 sim-run-core = { version = "0.1.7" }
+sim-web-shell = { version = "0.1.11" }
+
+[dev-dependencies]
+sim-kernel = { version = "0.1.5", features = ["test-support"] }
 
 [lints]
 workspace = true

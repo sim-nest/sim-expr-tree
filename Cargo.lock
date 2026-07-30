@@ -596,9 +596,13 @@ name = "sim-lib-expr-tree-serve"
 version = "0.1.0"
 dependencies = [
  "sim-codec-lisp",
+ "sim-config",
  "sim-kernel",
+ "sim-lib-expr-tree",
  "sim-lib-expr-tree-server",
+ "sim-lib-server",
  "sim-run-core",
+ "sim-web-shell",
 ]
 
 [[package]]
