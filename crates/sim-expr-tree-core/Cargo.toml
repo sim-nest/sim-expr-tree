@@ -10,6 +10,8 @@ publish = false
 description = "Scaffold for SIM expression-tree core records."
 
 [dependencies]
+sim-codec = { version = "0.1.6" }
+sim-kernel = { version = "0.1.5" }
 sim-table-core = { version = "0.1.2" }
 
 [lints]

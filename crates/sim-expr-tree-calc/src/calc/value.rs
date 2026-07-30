@@ -11,6 +11,13 @@ pub(super) fn canonicalize_value(
     next_volatile: &AtomicU64,
     value: Value,
 ) -> Result<MemoValue, IncrementalError<CalcQuery>> {
+    if value.object().as_callable().is_some() {
+        frame.charge_output(1)?;
+        return Ok(MemoValue::volatile(
+            value,
+            next_volatile.fetch_add(1, Ordering::Relaxed),
+        ));
+    }
     match value.object().as_expr(cx) {
         Ok(expr) if !is_opaque_projection(&expr) => {
             frame.charge_output(expr_weight(&expr, 0))?;

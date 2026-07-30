@@ -1,4 +1,4 @@
-use crate::{CellId, DirId, NamespaceName, PolicyPatch, Stamp};
+use crate::{CellId, CodecPolicyPatch, DirId, NamespaceName, Stamp};
 
 /// Durable expression-tree node families.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -48,7 +48,7 @@ pub struct CellRecord {
     name: NamespaceName,
     kind: NodeKind,
     source: Option<SourceRecord>,
-    policy_patch: PolicyPatch,
+    policy_patch: CodecPolicyPatch,
     created_at: Stamp,
 }
 
@@ -59,7 +59,7 @@ impl CellRecord {
         name: NamespaceName,
         kind: NodeKind,
         source: Option<SourceRecord>,
-        policy_patch: PolicyPatch,
+        policy_patch: CodecPolicyPatch,
         created_at: Stamp,
     ) -> Self {
         Self {
@@ -99,7 +99,7 @@ impl CellRecord {
     }
 
     /// Local policy patch.
-    pub fn policy_patch(&self) -> &PolicyPatch {
+    pub fn policy_patch(&self) -> &CodecPolicyPatch {
         &self.policy_patch
     }
 
@@ -120,7 +120,7 @@ pub struct DirRecord {
     id: DirId,
     parent: Option<DirId>,
     name: Option<NamespaceName>,
-    policy_patch: PolicyPatch,
+    policy_patch: CodecPolicyPatch,
     created_at: Stamp,
 }
 
@@ -130,7 +130,7 @@ impl DirRecord {
             id,
             parent: None,
             name: None,
-            policy_patch: PolicyPatch::empty(),
+            policy_patch: CodecPolicyPatch::empty(),
             created_at,
         }
     }
@@ -139,7 +139,7 @@ impl DirRecord {
         id: DirId,
         parent: DirId,
         name: NamespaceName,
-        policy_patch: PolicyPatch,
+        policy_patch: CodecPolicyPatch,
         created_at: Stamp,
     ) -> Self {
         Self {
@@ -167,7 +167,7 @@ impl DirRecord {
     }
 
     /// Local policy patch.
-    pub fn policy_patch(&self) -> &PolicyPatch {
+    pub fn policy_patch(&self) -> &CodecPolicyPatch {
         &self.policy_patch
     }
 

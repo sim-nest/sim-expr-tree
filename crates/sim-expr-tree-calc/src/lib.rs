@@ -22,12 +22,14 @@ pub use calc::{
     CalcStatus, CalcTrigger, CalcWatch, CellFailure, CycleMode, DERIVED_SNAPSHOT_KEY,
     DependencyStamp, DerivedPersistReport, DerivedRestoreDisposition, DerivedRestoreReport,
     DerivedSnapshotError, DerivedTableAdapter, DirectedCalcReport, DirectedCellResult, EffectStamp,
-    EffectiveAuthority, EffectiveCalcPolicy, ErrorMode, ExprTreeCalc, GRAPH_SCHEMA_VERSION,
+    EffectiveAuthority, EffectiveCalcPolicy, EncodedFace, ErrorMode, ExprTreeCalc, FaceContent,
+    FaceDimension, FaceIssue, FaceMetadata, FacePosition, GRAPH_SCHEMA_VERSION,
     HARD_MAX_EXPR_DEPTH, HARD_MAX_OBSERVATIONS, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH,
     HARD_MAX_WORK, LastGoodValue, MountRefreshSource, PolicyDigest, QueuedCalculation,
-    RefreshError, RefreshReport, RequestId,
+    RefreshError, RefreshReport, RequestId, SourceEditOutcome,
 };
 pub use policy::{EXPR_TREE_REF, ExprTreeRefPolicy};
+pub use sim_expr_tree_core::{CodecPolicyPatch, EffectiveCodecPolicy, FaceBudget};
 
 /// Returns the crate's public scaffold identity.
 pub fn crate_identity() -> &'static str {

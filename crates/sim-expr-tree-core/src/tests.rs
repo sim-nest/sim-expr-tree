@@ -153,7 +153,7 @@ fn name_rename_and_move_preserve_identity() {
         DirId::new("dir-work").unwrap(),
         &root,
         work,
-        PolicyPatch::empty(),
+        CodecPolicyPatch::empty(),
     )
     .unwrap();
     let cell_name = ns.reserve_name(lane, &root, named("source")).unwrap();
@@ -202,7 +202,7 @@ fn name_finite_reads_do_not_allocate_namespace_state() {
 }
 
 #[test]
-fn policy_effective_resolution_inherits_overrides_and_clears() {
+fn codec_policy_effective_resolution_inherits_overrides_and_clears() {
     let mut ns = namespace();
     let root = ns.root_dir().clone();
     let lane = ns.acquire_writer().unwrap();
@@ -223,7 +223,7 @@ fn policy_effective_resolution_inherits_overrides_and_clears() {
         cleared_id.clone(),
         &folder_id,
         cleared,
-        PolicyPatch::clear_codec(),
+        CodecPolicyPatch::clear_codec(),
     )
     .unwrap();
     let cell_name = ns.reserve_name(lane, &folder_id, named("cell")).unwrap();
@@ -236,27 +236,81 @@ fn policy_effective_resolution_inherits_overrides_and_clears() {
             cell_name,
             NodeKind::Control,
         )
-        .with_policy_patch(PolicyPatch::set_codec(CodecPolicy::new("codec:lisp"))),
+        .with_policy_patch(CodecPolicyPatch::set_codec("codec:lisp")),
     )
     .unwrap();
 
     assert_eq!(
         ns.effective_dir_policy(&folder_id)
             .unwrap()
-            .codec()
-            .unwrap()
-            .codec(),
+            .source_codec()
+            .unwrap(),
         "codec:bridge"
     );
-    assert_eq!(ns.effective_dir_policy(&cleared_id).unwrap().codec(), None);
+    assert_eq!(
+        ns.effective_dir_policy(&cleared_id).unwrap().source_codec(),
+        None
+    );
     assert_eq!(
         ns.effective_cell_policy(&cell)
             .unwrap()
-            .codec()
-            .unwrap()
-            .codec(),
+            .source_codec()
+            .unwrap(),
         "codec:lisp"
     );
+}
+
+#[test]
+fn codec_policy_inherits_each_source_and_result_field_independently() {
+    use sim_codec::{DecodeLimits, DecodePosition};
+    use sim_kernel::EncodePosition;
+
+    let inherited = EffectiveCodecPolicy::derive([
+        CodecPolicyPatch {
+            source_codec: Some(Some("codec/lisp".to_owned())),
+            source_position: Some(DecodePosition::Quote),
+            decode_limits: Some(DecodeLimits {
+                max_input_bytes: 4_096,
+                ..DecodeLimits::default()
+            }),
+            source_budget: Some(FaceBudget::new(1_024, 12, 80)),
+            result_codec: Some(Some("codec/json".to_owned())),
+            result_position: Some(EncodePosition::Data),
+            result_budget: Some(FaceBudget::new(2_048, 16, 120)),
+        },
+        CodecPolicyPatch {
+            source_codec: Some(Some("codec/algol".to_owned())),
+            result_position: Some(EncodePosition::Quote),
+            ..CodecPolicyPatch::default()
+        },
+    ]);
+
+    assert_eq!(inherited.source_codec(), Some("codec/algol"));
+    assert_eq!(inherited.source_position(), DecodePosition::Quote);
+    assert_eq!(inherited.decode_limits().max_input_bytes, 4_096);
+    assert_eq!(inherited.source_budget(), FaceBudget::new(1_024, 12, 80));
+    assert_eq!(inherited.result_codec(), Some("codec/json"));
+    assert_eq!(inherited.result_position(), EncodePosition::Quote);
+    assert_eq!(inherited.result_budget(), FaceBudget::new(2_048, 16, 120));
+
+    let clamped = EffectiveCodecPolicy::derive([CodecPolicyPatch {
+        decode_limits: Some(DecodeLimits {
+            max_input_bytes: usize::MAX,
+            max_tokens: usize::MAX,
+            max_expr_nodes: usize::MAX,
+            max_depth: usize::MAX,
+            max_string_bytes: usize::MAX,
+            max_blob_bytes: usize::MAX,
+            max_collection_len: usize::MAX,
+            max_trivia_items: usize::MAX,
+        }),
+        source_budget: Some(FaceBudget::new(usize::MAX, usize::MAX, usize::MAX)),
+        ..CodecPolicyPatch::default()
+    }]);
+    assert_eq!(clamped.decode_limits(), DecodeLimits::default());
+    assert_eq!(clamped.source_budget().max_bytes(), HARD_MAX_FACE_BYTES);
+    assert_eq!(clamped.source_budget().max_depth(), HARD_MAX_FACE_DEPTH);
+    assert_eq!(clamped.source_budget().max_items(), HARD_MAX_FACE_ITEMS);
 }
 
 #[test]
@@ -323,7 +377,7 @@ fn store_source_control_commit_recovers_from_partial_failure() {
     let mut control = BTreeMap::new();
     control.insert(
         "policy:/sheet".to_owned(),
-        ControlEntry::Policy(EffectivePolicy::empty()),
+        ControlEntry::Policy(EffectiveCodecPolicy::empty()),
     );
     let mut pending = ExprTreeStores::prepare_source_control_commit(source, control);
 

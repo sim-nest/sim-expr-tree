@@ -1,3 +1,4 @@
+use sim_expr_tree_core::{CodecPolicyPatch, EffectiveCodecPolicy};
 use sim_kernel::{CapabilityName, CapabilitySet};
 use sim_table_core::TablePath;
 
@@ -294,6 +295,24 @@ pub(super) fn effective_authority(
         patches.push(patch.clone());
     }
     EffectiveAuthority::derive(ceiling, patches)
+}
+
+pub(super) fn effective_codec_policy(
+    tree: &CodecPolicyPatch,
+    directories: &std::collections::BTreeMap<String, CodecPolicyPatch>,
+    cells: &std::collections::BTreeMap<String, CodecPolicyPatch>,
+    cell: &str,
+) -> EffectiveCodecPolicy {
+    let mut patches = vec![tree.clone()];
+    patches.extend(
+        ancestor_directories(cell)
+            .into_iter()
+            .filter_map(|ancestor| directories.get(&ancestor).cloned()),
+    );
+    if let Some(patch) = cells.get(cell) {
+        patches.push(patch.clone());
+    }
+    EffectiveCodecPolicy::derive(patches)
 }
 
 pub(super) fn is_descendant_or_same(directory: &TablePath, cell: &TablePath) -> bool {

@@ -6,6 +6,13 @@ policy over `sim-incremental-core`: runtime references record cells, missing
 names, lookup steps, listings, mount epochs, inherited policy, codec registry,
 and authority observations.
 
+Edited source is decoded through inherited installed-codec policy under
+explicit positions, bounded `DecodeLimits`, trusted caller policy, and
+diminished cell authority. Source and result presentation faces use independent
+hard-clamped byte/depth/item budgets and report truncation, unsupported values,
+and codec failures as metadata. Callable and otherwise non-projectable results
+remain ordinary calculation values and are never stringified by the face path.
+
 Canonical `as_expr` projections, including Citizen/read-construct values where
 available, receive stable fingerprints for value cutoff. Valid values without a
 canonical projection remain ordinary values, are labelled volatile, and

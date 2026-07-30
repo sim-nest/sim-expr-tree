@@ -23,6 +23,9 @@ pub(super) fn state_identities(
         tree_calc_policy,
         dir_calc_policies,
         cell_calc_policies,
+        tree_codec_policy,
+        dir_codec_policies,
+        cell_codec_policies,
         authority_ceiling,
         tree_authority_policy,
         dir_authority_policies,
@@ -38,6 +41,9 @@ pub(super) fn state_identities(
             state.tree_calc_policy.clone(),
             state.dir_calc_policies.clone(),
             state.cell_calc_policies.clone(),
+            state.tree_codec_policy.clone(),
+            state.dir_codec_policies.clone(),
+            state.cell_codec_policies.clone(),
             state.authority_ceiling.clone(),
             state.tree_authority_policy.clone(),
             state.dir_authority_policies.clone(),
@@ -59,6 +65,9 @@ pub(super) fn state_identities(
     control.write_debug(&tree_calc_policy);
     control.write_debug(&dir_calc_policies);
     control.write_debug(&cell_calc_policies);
+    control.write_debug(&tree_codec_policy);
+    control.write_debug(&dir_codec_policies);
+    control.write_debug(&cell_codec_policies);
     control.write_debug(&authority_ceiling);
     control.write_debug(&tree_authority_policy);
     control.write_debug(&dir_authority_policies);

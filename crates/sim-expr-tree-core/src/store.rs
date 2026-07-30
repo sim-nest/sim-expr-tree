@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use sim_table_core::TablePath;
 
-use crate::{CellId, DirId, EffectivePolicy};
+use crate::{CellId, DirId, EffectiveCodecPolicy};
 
 /// Backend family named by a mounted expression-tree store descriptor.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -143,7 +143,7 @@ pub enum ControlEntry {
     /// Durable generated-name or scheduler counter.
     Counter(u64),
     /// Effective policy snapshot.
-    Policy(EffectivePolicy),
+    Policy(EffectiveCodecPolicy),
     /// UI preference kept out of authored source.
     UiPreference(String),
     /// Last observed mount backend epoch.

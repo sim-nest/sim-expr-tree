@@ -10,6 +10,7 @@ publish = false
 description = "Bounded incremental calculation of ordinary SIM expressions and values."
 
 [dependencies]
+sim-codec = { version = "0.1.6" }
 sim-incremental-core = { version = "0.1.0" }
 sim-expr-tree-core = { path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.1.2" }
@@ -18,3 +19,7 @@ sim-table-core = { version = "0.1.2" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+sim-codec-json = { version = "0.1.2" }
+sim-codec-lisp = { version = "0.1.2" }

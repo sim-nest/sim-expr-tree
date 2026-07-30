@@ -1,8 +1,8 @@
 use std::collections::{BTreeSet, HashMap};
 
 use crate::{
-    CellId, CellRecord, CodecPolicy, DirId, DirRecord, EffectivePolicy, GeneratedNameKind,
-    NamespaceError, NamespaceName, NodeKind, PolicyPatch, RevisionTick, SourceRecord, Stamp,
+    CellId, CellRecord, CodecPolicyPatch, DirId, DirRecord, EffectiveCodecPolicy,
+    GeneratedNameKind, NamespaceError, NamespaceName, NodeKind, RevisionTick, SourceRecord, Stamp,
     TreeId,
 };
 
@@ -20,7 +20,7 @@ pub struct CellCreate {
     /// Optional source provenance.
     pub source: Option<SourceRecord>,
     /// Local policy patch.
-    pub policy_patch: PolicyPatch,
+    pub policy_patch: CodecPolicyPatch,
 }
 
 impl CellCreate {
@@ -32,7 +32,7 @@ impl CellCreate {
             name,
             kind,
             source: None,
-            policy_patch: PolicyPatch::empty(),
+            policy_patch: CodecPolicyPatch::empty(),
         }
     }
 
@@ -43,7 +43,7 @@ impl CellCreate {
     }
 
     /// Attach a local policy patch.
-    pub fn with_policy_patch(mut self, policy_patch: PolicyPatch) -> Self {
+    pub fn with_policy_patch(mut self, policy_patch: CodecPolicyPatch) -> Self {
         self.policy_patch = policy_patch;
         self
     }
@@ -221,7 +221,7 @@ impl Namespace {
         id: DirId,
         parent: &DirId,
         name: NamespaceName,
-        policy_patch: PolicyPatch,
+        policy_patch: CodecPolicyPatch,
     ) -> Result<(), NamespaceError> {
         self.require_writer(lane)?;
         self.consume_reservation(parent, &name)?;
@@ -331,7 +331,7 @@ impl Namespace {
     }
 
     /// Resolve the inherited policy for a directory.
-    pub fn effective_dir_policy(&self, id: &DirId) -> Result<EffectivePolicy, NamespaceError> {
+    pub fn effective_dir_policy(&self, id: &DirId) -> Result<EffectiveCodecPolicy, NamespaceError> {
         let mut lineage = Vec::new();
         let mut cursor = id;
         loop {
@@ -346,7 +346,7 @@ impl Namespace {
             }
         }
 
-        let mut effective = EffectivePolicy::empty();
+        let mut effective = EffectiveCodecPolicy::empty();
         for dir in lineage.into_iter().rev() {
             dir.policy_patch().apply_to(&mut effective);
         }
@@ -354,7 +354,10 @@ impl Namespace {
     }
 
     /// Resolve the inherited policy for a cell, applying the cell patch last.
-    pub fn effective_cell_policy(&self, id: &CellId) -> Result<EffectivePolicy, NamespaceError> {
+    pub fn effective_cell_policy(
+        &self,
+        id: &CellId,
+    ) -> Result<EffectiveCodecPolicy, NamespaceError> {
         let cell = self
             .cells
             .get(id)
@@ -458,7 +461,7 @@ pub enum NamespaceEntry {
 
 impl Namespace {
     /// Convenience policy patch for tests and callers that need only a codec.
-    pub fn codec_patch(codec: impl Into<String>) -> PolicyPatch {
-        PolicyPatch::set_codec(CodecPolicy::new(codec))
+    pub fn codec_patch(codec: impl Into<String>) -> CodecPolicyPatch {
+        CodecPolicyPatch::set_codec(codec)
     }
 }

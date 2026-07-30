@@ -6,7 +6,9 @@ use std::{
     },
 };
 
-use sim_expr_tree_core::{BackendKind, MountEpoch, MountResource};
+use sim_expr_tree_core::{
+    BackendKind, CodecPolicyPatch, EffectiveCodecPolicy, MountEpoch, MountResource,
+};
 use sim_incremental_core::{
     ContinuationToken, IncrementalEngine, IncrementalError, ObservationKind, SnapshotBudgets,
     ValueFingerprint,
@@ -23,6 +25,11 @@ mod attempt;
 mod engine;
 mod eval;
 use eval::{evaluate_cell, observe_runtime_context, parent_path, path_key};
+mod face;
+pub use face::{
+    EncodedFace, FaceContent, FaceDimension, FaceIssue, FaceMetadata, FacePosition,
+    SourceEditOutcome,
+};
 mod model;
 pub use model::{
     CalcError, CalcLimits, CalcQuery, CellFailure, HARD_MAX_EXPR_DEPTH, HARD_MAX_OBSERVATIONS,
@@ -34,7 +41,9 @@ pub use policy::{
     AuthorityDigest, AuthorityPolicyPatch, CalcPolicyPatch, CalcTrigger, CycleMode,
     EffectiveAuthority, EffectiveCalcPolicy, ErrorMode, PolicyDigest,
 };
-use policy::{effective_authority, effective_calc_policy, is_descendant_or_same};
+use policy::{
+    effective_authority, effective_calc_policy, effective_codec_policy, is_descendant_or_same,
+};
 mod persistence;
 pub use persistence::{
     DERIVED_SNAPSHOT_KEY, DerivedPersistReport, DerivedRestoreDisposition, DerivedRestoreReport,
@@ -94,6 +103,9 @@ pub(crate) struct CalcState {
     tree_calc_policy: CalcPolicyPatch,
     dir_calc_policies: BTreeMap<String, CalcPolicyPatch>,
     cell_calc_policies: BTreeMap<String, CalcPolicyPatch>,
+    tree_codec_policy: CodecPolicyPatch,
+    dir_codec_policies: BTreeMap<String, CodecPolicyPatch>,
+    cell_codec_policies: BTreeMap<String, CodecPolicyPatch>,
     authority_ceiling: CapabilitySet,
     tree_authority_policy: AuthorityPolicyPatch,
     dir_authority_policies: BTreeMap<String, AuthorityPolicyPatch>,

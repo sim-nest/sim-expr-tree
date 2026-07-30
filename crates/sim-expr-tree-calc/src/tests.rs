@@ -9,14 +9,16 @@ use sim_expr_tree_core::{BackendKind, MountEpoch, MountResource};
 use sim_incremental_core::{BudgetKind, IncrementalError, ObservationKind};
 use sim_kernel::{
     CapabilityName, CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, MacroExpander, Phase,
-    StrictNames, Symbol, capability::macro_expansion_capability_for_phase, object::RawArgs,
+    ReadPolicy, StrictNames, Symbol, TrustLevel, capability::macro_expansion_capability_for_phase,
+    object::RawArgs, read_eval_capability,
 };
 use sim_lib_stream_core::{BufferOverflowPolicy, BufferPolicy, StreamPacket};
 
 use crate::{
     AuthorityPolicyPatch, AutomaticBudget, CalcError, CalcLimits, CalcPolicyPatch, CalcQuery,
-    CalcTrigger, CellFailure, CycleMode, EXPR_TREE_REF, ErrorMode, ExprTreeCalc, ExprTreeRefPolicy,
-    HARD_MAX_EXPR_DEPTH, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH, core_identity, crate_identity,
+    CalcTrigger, CellFailure, CodecPolicyPatch, CycleMode, EXPR_TREE_REF, ErrorMode, ExprTreeCalc,
+    ExprTreeRefPolicy, FaceBudget, HARD_MAX_EXPR_DEPTH, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH,
+    core_identity, crate_identity,
 };
 
 mod support;
@@ -27,6 +29,194 @@ fn identity_names_the_calc_crate() {
     assert_eq!(crate_identity(), "sim-expr-tree-calc");
     assert_eq!(core_identity(), "sim-expr-tree-core");
 }
+
+#[test]
+fn codec_policy_inherits_tree_directory_and_cell_fields() {
+    use sim_codec::{DecodeLimits, DecodePosition};
+    use sim_kernel::EncodePosition;
+
+    let mut calc = ExprTreeCalc::new();
+    calc.set_tree_codec_policy(CodecPolicyPatch {
+        source_codec: Some(Some("codec/lisp".to_owned())),
+        source_position: Some(DecodePosition::Data),
+        decode_limits: Some(DecodeLimits {
+            max_input_bytes: 8_192,
+            ..DecodeLimits::default()
+        }),
+        source_budget: Some(FaceBudget::new(2_048, 20, 100)),
+        result_codec: Some(Some("codec/json".to_owned())),
+        result_position: Some(EncodePosition::Data),
+        result_budget: Some(FaceBudget::new(4_096, 30, 200)),
+    });
+    calc.set_dir_codec_policy(
+        path("/team"),
+        CodecPolicyPatch {
+            source_position: Some(DecodePosition::Quote),
+            result_codec: Some(Some("codec/lisp".to_owned())),
+            ..CodecPolicyPatch::default()
+        },
+    );
+    calc.set_cell_codec_policy(
+        path("/team/cell"),
+        CodecPolicyPatch {
+            source_codec: Some(Some("codec/algol".to_owned())),
+            result_position: Some(EncodePosition::Quote),
+            ..CodecPolicyPatch::default()
+        },
+    );
+
+    let inherited = calc.effective_codec_policy(&path("/team/cell"));
+    assert_eq!(inherited.source_codec(), Some("codec/algol"));
+    assert_eq!(inherited.source_position(), DecodePosition::Quote);
+    assert_eq!(inherited.decode_limits().max_input_bytes, 8_192);
+    assert_eq!(inherited.source_budget(), FaceBudget::new(2_048, 20, 100));
+    assert_eq!(inherited.result_codec(), Some("codec/lisp"));
+    assert_eq!(inherited.result_position(), EncodePosition::Quote);
+    assert_eq!(inherited.result_budget(), FaceBudget::new(4_096, 30, 200));
+}
+
+fn lisp_codec_calc(grant_read_eval: bool) -> ExprTreeCalc {
+    ExprTreeCalc::with_context_factory(move || codec_context(grant_read_eval))
+}
+
+fn codec_context(grant_read_eval: bool) -> Cx {
+    let (mut cx, seat) = Cx::new_seated(
+        Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
+        Arc::new(DefaultFactory),
+    );
+    if grant_read_eval {
+        seat.grant(&mut cx, read_eval_capability()).unwrap();
+    }
+    let lisp = sim_codec_lisp::LispCodecLib::new(cx.registry_mut().fresh_codec_id()).unwrap();
+    cx.load_lib(&lisp).unwrap();
+    let json = sim_codec_json::JsonCodecLib::new(cx.registry_mut().fresh_codec_id());
+    cx.load_lib(&json).unwrap();
+    cx
+}
+
+fn trusted_read_policy() -> ReadPolicy {
+    ReadPolicy {
+        trust: TrustLevel::TrustedSource,
+        capabilities: CapabilitySet::new().grant(read_eval_capability()),
+    }
+}
+
+#[test]
+fn codec_policy_edits_decode_with_position_limits_trust_and_diminished_authority() {
+    use sim_codec::{DecodeLimits, DecodePosition, Input};
+
+    let mut calc = lisp_codec_calc(true);
+    calc.set_tree_codec_policy(CodecPolicyPatch {
+        source_codec: Some(Some("codec/lisp".to_owned())),
+        source_position: Some(DecodePosition::Data),
+        decode_limits: Some(DecodeLimits {
+            max_input_bytes: 32,
+            ..DecodeLimits::default()
+        }),
+        ..CodecPolicyPatch::default()
+    });
+
+    let applied = calc.edit_cell_source(
+        path("/edited"),
+        Input::Text("\"safe\"".to_owned()),
+        ReadPolicy::default(),
+    );
+    assert!(applied.applied());
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/edited")).unwrap()),
+        Expr::String("safe".to_owned())
+    );
+
+    calc.set_cell_codec_policy(
+        path("/edited"),
+        CodecPolicyPatch {
+            decode_limits: Some(DecodeLimits {
+                max_input_bytes: 3,
+                ..DecodeLimits::default()
+            }),
+            ..CodecPolicyPatch::default()
+        },
+    );
+    let limited = calc.edit_cell_source(
+        path("/edited"),
+        Input::Text("\"too-large\"".to_owned()),
+        ReadPolicy::default(),
+    );
+    assert!(!limited.applied());
+    assert!(matches!(
+        limited.metadata().issue(),
+        crate::FaceIssue::CodecFailure { message }
+            if message.contains("input bytes limit exceeded")
+    ));
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/edited")).unwrap()),
+        Expr::String("safe".to_owned()),
+        "a rejected edit must preserve the prior source"
+    );
+
+    calc.set_cell_codec_policy(
+        path("/eval"),
+        CodecPolicyPatch {
+            source_position: Some(DecodePosition::Eval),
+            ..CodecPolicyPatch::default()
+        },
+    );
+    let untrusted = calc.edit_cell_source(
+        path("/eval"),
+        Input::Text("#eval(\"unsafe\")".to_owned()),
+        ReadPolicy {
+            trust: TrustLevel::Untrusted,
+            capabilities: CapabilitySet::new().grant(read_eval_capability()),
+        },
+    );
+    assert!(!untrusted.applied());
+    assert!(matches!(
+        untrusted.metadata().issue(),
+        crate::FaceIssue::CodecFailure { message } if message.contains("trusted caller")
+    ));
+
+    calc.set_cell_authority_policy(
+        path("/eval"),
+        AuthorityPolicyPatch {
+            deny: CapabilitySet::new().grant(read_eval_capability()),
+            ..AuthorityPolicyPatch::default()
+        },
+    );
+    let diminished = calc.edit_cell_source(
+        path("/eval"),
+        Input::Text("#eval(\"denied\")".to_owned()),
+        trusted_read_policy(),
+    );
+    assert!(!diminished.applied());
+    assert!(matches!(
+        diminished.metadata().issue(),
+        crate::FaceIssue::CodecFailure { message } if message.contains("capability denied")
+    ));
+
+    calc.set_cell_authority_policy(path("/eval"), AuthorityPolicyPatch::default());
+    let explicit = calc.edit_cell_source(
+        path("/eval"),
+        Input::Text("#eval(\"allowed\")".to_owned()),
+        trusted_read_policy(),
+    );
+    assert!(explicit.applied());
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/eval")).unwrap()),
+        Expr::String("allowed".to_owned())
+    );
+
+    let inert = calc.edit_cell_source(
+        path("/edited"),
+        Input::Text("#eval(\"ambient\")".to_owned()),
+        trusted_read_policy(),
+    );
+    assert!(
+        !inert.applied(),
+        "non-eval source positions must remove ambient read-eval authority"
+    );
+}
+
+mod face_budget;
 
 #[test]
 fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {

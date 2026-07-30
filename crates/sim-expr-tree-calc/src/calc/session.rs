@@ -2,6 +2,42 @@ use super::attempt::{intersect_limits, parse_absolute_path};
 use super::*;
 
 impl ExprTreeCalc {
+    /// Replaces the tree-level codec policy patch.
+    pub fn set_tree_codec_policy(&mut self, patch: CodecPolicyPatch) {
+        let mut state = self.state.write().expect("calc state poisoned");
+        state.tree_codec_policy = patch;
+        bump_generation(&mut state.control_generation);
+    }
+
+    /// Replaces one directory-level codec policy patch.
+    pub fn set_dir_codec_policy(&mut self, directory: TablePath, patch: CodecPolicyPatch) {
+        let key = path_key(&directory);
+        let mut state = self.state.write().expect("calc state poisoned");
+        state.dir_codec_policies.insert(key, patch);
+        bump_generation(&mut state.control_generation);
+    }
+
+    /// Replaces one cell-level codec policy patch.
+    pub fn set_cell_codec_policy(&mut self, cell: TablePath, patch: CodecPolicyPatch) {
+        let key = path_key(&cell);
+        let mut state = self.state.write().expect("calc state poisoned");
+        state.cell_codec_policies.insert(key, patch);
+        bump_generation(&mut state.control_generation);
+    }
+
+    /// Resolves codec policy field by field from tree through ancestor
+    /// directories to the selected cell.
+    #[must_use]
+    pub fn effective_codec_policy(&self, cell: &TablePath) -> EffectiveCodecPolicy {
+        let state = self.state.read().expect("calc state poisoned");
+        effective_codec_policy(
+            &state.tree_codec_policy,
+            &state.dir_codec_policies,
+            &state.cell_codec_policies,
+            &path_key(cell),
+        )
+    }
+
     /// Replaces the tree-level calculation policy patch.
     pub fn set_tree_calc_policy(&mut self, patch: CalcPolicyPatch) {
         {

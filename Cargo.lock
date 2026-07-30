@@ -34,6 +34,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "itoa"
+version = "1.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -73,6 +79,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
+name = "serde"
+version = "1.0.229"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+dependencies = [
+ "serde_core",
+ "serde_derive",
+]
+
+[[package]]
 name = "serde_core"
 version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -90,6 +106,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.3",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.151"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
+dependencies = [
+ "itoa",
+ "memchr",
+ "serde",
+ "serde_core",
+ "zmij",
 ]
 
 [[package]]
@@ -130,6 +159,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-codec-binary"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fede0e88e7cbc791209e61b9a570d80d577ac2a16bec023f5b3478627cf52d7"
+dependencies = [
+ "sim-codec",
+ "sim-cookbook",
+ "sim-kernel",
+ "sim-value",
+]
+
+[[package]]
+name = "sim-codec-binary-base64"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ea38c73dc98617ce2b2ef7afc06a09123fa456d88709c30f476cea80141cdcc"
+dependencies = [
+ "sim-codec",
+ "sim-codec-binary",
+ "sim-cookbook",
+ "sim-kernel",
+ "sim-value",
+]
+
+[[package]]
 name = "sim-codec-config"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -138,6 +192,21 @@ dependencies = [
  "sim-codec",
  "sim-cookbook",
  "sim-kernel",
+]
+
+[[package]]
+name = "sim-codec-json"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "482b4e39531ecac3b228b0daad547aef7369cd3f148b468af6b8770e07eeaac2"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sim-codec",
+ "sim-codec-binary-base64",
+ "sim-cookbook",
+ "sim-kernel",
+ "sim-shape",
 ]
 
 [[package]]
@@ -186,6 +255,9 @@ dependencies = [
 name = "sim-expr-tree-calc"
 version = "0.1.0"
 dependencies = [
+ "sim-codec",
+ "sim-codec-json",
+ "sim-codec-lisp",
  "sim-expr-tree-core",
  "sim-incremental-core",
  "sim-kernel",
@@ -197,6 +269,8 @@ dependencies = [
 name = "sim-expr-tree-core"
 version = "0.1.0"
 dependencies = [
+ "sim-codec",
+ "sim-kernel",
  "sim-table-core",
 ]
 
@@ -528,3 +602,9 @@ dependencies = [
 [[package]]
 name = "xtask"
 version = "0.1.0"
+
+[[package]]
+name = "zmij"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"

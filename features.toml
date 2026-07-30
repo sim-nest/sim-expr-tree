@@ -19,6 +19,27 @@ major_entrypoints = "advisory"
 frameworks = "advisory"
 
 [[feature]]
+id = "feature/sim-expr-tree/codec-policy"
+title = "Inherited codec policy and bounded value faces"
+summary = "Decode edited source and encode source/result faces through installed codecs with field-wise tree/directory/cell policy, explicit positions, trusted diminished read policy, and independent hard-clamped byte/depth/item budgets."
+owner = "crate/sim-expr-tree-calc"
+audiences = ["code", "framework"]
+guidance = "Use this row when an expression-tree caller needs safe codec-backed editing or presentation without changing the ordinary Expr/Value calculation model. Codec selectors are stable exported names resolved from each fresh runtime context, so removal fails closed and replacement takes effect without persisted process-local ids. Source codec, decode position, DecodeLimits, source budget, result codec, encode position, and result budget inherit independently from tree through ancestor directories to the cell. Eval-position edits require an explicitly trusted caller; ReadPolicy capabilities are intersected with effective cell authority, and non-eval positions remove read-eval even when ambient authority contains it. Source and result faces preflight expression payload bytes, depth, and items before invoking a trusted installed encoder, cap encoded output separately, forbid read-eval emission, and carry explicit truncation, unsupported-value, or codec-failure metadata. Result projection uses bounded data snapshots and bounded List/Table walks; callable and non-projectable values remain available as ordinary calculation Values and are never displayed or stringified by the face path. The claimed specimens cover inheritance, hard clamping, untrusted and diminished read-eval rejection, explicit trusted read-eval, decode limits, independent face budgets, pathological depth and item counts, huge payloads, callable results, codec removal/replacement, position-aware output, and Lisp/JSON general-purpose round trips."
+supports = [
+  "feature/sim-expr-tree/finite-namespace",
+]
+claims_anchors = [
+  "anchor/crate/sim-expr-tree-calc",
+  "anchor/rustdoc/sim-expr-tree-calc/crate-root",
+  "anchor/crate/sim-expr-tree-core",
+  "anchor/rustdoc/sim-expr-tree-core/crate-root",
+]
+claims_specimens = [
+  "spec-test/sim-expr-tree/crates/sim-expr-tree-core/src/tests",
+  "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
+]
+
+[[feature]]
 id = "feature/sim-expr-tree/finite-namespace"
 title = "Expression-tree finite namespace records"
 summary = "Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations."
