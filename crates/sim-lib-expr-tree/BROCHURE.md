@@ -1,7 +1,6 @@
 # sim-lib-expr-tree
 
-In one line: `sim-lib-expr-tree` gives any SIM runtime a checked, loadable
-expression-tree engine.
+In one line: `sim-lib-expr-tree` gives any SIM runtime a checked, loadable expression-tree engine.
 
 ## What it gives you
 

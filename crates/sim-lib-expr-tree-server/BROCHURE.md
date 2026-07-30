@@ -1,7 +1,6 @@
 # sim-lib-expr-tree-server
 
-In one line: `sim-lib-expr-tree-server` gives expression trees a real,
-loadable, authority-preserving home on SIM's standard server fabric.
+In one line: `sim-lib-expr-tree-server` gives expression trees a real, loadable, authority-preserving home on SIM's standard server fabric.
 
 ## What it gives you
 
