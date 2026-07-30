@@ -130,7 +130,7 @@ impl ExpressionTreeServer {
             if record.apply_surface_local(operation, self.limits)? {
                 record.changed(&kind, path, tick, wall, self.limits);
             }
-            return record.snapshot(self.limits);
+            record.snapshot(self.limits)
         } else {
             let (target, tick) = self.reserve_runtime(session, expected_revision)?;
             let result = execute_runtime(cx, &target, operation);
@@ -146,7 +146,7 @@ impl ExpressionTreeServer {
             if is_revision_change(&kind) {
                 record.changed(&kind, path, tick, wall, self.limits);
             }
-            return record.snapshot(self.limits);
+            record.snapshot(self.limits)
         }
     }
 
