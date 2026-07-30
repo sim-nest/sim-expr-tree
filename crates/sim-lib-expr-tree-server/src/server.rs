@@ -1,7 +1,7 @@
 //! Bounded authoritative session registry and request routing.
 
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     sync::{
         Arc, Mutex, MutexGuard,
         atomic::{AtomicU64, Ordering},
@@ -36,8 +36,23 @@ pub struct ExpressionTreeServer {
 
 struct Registry {
     sessions: BTreeMap<SessionId, SessionRecord>,
+    in_flight: BTreeSet<SessionId>,
     next_session: u64,
     next_tick: u64,
+}
+
+struct RuntimeTarget {
+    tree: TreeHandle,
+    resource: Symbol,
+}
+
+impl RuntimeTarget {
+    fn new(record: &SessionRecord) -> Self {
+        Self {
+            tree: record.tree.clone(),
+            resource: record.resource(),
+        }
+    }
 }
 
 impl ExpressionTreeServer {
@@ -69,6 +84,7 @@ impl ExpressionTreeServer {
             nonce: NEXT_SERVER_NONCE.fetch_add(1, Ordering::Relaxed),
             registry: Mutex::new(Registry {
                 sessions: BTreeMap::new(),
+                in_flight: BTreeSet::new(),
                 next_session: 1,
                 next_tick: 1,
             }),
@@ -202,6 +218,9 @@ impl ExpressionTreeServer {
     pub fn close_session(&self, session: &SessionId) -> ServerResult<bool> {
         let mut registry = self.lock_registry()?;
         begin_request(&mut registry, self.limits);
+        if registry.in_flight.contains(session) {
+            return Err(session_busy());
+        }
         Ok(registry.sessions.remove(session).is_some())
     }
 
@@ -254,6 +273,11 @@ impl ExpressionTreeServer {
     fn lock_registry(&self) -> ServerResult<MutexGuard<'_, Registry>> {
         self.registry.lock().map_err(internal)
     }
+
+    #[cfg(test)]
+    pub(crate) fn registry_is_unlocked_for_test(&self) -> bool {
+        self.registry.try_lock().is_ok()
+    }
 }
 
 impl Default for ExpressionTreeServer {
@@ -271,12 +295,28 @@ fn begin_request(registry: &mut Registry, limits: ExpressionTreeServerLimits) ->
 
 fn expire_idle(registry: &mut Registry, limits: ExpressionTreeServerLimits) {
     let now = registry.next_tick;
-    registry.sessions.retain(|_, session| {
-        now.saturating_sub(session.last_activity_tick) <= limits.max_idle_ticks
+    let Registry {
+        sessions,
+        in_flight,
+        ..
+    } = registry;
+    sessions.retain(|id, session| {
+        in_flight.contains(id)
+            || now.saturating_sub(session.last_activity_tick) <= limits.max_idle_ticks
     });
 }
 
 fn session_mut<'a>(
+    registry: &'a mut Registry,
+    session: &SessionId,
+) -> ServerResult<&'a mut SessionRecord> {
+    if registry.in_flight.contains(session) {
+        return Err(session_busy());
+    }
+    reserved_session_mut(registry, session)
+}
+
+fn reserved_session_mut<'a>(
     registry: &'a mut Registry,
     session: &SessionId,
 ) -> ServerResult<&'a mut SessionRecord> {
@@ -288,19 +328,26 @@ fn session_mut<'a>(
     })
 }
 
-fn execute_runtime(cx: &mut Cx, record: &SessionRecord, operation: &Expr) -> ServerResult<Value> {
-    validate_runtime_target(record, operation)?;
+fn session_busy() -> ExpressionTreeServerError {
+    ExpressionTreeServerError::new(
+        "session-busy",
+        "another operation is already evaluating for this session",
+    )
+}
+
+fn execute_runtime(cx: &mut Cx, target: &RuntimeTarget, operation: &Expr) -> ServerResult<Value> {
+    validate_runtime_target(target, operation)?;
     let tree = cx
         .factory()
-        .opaque(Arc::new(record.tree.clone()))
+        .opaque(Arc::new(target.tree.clone()))
         .map_err(classify_kernel_error)?;
     let mut env = Env::child(Arc::new(cx.env().clone()));
-    env.define(record.resource(), tree);
+    env.define(target.resource.clone(), tree);
     cx.with_env(env, |cx| cx.eval_expr(operation.clone()))
         .map_err(classify_kernel_error)
 }
 
-fn validate_runtime_target(record: &SessionRecord, operation: &Expr) -> ServerResult<()> {
+fn validate_runtime_target(target: &RuntimeTarget, operation: &Expr) -> ServerResult<()> {
     let Expr::Call { operator, args } = operation else {
         return Err(ExpressionTreeServerError::new(
             "invalid-operation",
@@ -319,7 +366,7 @@ fn validate_runtime_target(record: &SessionRecord, operation: &Expr) -> ServerRe
             "runtime operation is outside the expression-tree family",
         ));
     }
-    if !matches!(args.first(), Some(Expr::Symbol(resource)) if resource == &record.resource()) {
+    if !matches!(args.first(), Some(Expr::Symbol(resource)) if resource == &target.resource) {
         return Err(ExpressionTreeServerError::new(
             "session-mismatch",
             "runtime operation targets another expression-tree session",

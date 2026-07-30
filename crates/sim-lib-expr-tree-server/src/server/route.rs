@@ -3,9 +3,9 @@
 use sim_kernel::{Cx, Error, EvalReply, EvalRequest, Expr, Symbol, Value};
 
 use super::{
-    ExpressionTreeServer, begin_request, classify_kernel_error, execute_runtime,
-    is_revision_change, is_surface_local, operation_metadata, session_mut, snapshot_revision,
-    stale, target_session,
+    ExpressionTreeServer, RuntimeTarget, begin_request, classify_kernel_error, execute_runtime,
+    is_revision_change, is_surface_local, operation_metadata, reserved_session_mut, session_mut,
+    snapshot_revision, stale, target_session,
 };
 use crate::error::{ExpressionTreeServerError, ServerResult};
 use crate::model::SessionId;
@@ -115,28 +115,39 @@ impl ExpressionTreeServer {
         expected_revision: Option<u64>,
         operation: &Expr,
     ) -> ServerResult<Expr> {
-        let mut registry = self.lock_registry()?;
-        let tick = begin_request(&mut registry, self.limits);
         let wall = self.wall_observation();
-        let record = session_mut(&mut registry, session)?;
-        record.last_activity_tick = tick;
-        if let Some(expected) = expected_revision
-            && expected != record.revision
-        {
-            return Err(stale(expected, record.revision));
-        }
-
         let (kind, path) = operation_metadata(operation)?;
-        let changed = if is_surface_local(operation) {
-            record.apply_surface_local(operation, self.limits)?
+        if is_surface_local(operation) {
+            let mut registry = self.lock_registry()?;
+            let tick = begin_request(&mut registry, self.limits);
+            let record = session_mut(&mut registry, session)?;
+            record.last_activity_tick = tick;
+            if let Some(expected) = expected_revision
+                && expected != record.revision
+            {
+                return Err(stale(expected, record.revision));
+            }
+            if record.apply_surface_local(operation, self.limits)? {
+                record.changed(&kind, path, tick, wall, self.limits);
+            }
+            return record.snapshot(self.limits);
         } else {
-            execute_runtime(cx, record, operation)?;
-            is_revision_change(&kind)
-        };
-        if changed {
-            record.changed(&kind, path, tick, wall, self.limits);
+            let (target, tick) = self.reserve_runtime(session, expected_revision)?;
+            let result = execute_runtime(cx, &target, operation);
+            let mut registry = self.lock_registry()?;
+            if !registry.in_flight.remove(session) {
+                return Err(ExpressionTreeServerError::new(
+                    "internal",
+                    "runtime operation lost its session reservation",
+                ));
+            }
+            let record = reserved_session_mut(&mut registry, session)?;
+            result?;
+            if is_revision_change(&kind) {
+                record.changed(&kind, path, tick, wall, self.limits);
+            }
+            return record.snapshot(self.limits);
         }
-        record.snapshot(self.limits)
     }
 
     fn execute_direct_operation(
@@ -145,17 +156,44 @@ impl ExpressionTreeServer {
         session: &SessionId,
         operation: &Expr,
     ) -> ServerResult<Value> {
-        let mut registry = self.lock_registry()?;
-        let tick = begin_request(&mut registry, self.limits);
         let wall = self.wall_observation();
-        let record = session_mut(&mut registry, session)?;
-        record.last_activity_tick = tick;
         let (kind, path) = operation_metadata(operation)?;
-        let value = execute_runtime(cx, record, operation)?;
+        let (target, tick) = self.reserve_runtime(session, None)?;
+        let result = execute_runtime(cx, &target, operation);
+        let mut registry = self.lock_registry()?;
+        if !registry.in_flight.remove(session) {
+            return Err(ExpressionTreeServerError::new(
+                "internal",
+                "runtime operation lost its session reservation",
+            ));
+        }
+        let record = reserved_session_mut(&mut registry, session)?;
+        let value = result?;
         if is_revision_change(&kind) {
             record.changed(&kind, path, tick, wall, self.limits);
         }
         Ok(value)
+    }
+
+    fn reserve_runtime(
+        &self,
+        session: &SessionId,
+        expected_revision: Option<u64>,
+    ) -> ServerResult<(RuntimeTarget, u64)> {
+        let mut registry = self.lock_registry()?;
+        let tick = begin_request(&mut registry, self.limits);
+        let target = {
+            let record = session_mut(&mut registry, session)?;
+            record.last_activity_tick = tick;
+            if let Some(expected) = expected_revision
+                && expected != record.revision
+            {
+                return Err(stale(expected, record.revision));
+            }
+            RuntimeTarget::new(record)
+        };
+        registry.in_flight.insert(session.clone());
+        Ok((target, tick))
     }
 
     fn drain_changes(&self, session: &SessionId) -> ServerResult<Expr> {

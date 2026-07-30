@@ -1,6 +1,9 @@
-use std::sync::Arc;
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+};
 
-use sim_kernel::{Expr, Symbol};
+use sim_kernel::{Args, Callable, Cx, Expr, Object, ObjectCompat, Symbol, Value};
 use sim_lib_intent::{Origin, intent};
 use sim_lib_server::{EvalSite, ServerAddress, eval_reply_from_frame, server_frame_from_request};
 use sim_value::build;
@@ -130,6 +133,55 @@ fn caller_authority_is_diminished_and_errors_remain_structured() {
 }
 
 #[test]
+fn server_registry_lock_does_not_span_runtime_evaluation() {
+    let server = Arc::new(ExpressionTreeServer::local());
+    let observed_unlocked = Arc::new(AtomicBool::new(false));
+    let mut cx = full_cx();
+    let probe = cx
+        .factory()
+        .opaque(Arc::new(RegistryLockProbe {
+            server: Arc::clone(&server),
+            observed_unlocked: Arc::clone(&observed_unlocked),
+        }))
+        .unwrap();
+    cx.env_mut()
+        .define(Symbol::new("server-registry-lock-probe"), probe);
+    let session = server.create_session(&mut cx, "lock-probe").unwrap();
+    realize_expr(
+        &server,
+        &mut cx,
+        runtime_call(
+            &session,
+            "new-cell",
+            vec![
+                Expr::String("/".to_owned()),
+                Expr::String("probe".to_owned()),
+                Expr::Call {
+                    operator: Box::new(Expr::Symbol(Symbol::new("server-registry-lock-probe"))),
+                    args: Vec::new(),
+                },
+            ],
+        ),
+    );
+
+    let report = realize_expr(
+        &server,
+        &mut cx,
+        runtime_call(
+            &session,
+            "calculate",
+            vec![Expr::String("/probe".to_owned())],
+        ),
+    );
+
+    assert!(error_code(&report).is_none(), "{report:?}");
+    assert!(
+        observed_unlocked.load(Ordering::Acquire),
+        "server registry lock spanned SIM evaluation"
+    );
+}
+
+#[test]
 fn server_frames_preserve_correlation_and_use_existing_adapters() {
     let server = ExpressionTreeServer::new(
         ServerAddress::Local,
@@ -161,4 +213,35 @@ fn server_frames_preserve_correlation_and_use_existing_adapters() {
             if symbol.namespace.as_deref() == Some("expr-tree/session")
     ));
     assert!(EvalSite::as_eval_fabric(&server).is_some());
+}
+
+struct RegistryLockProbe {
+    server: Arc<ExpressionTreeServer>,
+    observed_unlocked: Arc<AtomicBool>,
+}
+
+impl Object for RegistryLockProbe {
+    fn display(&self, _cx: &mut Cx) -> sim_kernel::Result<String> {
+        Ok("#<server-registry-lock-probe>".to_owned())
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl ObjectCompat for RegistryLockProbe {
+    fn as_callable(&self) -> Option<&dyn Callable> {
+        Some(self)
+    }
+}
+
+impl Callable for RegistryLockProbe {
+    fn call(&self, cx: &mut Cx, _args: Args) -> sim_kernel::Result<Value> {
+        self.observed_unlocked.store(
+            self.server.registry_is_unlocked_for_test(),
+            Ordering::Release,
+        );
+        cx.factory().string("unlocked".to_owned())
+    }
 }
