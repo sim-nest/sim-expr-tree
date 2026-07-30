@@ -23,8 +23,6 @@
 {"kind":"recipe","path":"crates/sim-lib-expr-tree/recipes/book.toml"}
 {"kind":"recipe","path":"recipes/03-server/chapter.toml"}
 {"kind":"recipe","path":"recipes/03-server/web-session/expected.txt"}
-{"kind":"recipe","path":"recipes/03-server/web-session/fixtures/desktop.json"}
-{"kind":"recipe","path":"recipes/03-server/web-session/fixtures/phone.json"}
 {"kind":"recipe","path":"recipes/03-server/web-session/purpose.md"}
 {"kind":"recipe","path":"recipes/03-server/web-session/recipe.toml"}
 {"kind":"recipe","path":"recipes/03-server/web-session/screenshots/SHA256SUMS"}

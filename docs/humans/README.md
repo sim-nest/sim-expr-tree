@@ -68,8 +68,6 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 - `crates/sim-lib-expr-tree/recipes/book.toml`
 - `recipes/03-server/chapter.toml`
 - `recipes/03-server/web-session/expected.txt`
-- `recipes/03-server/web-session/fixtures/desktop.json`
-- `recipes/03-server/web-session/fixtures/phone.json`
 - `recipes/03-server/web-session/purpose.md`
 - `recipes/03-server/web-session/recipe.toml`
 - `recipes/03-server/web-session/screenshots/SHA256SUMS`
