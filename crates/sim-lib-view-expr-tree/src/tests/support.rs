@@ -94,10 +94,6 @@ pub(super) fn collect_kind<'a>(expr: &'a Expr, kind: &str, found: &mut Vec<&'a E
     }
 }
 
-pub(super) fn string_field<'a>(expr: &'a Expr, name: &str) -> Option<&'a str> {
-    access::field_str(expr, name)
-}
-
 pub(super) fn symbol_field(expr: &Expr, name: &str) -> Option<String> {
     access::field_sym(expr, name).map(|symbol| symbol.name.to_string())
 }

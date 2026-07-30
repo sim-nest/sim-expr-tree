@@ -7,9 +7,7 @@ use crate::{
     ExpressionTreeSurfaceCodec, FaceSnapshot, Freshness, NodeDetail, NodeSnapshot, TimestampSummary,
 };
 
-use super::support::{
-    TREE_REVISION, collect_kind, detail, expanded_cell, snapshot, string_field, target,
-};
+use super::support::{TREE_REVISION, collect_kind, detail, expanded_cell, snapshot, target};
 
 #[test]
 fn every_freshness_state_has_visible_non_color_status_text() {
@@ -31,9 +29,9 @@ fn every_freshness_state_has_visible_non_color_status_text() {
         let mut badges = Vec::new();
         collect_kind(&scene, "badge", &mut badges);
         let status = badges.first().expect("status badge");
-        assert_eq!(string_field(status, "label"), Some(expected));
+        assert_eq!(access::field_str(status, "label"), Some(expected));
         assert_eq!(
-            string_field(status, "aria-label"),
+            access::field_str(status, "aria-label"),
             Some(format!("Calculation status: {}", freshness.token()).as_str())
         );
     }
@@ -79,7 +77,7 @@ fn arbitrary_binary_and_truncated_or_failed_faces_remain_bounded() {
         assert!(
             texts
                 .iter()
-                .any(|text| string_field(text, "text") == Some(expected)),
+                .any(|text| access::field_str(text, "text") == Some(expected)),
             "missing {expected:?} in {scene:?}"
         );
     }

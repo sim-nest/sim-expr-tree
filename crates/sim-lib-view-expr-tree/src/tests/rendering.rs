@@ -4,7 +4,7 @@ use sim_value::access;
 
 use crate::{ExpressionTreeSurfaceCodec, Freshness};
 
-use super::support::{collect_kind, expanded_cell, snapshot, string_field, symbol_field};
+use super::support::{collect_kind, expanded_cell, snapshot, symbol_field};
 
 #[test]
 fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions() {
@@ -20,7 +20,7 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     assert_eq!(trees.len(), 1);
     assert_eq!(access::field_bool(trees[0], "open"), Some(true));
     assert_eq!(
-        string_field(trees[0], "aria-label"),
+        access::field_str(trees[0], "aria-label"),
         Some("solve, cell, expanded")
     );
 
@@ -40,9 +40,9 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     let mut fields = Vec::new();
     collect_kind(&scene, "field", &mut fields);
     assert_eq!(fields.len(), 1, "only the source face is editable");
-    assert_eq!(string_field(fields[0], "value"), Some("(+ 20 22)"));
+    assert_eq!(access::field_str(fields[0], "value"), Some("(+ 20 22)"));
     assert_eq!(
-        string_field(fields[0], "aria-label"),
+        access::field_str(fields[0], "aria-label"),
         Some("Edit source for solve")
     );
 
@@ -50,7 +50,7 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     collect_kind(&scene, "badge", &mut badges);
     let labels = badges
         .iter()
-        .filter_map(|badge| string_field(badge, "label"))
+        .filter_map(|badge| access::field_str(badge, "label"))
         .collect::<Vec<_>>();
     assert_eq!(labels, ["Fresh", "Automatic", "codec/lisp"]);
 
@@ -58,7 +58,7 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     collect_kind(&scene, "text", &mut text);
     let lines = text
         .iter()
-        .filter_map(|line| string_field(line, "text"))
+        .filter_map(|line| access::field_str(line, "text"))
         .collect::<Vec<_>>();
     assert!(lines.contains(&"42"));
     assert!(lines.contains(&"source r17 · result r16"));
@@ -71,7 +71,7 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     collect_kind(&scene, "button", &mut buttons);
     let controls = buttons
         .iter()
-        .filter_map(|button| string_field(button, "control"))
+        .filter_map(|button| access::field_str(button, "control"))
         .collect::<Vec<_>>();
     assert_eq!(
         controls,
@@ -87,7 +87,7 @@ fn expanded_row_renders_faces_status_revisions_times_policy_receipt_and_actions(
     assert!(
         buttons
             .iter()
-            .all(|button| string_field(button, "aria-label").is_some())
+            .all(|button| access::field_str(button, "aria-label").is_some())
     );
 }
 
@@ -129,7 +129,7 @@ fn face_layout(scene: &sim_kernel::Expr) -> String {
     stacks
         .into_iter()
         .find(|stack| {
-            string_field(stack, "aria-label")
+            access::field_str(stack, "aria-label")
                 .is_some_and(|label| label.ends_with("source and result"))
         })
         .and_then(|stack| symbol_field(stack, "dir"))

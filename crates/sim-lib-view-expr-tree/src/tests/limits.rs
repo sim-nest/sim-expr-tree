@@ -7,7 +7,7 @@ use crate::{
     ChildPage, ExpressionTreeSnapshot, ExpressionTreeSurfaceCodec, Freshness, NodeSnapshot,
 };
 
-use super::support::{TREE_REVISION, collect_kind, expanded_cell, snapshot, string_field, target};
+use super::support::{TREE_REVISION, collect_kind, expanded_cell, snapshot, target};
 
 #[test]
 fn collapsed_directory_does_not_inspect_descendant_payload() {
@@ -102,7 +102,7 @@ fn truncated_subtree_exposes_and_requires_explicit_continuation() {
         .collect::<Vec<_>>();
     assert_eq!(continuations.len(), 1);
     assert_eq!(
-        string_field(continuations[0], "label"),
+        access::field_str(continuations[0], "label"),
         Some("More descendants require explicit continuation")
     );
 
@@ -110,7 +110,7 @@ fn truncated_subtree_exposes_and_requires_explicit_continuation() {
     collect_kind(&scene, "button", &mut buttons);
     let more = buttons
         .iter()
-        .find(|button| string_field(button, "control") == Some("continue"))
+        .find(|button| access::field_str(button, "control") == Some("continue"))
         .expect("explicit Load more button");
     let continuation_target = access::field(more, "target")
         .cloned()
