@@ -8,13 +8,19 @@ use std::{
 
 use sim_expr_tree_core::{BackendKind, MountEpoch, MountResource};
 use sim_incremental_core::{
-    IncrementalEngine, IncrementalError, ObservationKind, SnapshotBudgets, ValueFingerprint,
+    ContinuationToken, IncrementalEngine, IncrementalError, ObservationKind, SnapshotBudgets,
+    ValueFingerprint,
 };
-use sim_kernel::{Cx, DefaultFactory, EagerPolicy, Expr, StrictNames, Symbol, Value};
+use sim_kernel::{
+    CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, StrictNames, Symbol, Value,
+};
+use sim_lib_stream_core::BufferPolicy;
 use sim_table_core::TablePath;
 
 use crate::ExprTreeRefPolicy;
 
+mod attempt;
+mod engine;
 mod eval;
 use eval::{evaluate_cell, observe_runtime_context, parent_path, path_key};
 mod model;
@@ -23,7 +29,33 @@ pub use model::{
     HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH, HARD_MAX_WORK, LastGoodValue,
 };
 use model::{ContextFactory, MemoOutcome, MemoValue};
+mod policy;
+pub use policy::{
+    AuthorityDigest, AuthorityPolicyPatch, CalcPolicyPatch, CalcTrigger, CycleMode,
+    EffectiveAuthority, EffectiveCalcPolicy, ErrorMode, PolicyDigest,
+};
+use policy::{effective_authority, effective_calc_policy, is_descendant_or_same};
+mod receipt;
+pub use receipt::{
+    CalcExplanation, CalcOutcome, CalcReason, CalcReceipt, CalcRequestMode, CalcStatus,
+    DependencyStamp, DirectedCalcReport, DirectedCellResult, EffectStamp, RequestId,
+};
+mod scheduler;
+use scheduler::MAX_READY_BYPASSES;
+pub use scheduler::{
+    AutomaticBudget, AutomaticContinuation, AutomaticQueueSnapshot, AutomaticRun, QueuedCalculation,
+};
+mod scheduling;
+mod session;
 mod value;
+mod watch;
+pub use watch::CalcWatch;
+
+const MAX_RECEIPT_DEPENDENCIES: usize = 64;
+const MAX_RECEIPT_GRAPH_NODES: usize = 4_096;
+const MAX_RECEIPT_GRAPH_EDGES: usize = 65_536;
+
+type WallClock = dyn Fn() -> Option<u64> + Send + Sync + 'static;
 
 /// Incremental calculator for ordinary SIM [`Expr`] sources and [`Value`]
 /// results.
@@ -33,21 +65,60 @@ pub struct ExprTreeCalc {
     context_factory: Arc<ContextFactory>,
     cancel_requested: Arc<AtomicBool>,
     next_volatile: Arc<AtomicU64>,
+    wall_clock: Arc<RwLock<Arc<WallClock>>>,
+    next_request_id: u64,
+    automatic_queue: BTreeMap<String, QueuedCalculation>,
+    automatic_generation: u64,
+    next_queue_sequence: u64,
+    watches: Vec<CalcWatch>,
+    next_watch_id: u64,
 }
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub(crate) struct CalcState {
     cells: BTreeMap<String, Expr>,
     bound_names: BTreeSet<String>,
     bound_values: BTreeMap<Symbol, Value>,
     mounts: BTreeMap<String, MountState>,
-    effective_policy: String,
     codec_registry_revision: u64,
-    authority_ceiling: String,
+    tree_calc_policy: CalcPolicyPatch,
+    dir_calc_policies: BTreeMap<String, CalcPolicyPatch>,
+    cell_calc_policies: BTreeMap<String, CalcPolicyPatch>,
+    authority_ceiling: CapabilitySet,
+    tree_authority_policy: AuthorityPolicyPatch,
+    dir_authority_policies: BTreeMap<String, AuthorityPolicyPatch>,
+    cell_authority_policies: BTreeMap<String, AuthorityPolicyPatch>,
+    active_request: Option<ActiveRequest>,
+    attempts: Vec<AttemptDraft>,
+    receipts: BTreeMap<String, CalcReceipt>,
+    next_logical_tick: u64,
     current: BTreeMap<String, Result<Value, CalcError>>,
     last_good: BTreeMap<String, Value>,
     volatile: BTreeSet<String>,
     failed_cells: BTreeSet<String>,
+}
+
+#[derive(Clone)]
+struct ActiveRequest {
+    id: RequestId,
+    reason: CalcReason,
+    directed_cells: BTreeSet<String>,
+    automatic: bool,
+}
+
+struct AttemptDraft {
+    request_id: RequestId,
+    cell: String,
+    policy: EffectiveCalcPolicy,
+    authority: EffectiveAuthority,
+    started_tick: u64,
+    finished_tick: u64,
+    wall_started_ms: Option<u64>,
+    wall_finished_ms: Option<u64>,
+    outcome: CalcOutcome,
+    effects: Vec<EffectStamp>,
+    omitted_effects: usize,
+    reason: CalcReason,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -79,17 +150,46 @@ impl ExprTreeCalc {
     where
         F: Fn() -> Cx + Send + Sync + 'static,
     {
+        let context_factory: Arc<ContextFactory> = Arc::new(factory);
+        let open_time_authority = context_factory().capabilities().clone();
         Self {
             state: Arc::new(RwLock::new(CalcState {
-                effective_policy: "default".to_owned(),
-                authority_ceiling: "ambient".to_owned(),
+                authority_ceiling: open_time_authority,
+                next_logical_tick: 1,
                 ..CalcState::default()
             })),
             engine: IncrementalEngine::new(),
-            context_factory: Arc::new(factory),
+            context_factory,
             cancel_requested: Arc::new(AtomicBool::new(false)),
             next_volatile: Arc::new(AtomicU64::new(1)),
+            wall_clock: Arc::new(RwLock::new(Arc::new(|| None))),
+            next_request_id: 1,
+            automatic_queue: BTreeMap::new(),
+            automatic_generation: 1,
+            next_queue_sequence: 1,
+            watches: Vec::new(),
+            next_watch_id: 1,
         }
+    }
+
+    /// Replaces the optional human wall-clock observation source.
+    ///
+    /// Logical ticks and revisions remain the only freshness authority.
+    pub fn set_wall_clock<F>(&mut self, clock: F)
+    where
+        F: Fn() -> Option<u64> + Send + Sync + 'static,
+    {
+        *self.wall_clock.write().expect("wall clock lock poisoned") = Arc::new(clock);
+    }
+
+    /// Returns the immutable capability ceiling captured when this tree opened.
+    #[must_use]
+    pub fn open_time_authority(&self) -> CapabilitySet {
+        self.state
+            .read()
+            .expect("calc state poisoned")
+            .authority_ceiling
+            .clone()
     }
 
     /// Installs or replaces an ordinary expression source.
@@ -106,10 +206,12 @@ impl ExprTreeCalc {
             )
         };
         if !replaced {
-            self.register_cell_query(key);
+            self.register_cell_query(key.clone());
         }
         self.invalidate_cell_source(&path, !replaced);
         self.invalidate_failed_cells(failed);
+        self.emit_change("source-set", &key);
+        self.schedule_dirty_automatic();
     }
 
     /// Removes a cell source while retaining an explicit missing-value query.
@@ -122,9 +224,11 @@ impl ExprTreeCalc {
             state.volatile.remove(&key);
             state.failed_cells.iter().cloned().collect::<Vec<_>>()
         };
-        self.register_cell_query(key);
+        self.register_cell_query(key.clone());
         self.invalidate_cell_source(path, true);
         self.invalidate_failed_cells(failed);
+        self.emit_change("source-removed", &key);
+        self.schedule_dirty_automatic();
     }
 
     /// Moves an ordinary source and invalidates both namespace locations.
@@ -145,12 +249,15 @@ impl ExprTreeCalc {
             (moved, failed)
         };
         if moved.is_some() {
-            self.register_cell_query(to_key);
+            self.register_cell_query(to_key.clone());
         }
-        self.register_cell_query(from_key);
+        self.register_cell_query(from_key.clone());
         self.invalidate_cell_source(from, true);
         self.invalidate_cell_source(&to, true);
         self.invalidate_failed_cells(failed);
+        self.emit_change("source-moved-from", &from_key);
+        self.emit_change("source-moved-to", &to_key);
+        self.schedule_dirty_automatic();
     }
 
     /// Binds a lexical name to a diagnostic string value.
@@ -178,176 +285,6 @@ impl ExprTreeCalc {
             .invalidate(&CalcQuery::NameSlot(name.to_string()));
     }
 
-    /// Updates effective policy observation state.
-    pub fn set_effective_policy(&mut self, policy: impl Into<String>) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .effective_policy = policy.into();
-        self.engine.invalidate(&CalcQuery::EffectivePolicy);
-    }
-
-    /// Updates the observed codec registry revision.
-    pub fn set_codec_registry_revision(&mut self, revision: u64) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .codec_registry_revision = revision;
-        self.engine.invalidate(&CalcQuery::CodecRegistry);
-    }
-
-    /// Updates the observed authority ceiling.
-    pub fn set_authority_ceiling(&mut self, ceiling: impl Into<String>) {
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .authority_ceiling = ceiling.into();
-        self.engine.invalidate(&CalcQuery::AuthorityCeiling);
-    }
-
-    /// Adds or replaces a mounted backend observation.
-    pub fn mount(
-        &mut self,
-        path: TablePath,
-        resource: MountResource,
-        backend: BackendKind,
-        epoch: MountEpoch,
-    ) {
-        let key = path_key(&path);
-        self.state
-            .write()
-            .expect("calc state poisoned")
-            .mounts
-            .insert(
-                key.clone(),
-                MountState {
-                    resource,
-                    backend,
-                    epoch,
-                },
-            );
-        self.engine.invalidate(&CalcQuery::MountEpoch(key));
-    }
-
-    /// Advances a mounted backend epoch.
-    pub fn observe_mount_epoch(&mut self, path: &TablePath, epoch: MountEpoch) {
-        let key = path_key(path);
-        if let Some(mount) = self
-            .state
-            .write()
-            .expect("calc state poisoned")
-            .mounts
-            .get_mut(&key)
-        {
-            mount.epoch = epoch;
-        }
-        self.engine.invalidate(&CalcQuery::MountEpoch(key));
-    }
-
-    /// Requests cancellation of the next calculation work that actually runs.
-    pub fn request_cancellation(&self) {
-        self.cancel_requested.store(true, Ordering::Release);
-    }
-
-    /// Pull-verifies a cell under the hard default ceilings.
-    pub fn verify_cell(&mut self, path: &TablePath) -> Result<Value, CalcError> {
-        self.verify_cell_with_limits(path, CalcLimits::default())
-    }
-
-    /// Pull-verifies a cell with requested limits clamped to hard ceilings.
-    pub fn verify_cell_with_limits(
-        &mut self,
-        path: &TablePath,
-        limits: CalcLimits,
-    ) -> Result<Value, CalcError> {
-        let key = path_key(path);
-        let result = self
-            .engine
-            .verify_with_budgets(CalcQuery::Cell(key.clone()), limits.clamped())
-            .map_err(CalcError::Incremental)
-            .and_then(|memo| {
-                let is_volatile = memo.is_volatile();
-                match memo.outcome {
-                    MemoOutcome::Value(value) => Ok((value, is_volatile)),
-                    MemoOutcome::Failure(failure) => Err(CalcError::Cell(failure)),
-                }
-            });
-
-        let mut state = self.state.write().expect("calc state poisoned");
-        match result {
-            Ok((value, is_volatile)) => {
-                state.current.insert(key.clone(), Ok(value.clone()));
-                state.last_good.insert(key.clone(), value.clone());
-                state.failed_cells.remove(&key);
-                if is_volatile {
-                    state.volatile.insert(key);
-                } else {
-                    state.volatile.remove(&key);
-                }
-                Ok(value)
-            }
-            Err(error) => {
-                state.current.insert(key.clone(), Err(error.clone()));
-                state.volatile.remove(&key);
-                state.failed_cells.insert(key);
-                Err(error)
-            }
-        }
-    }
-
-    /// Reads only the current committed result.
-    ///
-    /// A failed or cancelled recalculation never falls back to last-good.
-    pub fn current_cell(&self, path: &TablePath) -> Result<Value, CalcError> {
-        let key = path_key(path);
-        self.state
-            .read()
-            .expect("calc state poisoned")
-            .current
-            .get(&key)
-            .cloned()
-            .unwrap_or(Err(CalcError::NotCalculated { path: key }))
-    }
-
-    /// Returns the retained historical success, explicitly labelled
-    /// `last-good`.
-    #[must_use]
-    pub fn last_good_cell(&self, path: &TablePath) -> Option<LastGoodValue> {
-        self.state
-            .read()
-            .expect("calc state poisoned")
-            .last_good
-            .get(&path_key(path))
-            .cloned()
-            .map(|value| LastGoodValue { value })
-    }
-
-    /// Returns whether the current successful result is noncanonical and must
-    /// therefore be treated as volatile.
-    #[must_use]
-    pub fn current_is_volatile(&self, path: &TablePath) -> bool {
-        self.state
-            .read()
-            .expect("calc state poisoned")
-            .volatile
-            .contains(&path_key(path))
-    }
-
-    /// Returns the current incremental memo revision.
-    #[must_use]
-    pub fn cell_revision(&self, path: &TablePath) -> Option<u64> {
-        self.engine
-            .memo_revision(&CalcQuery::Cell(path_key(path)))
-            .map(|revision| revision.get())
-    }
-
-    /// Returns the current incremental fingerprint.
-    #[must_use]
-    pub fn cell_fingerprint(&self, path: &TablePath) -> Option<ValueFingerprint> {
-        self.engine
-            .memo_fingerprint(&CalcQuery::Cell(path_key(path)))
-    }
-
     /// Returns the dependency observations for a cell in deterministic order.
     pub fn cell_dependencies(
         &mut self,
@@ -368,58 +305,6 @@ impl ExprTreeCalc {
                     .collect()
             })
             .unwrap_or_default())
-    }
-
-    fn register_cell_query(&mut self, key: String) {
-        let state = Arc::clone(&self.state);
-        let context_factory = Arc::clone(&self.context_factory);
-        let cancel_requested = Arc::clone(&self.cancel_requested);
-        let next_volatile = Arc::clone(&self.next_volatile);
-        self.engine
-            .register_fn(CalcQuery::Cell(key), move |query, frame| {
-                let CalcQuery::Cell(cell_key) = query else {
-                    return Err(IncrementalError::UnknownQuery { key: query.clone() });
-                };
-                if cancel_requested.swap(false, Ordering::AcqRel) {
-                    frame.cancel();
-                    frame.charge_work(0)?;
-                }
-                observe_runtime_context(frame)?;
-                frame.observe(
-                    ObservationKind::Custom("cell-source"),
-                    CalcQuery::Cell(cell_key.clone()),
-                )?;
-                let source = state
-                    .read()
-                    .expect("calc state poisoned")
-                    .cells
-                    .get(cell_key)
-                    .cloned();
-                let memo = evaluate_cell(
-                    &state,
-                    frame,
-                    &context_factory,
-                    &next_volatile,
-                    cell_key,
-                    source,
-                )?;
-                Ok(memo)
-            });
-    }
-
-    fn invalidate_cell_source(&mut self, path: &TablePath, namespace_changed: bool) {
-        self.engine.invalidate(&CalcQuery::Cell(path_key(path)));
-        if namespace_changed {
-            self.engine.invalidate(&CalcQuery::NameSlot(path_key(path)));
-            self.engine
-                .invalidate(&CalcQuery::Listing(path_key(&parent_path(path))));
-        }
-    }
-
-    fn invalidate_failed_cells(&mut self, failed: Vec<String>) {
-        for key in failed {
-            self.engine.invalidate(&CalcQuery::Cell(key));
-        }
     }
 
     #[cfg(test)]

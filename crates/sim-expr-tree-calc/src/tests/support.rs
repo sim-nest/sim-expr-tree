@@ -8,8 +8,9 @@ use std::{
 
 use sim_incremental_core::ObservationKind;
 use sim_kernel::{
-    Args, Callable, Cx, DefaultFactory, Dir, EagerPolicy, Error, Expr, Object, ObjectCompat,
-    StrictNames, Symbol, Table, Value,
+    Args, Callable, CapabilityName, Cx, DefaultFactory, Dir, EagerPolicy, Error, Expr, Object,
+    ObjectCompat, Ref, StrictNames, Symbol, Table, Value,
+    effect::{Effect, effect_abort_op_key, effect_resume_op_key, resolve_effect},
 };
 use sim_table_core::TablePath;
 
@@ -141,6 +142,16 @@ pub(super) fn strict_context() -> Cx {
         Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
         Arc::new(DefaultFactory),
     )
+}
+
+pub(super) fn effect_context(capability: CapabilityName) -> Cx {
+    let (mut cx, seat) = Cx::new_seated(
+        Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
+        Arc::new(DefaultFactory),
+    );
+    seat.grant(&mut cx, capability.clone()).unwrap();
+    bind_callable(&mut cx, "effectful", EffectfulCallable { capability });
+    cx
 }
 
 pub(super) fn lock_probe_context(state: Arc<RwLock<CalcState>>) -> Cx {
@@ -284,6 +295,30 @@ impl Callable for LockProbeCallable {
 }
 
 impl_test_callable!(LockProbeCallable, "#<lock-probe>");
+
+struct EffectfulCallable {
+    capability: CapabilityName,
+}
+
+impl Callable for EffectfulCallable {
+    fn call(&self, cx: &mut Cx, _args: Args) -> sim_kernel::Result<Value> {
+        let effect = Effect::new(
+            Symbol::qualified("expr-tree", "test-effect"),
+            Ref::Symbol(Symbol::qualified("expr-tree", "test-subject")),
+            Ref::Symbol(Symbol::qualified("expr-tree", "test-input")),
+            Ref::Symbol(Symbol::qualified("core", "Any")),
+            effect_resume_op_key(),
+            effect_abort_op_key(),
+        )
+        .requiring(self.capability.clone());
+        resolve_effect(cx, effect, |_cx, _effect| {
+            Ok(Ref::Symbol(Symbol::qualified("expr-tree", "effect-ok")))
+        })?;
+        cx.factory().string("effect-ok".to_owned())
+    }
+}
+
+impl_test_callable!(EffectfulCallable, "#<effectful>");
 
 pub(super) struct OpaqueMarker;
 

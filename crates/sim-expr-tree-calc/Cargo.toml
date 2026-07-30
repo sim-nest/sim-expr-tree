@@ -13,6 +13,7 @@ description = "Bounded incremental calculation of ordinary SIM expressions and v
 sim-incremental-core = { version = "0.1.0" }
 sim-expr-tree-core = { path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.1.2" }
+sim-lib-stream-core = { version = "0.1.3" }
 sim-table-core = { version = "0.1.2" }
 
 [lints]

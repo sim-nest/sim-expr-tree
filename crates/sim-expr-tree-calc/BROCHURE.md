@@ -14,6 +14,12 @@ parallel store.
 
 - Recompute only the tree results whose observed dependencies changed.
 - Treat explicit names, fallback lookup, bindings, and mounts as refresh inputs.
+- Mix automatic, on-demand, manual, and frozen cells under inherited policy.
+- Direct verification, root forcing, and recursive forcing through one engine.
+- Keep authority below an immutable open-time ceiling, with effect evidence.
+- Resume bounded fair automatic work from explicit queue continuations.
+- Consume progress and changes through standard bounded stream operations.
+- Explain every attempt from compact revision, authority, dependency, and time receipts.
 - Keep dependency tracking outside the kernel while still using SIM policy.
 - Test evaluation wrappers with ordinary workspace validation.
 

@@ -2,14 +2,20 @@ use std::sync::{Arc, RwLock, atomic::AtomicU64};
 
 use sim_expr_tree_core::MountResource;
 use sim_incremental_core::{IncrementalError, ObservationKind, QueryFrame};
-use sim_kernel::{Cx, Expr, Phase, Symbol};
+use sim_kernel::{CapabilitySet, Cx, Expr, Phase, Symbol};
 use sim_table_core::{TablePath, TablePathRef};
 
 use super::{
-    CalcQuery, CalcState, CellFailure, ContextFactory, HARD_MAX_EXPR_DEPTH, MemoOutcome, MemoValue,
-    incremental_failure, value::canonicalize_value,
+    CalcQuery, CalcState, CellFailure, ContextFactory, EffectStamp, HARD_MAX_EXPR_DEPTH,
+    MemoOutcome, MemoValue, incremental_failure, value::canonicalize_value,
 };
 use crate::EXPR_TREE_REF;
+
+mod namespace;
+use namespace::{install_bindings, parse_absolute, resolve_bare_symbol, resolve_explicit_ref};
+pub(super) use namespace::{observe_runtime_context, parent_path, path_key};
+
+pub(super) const MAX_RECEIPT_EFFECTS: usize = 32;
 
 enum EvalAbort {
     Cell(CellFailure),
@@ -28,6 +34,12 @@ impl From<IncrementalError<CalcQuery>> for EvalAbort {
     }
 }
 
+pub(super) struct EvaluatedMemo {
+    pub(super) memo: MemoValue,
+    pub(super) effects: Vec<EffectStamp>,
+    pub(super) omitted_effects: usize,
+}
+
 pub(super) fn evaluate_cell(
     state: &Arc<RwLock<CalcState>>,
     frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
@@ -35,59 +47,112 @@ pub(super) fn evaluate_cell(
     next_volatile: &AtomicU64,
     caller_key: &str,
     source: Option<Expr>,
-) -> Result<MemoValue, IncrementalError<CalcQuery>> {
+    capabilities: CapabilitySet,
+) -> Result<EvaluatedMemo, IncrementalError<CalcQuery>> {
     let mut cx = context_factory();
     if let Err(error) = install_bindings(state, &mut cx) {
-        return Ok(MemoValue::failure(CellFailure::Evaluation {
-            message: format!("cannot install evaluation bindings: {error}"),
-        }));
+        return Ok(EvaluatedMemo {
+            memo: MemoValue::failure(CellFailure::Evaluation {
+                message: format!("cannot install evaluation bindings: {error}"),
+            }),
+            effects: Vec::new(),
+            omitted_effects: 0,
+        });
     }
     let Some(source) = source else {
         let value = match cx.factory().string(format!("missing:{caller_key}")) {
             Ok(value) => value,
             Err(error) => {
-                return Ok(MemoValue::failure(CellFailure::Evaluation {
-                    message: format!("cannot construct missing-cell value: {error}"),
-                }));
+                return Ok(EvaluatedMemo {
+                    memo: MemoValue::failure(CellFailure::Evaluation {
+                        message: format!("cannot construct missing-cell value: {error}"),
+                    }),
+                    effects: Vec::new(),
+                    omitted_effects: 0,
+                });
             }
         };
-        return canonicalize_value(frame, &mut cx, next_volatile, value);
+        return canonicalize_value(frame, &mut cx, next_volatile, value).map(|memo| {
+            EvaluatedMemo {
+                memo,
+                effects: Vec::new(),
+                omitted_effects: 0,
+            }
+        });
     };
 
-    let result = (|| {
-        let expanded =
-            cx.expand_macros(Phase::Eval, source)
+    let mut result = None;
+    cx.with_capabilities(capabilities, |cx| {
+        result = Some((|| {
+            let expanded =
+                cx.expand_macros(Phase::Eval, source)
+                    .map_err(|error| CellFailure::Evaluation {
+                        message: error.to_string(),
+                    })?;
+            // Expansion must happen before dependency preparation so references
+            // emitted by macros are observed. The fresh per-cell context is then
+            // cleared to prevent the kernel evaluator from expanding the already
+            // prepared form a second time.
+            cx.clear_macro_expander();
+            let mut dependency_index = 0;
+            let prepared = prepare_expr(
+                state,
+                frame,
+                cx,
+                caller_key,
+                expanded,
+                0,
+                &mut dependency_index,
+            )?;
+            let value = cx
+                .eval_expr(prepared)
                 .map_err(|error| CellFailure::Evaluation {
                     message: error.to_string(),
                 })?;
-        // Expansion must happen before dependency preparation so references
-        // emitted by macros are observed. The fresh per-cell context is then
-        // cleared to prevent the kernel evaluator from expanding the already
-        // prepared form a second time.
-        cx.clear_macro_expander();
-        let mut dependency_index = 0;
-        let prepared = prepare_expr(
-            state,
-            frame,
-            &mut cx,
-            caller_key,
-            expanded,
-            0,
-            &mut dependency_index,
-        )?;
-        let value = cx
-            .eval_expr(prepared)
-            .map_err(|error| CellFailure::Evaluation {
-                message: error.to_string(),
-            })?;
-        canonicalize_value(frame, &mut cx, next_volatile, value).map_err(EvalAbort::from)
-    })();
+            canonicalize_value(frame, cx, next_volatile, value).map_err(EvalAbort::from)
+        })());
+        Ok(())
+    })
+    .expect("installing diminished capabilities cannot fail");
+    let result = result.expect("diminished evaluation must produce a result");
+    let (effects, omitted_effects) = effect_evidence(&cx);
 
     match result {
-        Ok(memo) => Ok(memo),
-        Err(EvalAbort::Cell(failure)) => Ok(MemoValue::failure(failure)),
-        Err(EvalAbort::Incremental(error)) => incremental_failure(error),
+        Ok(memo) => Ok(EvaluatedMemo {
+            memo,
+            effects,
+            omitted_effects,
+        }),
+        Err(EvalAbort::Cell(failure)) => Ok(EvaluatedMemo {
+            memo: MemoValue::failure(failure),
+            effects,
+            omitted_effects,
+        }),
+        Err(EvalAbort::Incremental(error)) => {
+            incremental_failure(error).map(|memo| EvaluatedMemo {
+                memo,
+                effects,
+                omitted_effects,
+            })
+        }
     }
+}
+
+fn effect_evidence(cx: &Cx) -> (Vec<EffectStamp>, usize) {
+    let ledger = cx.effect_ledger();
+    let total = ledger.records().len();
+    let effects = ledger
+        .records()
+        .iter()
+        .take(MAX_RECEIPT_EFFECTS)
+        .filter_map(|record| {
+            ledger.effect(&record.effect).map(|effect| EffectStamp {
+                kind: effect.kind.to_string(),
+                aborted: record.aborted,
+            })
+        })
+        .collect();
+    (effects, total.saturating_sub(MAX_RECEIPT_EFFECTS))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -283,200 +348,4 @@ fn explicit_reference(args: &[Expr]) -> Result<String, CellFailure> {
             message: "expr-tree/ref requires exactly one string or symbol reference".to_owned(),
         }),
     }
-}
-
-fn resolve_explicit_ref(
-    state: &Arc<RwLock<CalcState>>,
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-    base_cell: &TablePath,
-    reference: &str,
-) -> Result<MemoValue, EvalAbort> {
-    let reference = TablePathRef::parse(reference).map_err(|error| CellFailure::Evaluation {
-        message: format!("invalid expression-tree reference {reference:?}: {error:?}"),
-    })?;
-    let target = parent_path(base_cell)
-        .resolve(&reference)
-        .map_err(|error| CellFailure::Evaluation {
-            message: format!(
-                "cannot resolve expression-tree reference {}: {error:?}",
-                reference.to_reference_string()
-            ),
-        })?;
-    resolve_target(state, frame, &target)
-}
-
-fn resolve_bare_symbol(
-    state: &Arc<RwLock<CalcState>>,
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-    caller_key: &str,
-    symbol: &Symbol,
-) -> Result<MemoValue, EvalAbort> {
-    let name = symbol.to_string();
-    let mut dir = parent_path(&parse_absolute(caller_key));
-    loop {
-        frame.observe_listing(CalcQuery::Listing(path_key(&dir)))?;
-        let mut candidate = dir.clone();
-        candidate
-            .push(&name)
-            .map_err(|error| CellFailure::Evaluation {
-                message: format!("invalid bare cell name {name:?}: {error:?}"),
-            })?;
-        observe_lookup_path(frame, &candidate)?;
-        if cell_exists(state, &candidate) {
-            return frame
-                .read(CalcQuery::Cell(path_key(&candidate)))
-                .map_err(EvalAbort::from);
-        }
-        frame.observe_missing(CalcQuery::NameSlot(path_key(&candidate)))?;
-        if dir.is_root() {
-            let cx = default_value_context();
-            let value = cx
-                .factory()
-                .string(format!("missing:{name}"))
-                .map_err(|error| CellFailure::Evaluation {
-                    message: error.to_string(),
-                })?;
-            return Ok(MemoValue::canonical(
-                value,
-                Expr::String(format!("missing:{name}")).canonical_key(),
-            ));
-        }
-        dir = parent_path(&dir);
-    }
-}
-
-fn resolve_target(
-    state: &Arc<RwLock<CalcState>>,
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-    target: &TablePath,
-) -> Result<MemoValue, EvalAbort> {
-    frame.observe_listing(CalcQuery::Listing(path_key(&parent_path(target))))?;
-    observe_lookup_path(frame, target)?;
-    observe_mount_epochs(state, frame, target)?;
-    if cell_exists(state, target) {
-        frame
-            .read(CalcQuery::Cell(path_key(target)))
-            .map_err(EvalAbort::from)
-    } else {
-        frame.observe_missing(CalcQuery::NameSlot(path_key(target)))?;
-        let text = format!("missing:{}", path_key(target));
-        let cx = default_value_context();
-        let value = cx
-            .factory()
-            .string(text.clone())
-            .map_err(|error| CellFailure::Evaluation {
-                message: error.to_string(),
-            })?;
-        Ok(MemoValue::canonical(
-            value,
-            Expr::String(text).canonical_key(),
-        ))
-    }
-}
-
-pub(super) fn observe_runtime_context(
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-) -> Result<(), IncrementalError<CalcQuery>> {
-    frame.observe_policy(CalcQuery::EffectivePolicy)?;
-    frame.observe(
-        ObservationKind::Custom("codec-registry"),
-        CalcQuery::CodecRegistry,
-    )?;
-    frame.observe_policy(CalcQuery::AuthorityCeiling)
-}
-
-fn observe_lookup_path(
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-    target: &TablePath,
-) -> Result<(), IncrementalError<CalcQuery>> {
-    let mut step = TablePath::root();
-    frame.observe(
-        ObservationKind::Custom("lookup-step"),
-        CalcQuery::LookupStep(path_key(&step)),
-    )?;
-    for segment in target.segments() {
-        step.push(segment)
-            .map_err(|_| IncrementalError::UnknownQuery {
-                key: CalcQuery::LookupStep(segment.clone()),
-            })?;
-        frame.observe(
-            ObservationKind::Custom("lookup-step"),
-            CalcQuery::LookupStep(path_key(&step)),
-        )?;
-    }
-    Ok(())
-}
-
-fn observe_mount_epochs(
-    state: &Arc<RwLock<CalcState>>,
-    frame: &mut QueryFrame<'_, CalcQuery, MemoValue>,
-    target: &TablePath,
-) -> Result<(), IncrementalError<CalcQuery>> {
-    let mounts = state.read().expect("calc state poisoned").mounts.clone();
-    for (mount_key, mount) in mounts {
-        let mount_path = parse_absolute(&mount_key);
-        if (mount.resource == MountResource::Dir || mount_path == *target)
-            && is_prefix(&mount_path, target)
-        {
-            let _backend = mount.backend;
-            let _epoch = mount.epoch;
-            frame.observe_epoch(CalcQuery::MountEpoch(mount_key))?;
-        }
-    }
-    Ok(())
-}
-
-fn install_bindings(state: &Arc<RwLock<CalcState>>, cx: &mut Cx) -> sim_kernel::Result<()> {
-    let (bound_names, bound_values) = {
-        let state = state.read().expect("calc state poisoned");
-        (state.bound_names.clone(), state.bound_values.clone())
-    };
-    for name in bound_names {
-        let value = cx.factory().string(format!("bound:{name}"))?;
-        cx.env_mut().define(Symbol::new(name), value);
-    }
-    for (name, value) in bound_values {
-        cx.env_mut().define(name, value);
-    }
-    Ok(())
-}
-
-fn cell_exists(state: &Arc<RwLock<CalcState>>, path: &TablePath) -> bool {
-    state
-        .read()
-        .expect("calc state poisoned")
-        .cells
-        .contains_key(&path_key(path))
-}
-
-fn is_prefix(candidate: &TablePath, path: &TablePath) -> bool {
-    candidate.segments().len() <= path.segments().len()
-        && candidate
-            .segments()
-            .iter()
-            .zip(path.segments())
-            .all(|(left, right)| left == right)
-}
-
-pub(super) fn parent_path(path: &TablePath) -> TablePath {
-    TablePath::from_segments(
-        path.segments()
-            .iter()
-            .take(path.segments().len().saturating_sub(1)),
-    )
-    .expect("existing path segments are valid")
-}
-
-fn parse_absolute(path: &str) -> TablePath {
-    TablePath::parse_absolute(path).expect("stored calc keys are absolute")
-}
-
-pub(super) fn path_key(path: &TablePath) -> String {
-    path.to_absolute_reference()
-}
-
-fn default_value_context() -> Cx {
-    use sim_kernel::{DefaultFactory, EagerPolicy};
-
-    Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory))
 }

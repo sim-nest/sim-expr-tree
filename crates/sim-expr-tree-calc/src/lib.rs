@@ -6,15 +6,22 @@
 //! [`sim_kernel::Value`] handles. The calculator adds dynamic tree-reference
 //! observation, dependency-first pull verification, deterministic cycles,
 //! canonical fingerprint cutoff, conservative volatility for noncanonical
-//! values, failure memos, and explicitly labelled last-good recovery without
-//! introducing a product-specific value enum.
+//! values, inherited triggers, directed force modes, immutable authority
+//! diminution, restartable automatic queues, bounded standard progress streams,
+//! calculation receipts, explanations, failure memos, and explicitly labelled
+//! last-good recovery without introducing a product-specific value enum.
 
 mod calc;
 mod policy;
 
 pub use calc::{
-    CalcError, CalcLimits, CalcQuery, CellFailure, ExprTreeCalc, HARD_MAX_EXPR_DEPTH,
-    HARD_MAX_OBSERVATIONS, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH, HARD_MAX_WORK, LastGoodValue,
+    AuthorityDigest, AuthorityPolicyPatch, AutomaticBudget, AutomaticContinuation,
+    AutomaticQueueSnapshot, AutomaticRun, CalcError, CalcExplanation, CalcLimits, CalcOutcome,
+    CalcPolicyPatch, CalcQuery, CalcReason, CalcReceipt, CalcRequestMode, CalcStatus, CalcTrigger,
+    CalcWatch, CellFailure, CycleMode, DependencyStamp, DirectedCalcReport, DirectedCellResult,
+    EffectStamp, EffectiveAuthority, EffectiveCalcPolicy, ErrorMode, ExprTreeCalc,
+    HARD_MAX_EXPR_DEPTH, HARD_MAX_OBSERVATIONS, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH,
+    HARD_MAX_WORK, LastGoodValue, PolicyDigest, QueuedCalculation, RequestId,
 };
 pub use policy::{EXPR_TREE_REF, ExprTreeRefPolicy};
 

@@ -4,7 +4,7 @@ use std::{
 };
 
 use sim_incremental_core::{IncrementalError, QueryBudgets};
-use sim_kernel::{CanonicalKey, Cx, Value};
+use sim_kernel::{CanonicalKey, CapabilityName, Cx, Value};
 
 /// Absolute safety ceilings for one expression-tree calculation.
 ///
@@ -32,12 +32,16 @@ pub enum CalcQuery {
     Listing(String),
     /// The observed epoch of a mounted backend.
     MountEpoch(String),
-    /// Effective inherited calculation policy.
-    EffectivePolicy,
+    /// Effective inherited calculation policy for one canonical cell.
+    EffectivePolicy(String),
+    /// Effective inherited authority policy for one canonical cell.
+    AuthorityPolicy(String),
     /// Installed source/result codec registry.
     CodecRegistry,
     /// Open-time authority ceiling.
     AuthorityCeiling,
+    /// Explicit force epoch for one canonical cell.
+    ForceEpoch(String),
 }
 
 /// Caller-requested limits for one verification.
@@ -109,6 +113,20 @@ pub enum CellFailure {
         /// Hard ceiling.
         limit: usize,
     },
+    /// Effective trigger policy prevented this attempt.
+    Blocked {
+        /// Canonical blocked cell.
+        path: String,
+        /// Stable policy explanation.
+        reason: String,
+    },
+    /// Diminished authority did not contain a required capability.
+    RequiredCapability {
+        /// Canonical cell requiring the capability.
+        path: String,
+        /// First missing required capability in stable name order.
+        capability: CapabilityName,
+    },
 }
 
 impl fmt::Display for CellFailure {
@@ -118,6 +136,12 @@ impl fmt::Display for CellFailure {
             Self::Cycle { path } => write!(f, "cell dependency cycle {path:?}"),
             Self::ExpressionDepth { limit } => {
                 write!(f, "cell expression depth exceeds hard limit {limit}")
+            }
+            Self::Blocked { path, reason } => {
+                write!(f, "cell {path} is blocked: {reason}")
+            }
+            Self::RequiredCapability { path, capability } => {
+                write!(f, "cell {path} requires capability {capability}")
             }
         }
     }
@@ -135,6 +159,16 @@ pub enum CalcError {
     Cell(CellFailure),
     /// Verification stopped before a current memo could commit.
     Incremental(IncrementalError<CalcQuery>),
+    /// An automatic continuation did not match the current restored queue.
+    UnknownAutomaticContinuation {
+        /// Supplied queue generation.
+        generation: u64,
+    },
+    /// A persisted automatic queue snapshot was structurally invalid.
+    CorruptAutomaticQueue {
+        /// Canonical duplicated or invalid cell key.
+        cell: String,
+    },
 }
 
 impl fmt::Display for CalcError {
@@ -143,6 +177,12 @@ impl fmt::Display for CalcError {
             Self::NotCalculated { path } => write!(f, "cell {path} has no current result"),
             Self::Cell(failure) => failure.fmt(f),
             Self::Incremental(error) => error.fmt(f),
+            Self::UnknownAutomaticContinuation { generation } => {
+                write!(f, "unknown automatic continuation generation {generation}")
+            }
+            Self::CorruptAutomaticQueue { cell } => {
+                write!(f, "corrupt automatic queue entry for {cell}")
+            }
         }
     }
 }

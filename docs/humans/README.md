@@ -18,7 +18,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | Feature | Subject | Specimens | Summary |
 | --- | --- | ---: | --- |
 | `feature/sim-expr-tree/finite-namespace` | `crate/sim-expr-tree-core` | 1 | Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations. |
-| `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Pull-verify ordinary Expr sources into ordinary Value results with dynamic dependencies, deterministic cycles, canonical value cutoff, volatile noncanonical values, bounded evaluation, failure memos, and labelled last-good recovery. |
+| `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Calculate ordinary Expr sources into ordinary Value results through one bounded incremental engine with inherited triggers, directed force modes, immutable authority ceilings, restartable automatic work, standard progress streams, and inspectable receipts. |
 | `feature/sim-expr-tree/mixed-backend-storage` | `crate/sim-expr-tree-core` | 1 | Compose authored source, operational control, rebuildable derived state, and explicit Table/Dir mounts without flattening mounted backend behavior. |
 
 ## Surfaces
@@ -526,17 +526,22 @@ Source `crates/sim-expr-tree-calc/src/tests.rs`:
 ```rust
 //! conformance: ordinary-value incremental expression-tree calculation.
 
-use std::sync::{Arc, atomic::Ordering};
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 
 use sim_expr_tree_core::{BackendKind, MountEpoch, MountResource};
 use sim_incremental_core::{BudgetKind, IncrementalError, ObservationKind};
 use sim_kernel::{
-    Cx, DefaultFactory, EagerPolicy, Expr, MacroExpander, Phase, StrictNames, Symbol,
-    capability::macro_expansion_capability_for_phase, object::RawArgs,
+    CapabilityName, CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, MacroExpander, Phase,
+    StrictNames, Symbol, capability::macro_expansion_capability_for_phase, object::RawArgs,
 };
+use sim_lib_stream_core::{BufferOverflowPolicy, BufferPolicy, StreamPacket};
 
 use crate::{
-    CalcError, CalcLimits, CalcQuery, CellFailure, EXPR_TREE_REF, ExprTreeCalc, ExprTreeRefPolicy,
+    AuthorityPolicyPatch, AutomaticBudget, CalcError, CalcLimits, CalcPolicyPatch, CalcQuery,
+    CalcTrigger, CellFailure, CycleMode, EXPR_TREE_REF, ErrorMode, ExprTreeCalc, ExprTreeRefPolicy,
     HARD_MAX_EXPR_DEPTH, HARD_MAX_OUTPUT, HARD_MAX_QUERY_DEPTH, core_identity, crate_identity,
 };
 
@@ -550,120 +555,80 @@ fn identity_names_the_calc_crate() {
 }
 
 #[test]
-fn verify_ordinary_expr_returns_ordinary_value_and_tracks_runtime_references() {
+fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {
     let mut calc = ExprTreeCalc::new();
-    calc.set_cell(path("/sheet/a"), Expr::String("A".to_owned()));
-    calc.set_cell(path("/sheet/b"), explicit_ref("a"));
-    calc.set_cell(path("/sheet/c"), Expr::Symbol(Symbol::new("a")));
-
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/b")).unwrap()),
-        Expr::String("A".to_owned())
-    );
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/c")).unwrap()),
-        Expr::String("A".to_owned())
-    );
-    assert!(dependencies(&mut calc, "/sheet/b").contains(&(
-        CalcQuery::Cell("/sheet/a".to_owned()),
-        ObservationKind::Read,
-    )));
-    assert!(dependencies(&mut calc, "/sheet/c").contains(&(
-        CalcQuery::Cell("/sheet/a".to_owned()),
-        ObservationKind::Read,
-    )));
-
-    calc.set_cell(
-        path("/sheet/quoted"),
-        Expr::Quote {
-            mode: sim_kernel::QuoteMode::Quote,
-            expr: Box::new(Expr::Symbol(Symbol::new("future-name"))),
-        },
-    );
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/quoted")).unwrap()),
-        Expr::Symbol(Symbol::new("future-name"))
-    );
-    assert!(
-        !dependencies(&mut calc, "/sheet/quoted")
-            .iter()
-            .any(|(key, _)| matches!(key, CalcQuery::NameSlot(_)))
-    );
-}
-
-#[test]
-fn verify_lexical_binding_invalidates_prior_tree_fallback() {
-    let mut calc = ExprTreeCalc::new();
-    calc.set_cell(path("/sheet/value"), Expr::String("tree".to_owned()));
-    calc.set_cell(path("/sheet/use-value"), Expr::Symbol(Symbol::new("value")));
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/use-value")).unwrap()),
-        Expr::String("tree".to_owned())
-    );
-
-    let cx = strict_context();
-    let bound = cx.factory().string("bound".to_owned()).unwrap();
-    calc.bind_value(Symbol::new("value"), bound);
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/use-value")).unwrap()),
-        Expr::String("bound".to_owned())
-    );
-}
-
-#[test]
-fn verify_macro_created_reference_is_observed_after_expansion() {
-    struct RefMacro;
-
-    impl MacroExpander for RefMacro {
-        fn expand_expr(&self, _cx: &mut Cx, _phase: Phase, expr: Expr) -> sim_kernel::Result<Expr> {
-            if matches!(
-                expr,
-                Expr::Extension { ref tag, .. } if tag.to_string() == "test/macro-input"
-            ) {
-                Ok(explicit_ref("a"))
-            } else {
-                Ok(expr)
-            }
-        }
-    }
-
-    let mut calc = ExprTreeCalc::with_context_factory(|| {
-        let (mut cx, seat) = Cx::new_seated(
-            Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
-            Arc::new(DefaultFactory),
-        );
-        seat.grant(&mut cx, macro_expansion_capability_for_phase(Phase::Eval))
-            .unwrap();
-        cx.set_macro_expander(Arc::new(RefMacro));
-        cx
+    calc.set_tree_calc_policy(CalcPolicyPatch {
+        trigger: Some(CalcTrigger::OnDemand),
+        error_mode: Some(ErrorMode::FailFast),
+        cycle_mode: Some(CycleMode::Block),
+        budget: Some(CalcLimits::new(80, 70, 60, 50)),
+        priority: Some(4),
+        debounce_ms: Some(30),
     });
-    calc.set_cell(path("/sheet/a"), Expr::String("macro-value".to_owned()));
-    calc.set_cell(
-        path("/sheet/use"),
-        Expr::Extension {
-            tag: Symbol::new("test/macro-input"),
-            payload: Box::new(Expr::Nil),
+    calc.set_dir_calc_policy(
+        path("/team"),
+        CalcPolicyPatch {
+            trigger: Some(CalcTrigger::Manual),
+            priority: Some(8),
+            ..CalcPolicyPatch::default()
         },
     );
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/use")).unwrap()),
-        Expr::String("macro-value".to_owned())
+    calc.set_cell_calc_policy(
+        path("/team/frozen"),
+        CalcPolicyPatch {
+            trigger: Some(CalcTrigger::Frozen),
+            debounce_ms: Some(90),
+            ..CalcPolicyPatch::default()
+        },
     );
-    assert!(dependencies(&mut calc, "/sheet/use").contains(&(
-        CalcQuery::Cell("/sheet/a".to_owned()),
-        ObservationKind::Read,
-    )));
+
+    let inherited = calc.effective_calc_policy(&path("/team/manual"));
+    assert_eq!(inherited.trigger, CalcTrigger::Manual);
+    assert_eq!(inherited.error_mode, ErrorMode::FailFast);
+    assert_eq!(inherited.cycle_mode, CycleMode::Block);
+    assert_eq!(inherited.budget, CalcLimits::new(80, 70, 60, 50));
+    assert_eq!(inherited.priority, 8);
+    assert_eq!(inherited.debounce_ms, 30);
+    let frozen = calc.effective_calc_policy(&path("/team/frozen"));
+    assert_eq!(frozen.trigger, CalcTrigger::Frozen);
+    assert_eq!(frozen.priority, 8);
+    assert_eq!(frozen.debounce_ms, 90);
+
+    calc.set_cell(path("/ondemand"), Expr::String("pull".to_owned()));
+    calc.set_cell(path("/team/manual"), Expr::String("directed".to_owned()));
+    calc.set_cell(path("/team/frozen"), Expr::String("retained".to_owned()));
+    assert!(
+        calc.automatic_queue_snapshot().entries.is_empty(),
+        "on-demand, manual, and frozen cells must not enqueue automatic work"
+    );
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/ondemand")).unwrap()),
+        Expr::String("pull".to_owned())
+    );
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/team/manual")).unwrap()),
+        Expr::String("directed".to_owned())
+    );
+    assert!(matches!(
+        calc.verify_cell(&path("/team/frozen")),
+        Err(CalcError::Cell(CellFailure::Blocked { .. }))
+    ));
+
+    let mut automatic = ExprTreeCalc::new();
+    automatic.set_cell(path("/auto"), Expr::String("queued".to_owned()));
+    assert_eq!(
+        automatic.automatic_queue_snapshot().entries[0].cell,
+        "/auto"
+    );
 }
 
 #[test]
-fn verify_diamond_changing_and_unchanged_branches_match_full_recomputation() {
+fn policy_request_modes_verify_force_roots_force_recursive_and_block_dependencies() {
     let runtime = TestRuntime::default();
     *runtime.source.lock().unwrap() = "one".to_owned();
     let mut calc = runtime_calc(runtime.clone());
     install_diamond(&mut calc);
-
-    let first = value_expr(calc.verify_cell(&path("/d")).unwrap());
-    assert_eq!(first, Expr::String("one-bone-c".to_owned()));
+    calc.verify_cell(&path("/d")).unwrap();
     assert_eq!(
         (
             runtime.count("probe"),
@@ -674,10 +639,10 @@ fn verify_diamond_changing_and_unchanged_branches_match_full_recomputation() {
         (1, 1, 1, 1)
     );
 
-    *runtime.source.lock().unwrap() = "two".to_owned();
-    calc.set_cell(path("/a"), probe_expr());
-    let changed = value_expr(calc.verify_cell(&path("/d")).unwrap());
-    assert_eq!(changed, Expr::String("two-btwo-c".to_owned()));
+    calc.verify_cell(&path("/d")).unwrap();
+    assert_eq!(runtime.count("concat-d"), 1, "verify reuses the root");
+
+    calc.recalculate_cell(&path("/d")).unwrap();
     assert_eq!(
         (
             runtime.count("probe"),
@@ -685,18 +650,11 @@ fn verify_diamond_changing_and_unchanged_branches_match_full_recomputation() {
             runtime.count("concat-c"),
             runtime.count("concat-d"),
         ),
-        (2, 2, 2, 2)
+        (1, 1, 1, 2),
+        "force-roots must preserve valid dependency reuse"
     );
 
-    let full_runtime = TestRuntime::default();
-    *full_runtime.source.lock().unwrap() = "two".to_owned();
-    let mut full = runtime_calc(full_runtime);
-    install_diamond(&mut full);
-    assert_eq!(value_expr(full.verify_cell(&path("/d")).unwrap()), changed);
-
-    calc.set_cell(path("/a"), probe_expr());
-    let unchanged = value_expr(calc.verify_cell(&path("/d")).unwrap());
-    assert_eq!(unchanged, changed);
+    calc.recalculate_recursive(&path("/d")).unwrap();
     assert_eq!(
         (
             runtime.count("probe"),
@@ -704,326 +662,333 @@ fn verify_diamond_changing_and_unchanged_branches_match_full_recomputation() {
             runtime.count("concat-c"),
             runtime.count("concat-d"),
         ),
-        (3, 2, 2, 2),
-        "canonical cutoff must stop the unchanged branch at /a"
+        (2, 2, 2, 3),
+        "force-recursive must force the reachable calculated closure"
     );
+
+    let mut blocked = ExprTreeCalc::new();
+    blocked.set_cell_calc_policy(
+        path("/manual"),
+        CalcPolicyPatch {
+            trigger: Some(CalcTrigger::Manual),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    blocked.set_cell(path("/manual"), Expr::String("directed-only".to_owned()));
+    blocked.set_cell(path("/auto"), explicit_ref("/manual"));
+    assert!(matches!(
+        blocked.verify_cell(&path("/auto")),
+        Err(CalcError::Cell(CellFailure::Blocked { .. }))
+    ));
+    blocked.verify_cell(&path("/manual")).unwrap();
+    assert_eq!(
+        value_expr(blocked.verify_cell(&path("/auto")).unwrap()),
+        Expr::String("directed-only".to_owned()),
+        "a current manual dependency may be reused without silently forcing it"
+    );
+
+    blocked.set_cell_calc_policy(
+        path("/manual"),
+        CalcPolicyPatch {
+            trigger: Some(CalcTrigger::Frozen),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    blocked.set_cell(path("/manual"), Expr::String("new-but-frozen".to_owned()));
+    assert!(matches!(
+        blocked.recalculate_recursive(&path("/auto")),
+        Err(CalcError::Cell(CellFailure::Blocked { .. }))
+    ));
 }
 
 #[test]
-fn cycle_dynamic_path_is_deterministic_and_recovers() {
-    let mut calc = ExprTreeCalc::new();
-    calc.set_cell(path("/a"), explicit_ref("/b"));
-    calc.set_cell(path("/b"), Expr::String("ready".to_owned()));
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/a")).unwrap()),
-        Expr::String("ready".to_owned())
-    );
-
-    calc.set_cell(path("/b"), explicit_ref("/a"));
-    let first = calc.verify_cell(&path("/a")).unwrap_err();
-    let expected = CalcError::Cell(CellFailure::Cycle {
-        path: vec![
-            CalcQuery::Cell("/a".to_owned()),
-            CalcQuery::Cell("/b".to_owned()),
-            CalcQuery::Cell("/a".to_owned()),
-        ],
+fn authority_open_ceiling_is_immutable_and_cell_policy_only_diminishes() {
+    let alpha = CapabilityName::new("expr-tree.test.alpha");
+    let beta = CapabilityName::new("expr-tree.test.beta");
+    let calls = Arc::new(AtomicUsize::new(0));
+    let factory_calls = Arc::clone(&calls);
+    let alpha_for_factory = alpha.clone();
+    let beta_for_factory = beta.clone();
+    let mut calc = ExprTreeCalc::with_context_factory(move || {
+        let (mut cx, seat) = Cx::new_seated(
+            Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
+            Arc::new(DefaultFactory),
+        );
+        seat.grant(&mut cx, alpha_for_factory.clone()).unwrap();
+        if factory_calls.fetch_add(1, Ordering::AcqRel) > 0 {
+            seat.grant(&mut cx, beta_for_factory.clone()).unwrap();
+        }
+        cx
     });
-    assert_eq!(first, expected);
-    assert_eq!(calc.verify_cell(&path("/a")).unwrap_err(), expected);
+    assert!(calc.open_time_authority().contains(&alpha));
+    assert!(!calc.open_time_authority().contains(&beta));
 
-    calc.set_cell(path("/b"), Expr::String("recovered".to_owned()));
+    calc.set_tree_authority_policy(AuthorityPolicyPatch {
+        allow: Some(
+            CapabilitySet::new()
+                .grant(alpha.clone())
+                .grant(beta.clone()),
+        ),
+        ..AuthorityPolicyPatch::default()
+    });
+    calc.set_dir_authority_policy(
+        path("/secure"),
+        AuthorityPolicyPatch {
+            allow: Some(CapabilitySet::new().grant(beta.clone())),
+            required: CapabilitySet::new().grant(beta.clone()),
+            ..AuthorityPolicyPatch::default()
+        },
+    );
+    calc.set_cell(
+        path("/secure/result"),
+        Expr::String("must-not-escalate".to_owned()),
+    );
+    let diminished = calc.effective_authority(&path("/secure/result"));
+    assert!(!diminished.capabilities().contains(&alpha));
+    assert!(!diminished.capabilities().contains(&beta));
+    assert_eq!(diminished.first_missing_requirement(), Some(beta.clone()));
+    assert!(matches!(
+        calc.verify_cell(&path("/secure/result")),
+        Err(CalcError::Cell(CellFailure::RequiredCapability {
+            capability,
+            ..
+        })) if capability == beta
+    ));
+
+    calc.set_dir_authority_policy(
+        path("/secure"),
+        AuthorityPolicyPatch {
+            allow: Some(
+                CapabilitySet::new()
+                    .grant(alpha.clone())
+                    .grant(beta.clone()),
+            ),
+            deny: CapabilitySet::new().grant(beta.clone()),
+            required: CapabilitySet::new().grant(alpha.clone()),
+        },
+    );
+    let diminished = calc.effective_authority(&path("/secure/result"));
+    assert!(diminished.capabilities().contains(&alpha));
+    assert!(!diminished.capabilities().contains(&beta));
+    assert!(diminished.denied().contains(&beta));
     assert_eq!(
-        value_expr(calc.verify_cell(&path("/a")).unwrap()),
-        Expr::String("recovered".to_owned())
+        value_expr(calc.verify_cell(&path("/secure/result")).unwrap()),
+        Expr::String("must-not-escalate".to_owned())
     );
 }
 
 #[test]
-fn cycle_hard_depth_and_output_limits_override_requested_policy() {
-    let mut deep = ExprTreeCalc::new();
-    for index in 0..=HARD_MAX_QUERY_DEPTH {
-        let source = if index == HARD_MAX_QUERY_DEPTH {
-            Expr::String("bottom".to_owned())
-        } else {
-            explicit_ref(&format!("/chain/{}", index + 1))
+fn authority_effect_ledger_evidence_is_preserved_in_receipt() {
+    let effect_capability = CapabilityName::new("expr-tree.test.effect");
+    let capability_for_factory = effect_capability.clone();
+    let mut calc =
+        ExprTreeCalc::with_context_factory(move || effect_context(capability_for_factory.clone()));
+    calc.set_tree_authority_policy(AuthorityPolicyPatch {
+        required: CapabilitySet::new().grant(effect_capability.clone()),
+        ..AuthorityPolicyPatch::default()
+    });
+    calc.set_cell(path("/effect"), call("effectful", Vec::new()));
+    assert_eq!(
+        value_expr(calc.verify_cell(&path("/effect")).unwrap()),
+        Expr::String("effect-ok".to_owned())
+    );
+    let receipt = calc.receipt(&path("/effect")).unwrap();
+    assert_eq!(receipt.effects.len(), 1);
+    assert_eq!(receipt.effects[0].kind, "expr-tree/test-effect");
+    assert!(!receipt.effects[0].aborted);
+    assert_eq!(receipt.omitted_effects, 0);
+
+    calc.set_cell_authority_policy(
+        path("/effect"),
+        AuthorityPolicyPatch {
+            deny: CapabilitySet::new().grant(effect_capability.clone()),
+            required: CapabilitySet::new().grant(effect_capability.clone()),
+            ..AuthorityPolicyPatch::default()
+        },
+    );
+    calc.set_cell(path("/effect"), call("effectful", Vec::new()));
+    assert!(matches!(
+        calc.verify_cell(&path("/effect")),
+        Err(CalcError::Cell(CellFailure::RequiredCapability {
+            capability,
+            ..
+        })) if capability == effect_capability
+    ));
+    assert!(calc.receipt(&path("/effect")).unwrap().effects.is_empty());
+}
+
+#[test]
+fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restart() {
+    let mut calc = ExprTreeCalc::new();
+    calc.set_cell_calc_policy(
+        path("/low"),
+        CalcPolicyPatch {
+            priority: Some(-10),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    calc.set_cell_calc_policy(
+        path("/high"),
+        CalcPolicyPatch {
+            priority: Some(10),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    calc.set_cell_calc_policy(
+        path("/later"),
+        CalcPolicyPatch {
+            priority: Some(100),
+            debounce_ms: Some(100),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    calc.set_cell(path("/low"), Expr::String("low".to_owned()));
+    calc.set_cell(path("/high"), Expr::String("high-0".to_owned()));
+    calc.set_cell(path("/later"), Expr::String("later".to_owned()));
+
+    let turn = AutomaticBudget::new(1, CalcLimits::default());
+    let first = calc.run_automatic(turn, 0);
+    assert!(first.continuation.is_some());
+    assert_eq!(
+        value_expr(calc.current_cell(&path("/high")).unwrap()),
+        Expr::String("high-0".to_owned()),
+        "the highest ready priority must run first"
+    );
+    assert!(matches!(
+        calc.current_cell(&path("/later")),
+        Err(CalcError::NotCalculated { .. })
+    ));
+
+    for revision in 1..=2 {
+        calc.set_cell(path("/high"), Expr::String(format!("high-{revision}")));
+        calc.run_automatic(turn, 0);
+    }
+    calc.set_cell(path("/high"), Expr::String("high-3".to_owned()));
+    calc.run_automatic(turn, 0);
+    assert_eq!(
+        value_expr(calc.current_cell(&path("/low")).unwrap()),
+        Expr::String("low".to_owned()),
+        "a ready low-priority cell must run after bounded bypasses"
+    );
+
+    let before_debounce = calc.run_automatic(AutomaticBudget::default(), 99);
+    assert!(before_debounce.continuation.is_some());
+    assert!(matches!(
+        calc.current_cell(&path("/later")),
+        Err(CalcError::NotCalculated { .. })
+    ));
+    calc.run_automatic(AutomaticBudget::default(), 100);
+    assert_eq!(
+        value_expr(calc.current_cell(&path("/later")).unwrap()),
+        Expr::String("later".to_owned())
+    );
+
+    calc.set_cell(path("/cancel"), Expr::String("cancelled".to_owned()));
+    let cancel_id = calc
+        .automatic_queue_snapshot()
+        .entries
+        .iter()
+        .find(|entry| entry.cell == "/cancel")
+        .unwrap()
+        .request_id;
+    assert!(calc.cancel_request(cancel_id));
+    assert!(
+        !calc
+            .automatic_queue_snapshot()
+            .entries
+            .iter()
+            .any(|entry| entry.cell == "/cancel")
+    );
+
+    calc.set_cell(path("/restart"), Expr::String("restored".to_owned()));
+    let snapshot = calc.automatic_queue_snapshot();
+    let mut restored = ExprTreeCalc::new();
+    restored.set_cell(path("/restart"), Expr::String("restored".to_owned()));
+    restored.restore_automatic_queue(snapshot.clone()).unwrap();
+    assert_eq!(restored.automatic_queue_snapshot(), snapshot);
+    restored.run_automatic(AutomaticBudget::default(), 100);
+    assert_eq!(
+        value_expr(restored.current_cell(&path("/restart")).unwrap()),
+        Expr::String("restored".to_owned())
+    );
+}
+
+#[test]
+fn automatic_budget_exhaustion_returns_and_resumes_explicit_continuation() {
+    let mut calc = ExprTreeCalc::new();
+    calc.set_cell_calc_policy(
+        path("/root"),
+        CalcPolicyPatch {
+            priority: Some(10),
+            ..CalcPolicyPatch::default()
+        },
+    );
+    calc.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
+    calc.set_cell(path("/root"), explicit_ref("/leaf"));
+    let stopped = calc.run_automatic(AutomaticBudget::new(1, CalcLimits::new(1, 100, 10, 100)), 0);
+    assert_eq!(stopped.budget_exhausted.len(), 1);
+    let continuation = stopped.continuation.expect("queue work must remain");
+    let resumed = calc
+        .continue_automatic(
+            continuation,
+            AutomaticBudget::new(1, CalcLimits::default()),
+            0,
+        )
+        .unwrap();
+    assert_eq!(resumed.completed.len(), 1);
+    assert_eq!(
+        value_expr(calc.current_cell(&path("/root")).unwrap()),
+        Expr::String("leaf".to_owned())
+    );
+}
+
+#[test]
+fn stream_progress_changes_are_bounded_observable_and_cancellable() {
+    let mut calc = ExprTreeCalc::new();
+    let events = calc
+        .watch(BufferPolicy::bounded_with_overflow(32, BufferOverflowPolicy::DropNewest).unwrap());
+    let overflow = calc
+        .watch(BufferPolicy::bounded_with_overflow(1, BufferOverflowPolicy::DropNewest).unwrap());
+    assert_eq!(events.stream().metadata().buffer().capacity(), 32);
+    assert_eq!(overflow.stream().metadata().buffer().capacity(), 1);
+
+    calc.set_cell(path("/watched"), Expr::String("value".to_owned()));
+    calc.run_automatic(AutomaticBudget::default(), 0);
+    assert!(
+        overflow.overflow_evidence() > 0,
+        "a full endpoint must retain explicit overflow evidence"
+    );
+    assert!(overflow.stream().stats().unwrap().dropped_newest > 0);
+
+    let mut packet_kinds = Vec::new();
+    while let Some(item) = events.next().unwrap() {
+        let StreamPacket::Data(data) = item.packet() else {
+            panic!("expression-tree watches must use standard data packets");
         };
-        deep.set_cell(path(&format!("/chain/{index}")), source);
-    }
-    let generous = CalcLimits::new(usize::MAX, usize::MAX, usize::MAX, usize::MAX);
-    assert!(matches!(
-        deep.verify_cell_with_limits(&path("/chain/0"), generous),
-        Err(CalcError::Incremental(IncrementalError::BudgetExceeded {
-            kind: BudgetKind::Depth,
-            limit: HARD_MAX_QUERY_DEPTH,
-            ..
-        }))
-    ));
-
-    let mut output = ExprTreeCalc::new();
-    output.set_cell(
-        path("/large"),
-        Expr::String("x".repeat(HARD_MAX_OUTPUT + 1)),
-    );
-    assert!(matches!(
-        output.verify_cell_with_limits(&path("/large"), generous),
-        Err(CalcError::Incremental(IncrementalError::BudgetExceeded {
-            kind: BudgetKind::Output,
-            limit: HARD_MAX_OUTPUT,
-            ..
-        }))
-    ));
-
-    let mut nested = Expr::Nil;
-    for _ in 0..=HARD_MAX_EXPR_DEPTH {
-        nested = Expr::List(vec![nested]);
-    }
-    let mut recursion = ExprTreeCalc::new();
-    recursion.set_cell(path("/nested"), nested);
-    assert_eq!(
-        recursion.verify_cell_with_limits(&path("/nested"), generous),
-        Err(CalcError::Cell(CellFailure::ExpressionDepth {
-            limit: HARD_MAX_EXPR_DEPTH,
-        }))
-    );
-}
-
-#[test]
-fn verify_deep_chain_matches_full_recomputation() {
-    const LAST: usize = HARD_MAX_QUERY_DEPTH - 1;
-
-    fn install_chain(calc: &mut ExprTreeCalc, leaf: &str) {
-        for index in 0..=LAST {
-            let source = if index == LAST {
-                Expr::String(leaf.to_owned())
-            } else {
-                explicit_ref(&format!("/chain/{}", index + 1))
-            };
-            calc.set_cell(path(&format!("/chain/{index}")), source);
+        let Expr::Map(fields) = &data.payload else {
+            panic!("watch payload must be an ordinary expression map");
+        };
+        let kind = fields.iter().find_map(|(key, value)| match (key, value) {
+            (Expr::Symbol(key), Expr::Symbol(value)) if key.to_string() == "kind" => {
+                Some(value.to_string())
+            }
+            _ => None,
+        });
+        if let Some(kind) = kind {
+            packet_kinds.push(kind);
         }
     }
+    assert!(packet_kinds.iter().any(|kind| kind == "expr-tree/change"));
+    assert!(packet_kinds.iter().any(|kind| kind == "expr-tree/progress"));
 
-    let mut incremental = ExprTreeCalc::new();
-    install_chain(&mut incremental, "before");
-    assert_eq!(
-        value_expr(incremental.verify_cell(&path("/chain/0")).unwrap()),
-        Expr::String("before".to_owned())
-    );
-    incremental.set_cell(
-        path(&format!("/chain/{LAST}")),
-        Expr::String("after".to_owned()),
-    );
-    let changed = value_expr(incremental.verify_cell(&path("/chain/0")).unwrap());
-
-    let mut full = ExprTreeCalc::new();
-    install_chain(&mut full, "after");
-    assert_eq!(
-        value_expr(full.verify_cell(&path("/chain/0")).unwrap()),
-        changed
-    );
+    overflow.cancel().unwrap();
+    assert!(overflow.stream().stats().unwrap().cancelled);
+    assert!(overflow.next().unwrap().is_none());
 }
 
-#[test]
-fn arbitrary_value_callable_lambda_table_dir_and_opaque_are_retained() {
-    let runtime = TestRuntime::default();
-    let mut calc = runtime_calc(runtime);
-    calc.set_cell(
-        path("/lambda-call"),
-        call("lambda", vec![Expr::String("lambda-value".to_owned())]),
-    );
-    let table_source = Expr::Map(vec![(
-        Expr::Quote {
-            mode: sim_kernel::QuoteMode::Quote,
-            expr: Box::new(Expr::Symbol(Symbol::new("field"))),
-        },
-        Expr::String("table-value".to_owned()),
-    )]);
-    calc.set_cell(path("/table"), table_source.clone());
-    calc.set_cell(path("/callable"), call("return-lambda", vec![]));
-    calc.set_cell(path("/dir"), call("return-dir", vec![]));
-    calc.set_cell(path("/opaque"), call("return-opaque", vec![]));
+mod receipt;
 
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/lambda-call")).unwrap()),
-        Expr::String("lambda-value".to_owned())
-    );
-    let table = calc.verify_cell(&path("/table")).unwrap();
-    assert!(table.object().as_table_impl().is_some());
-    assert_eq!(
-        value_expr(table),
-        Expr::Map(vec![(
-            Expr::Symbol(Symbol::new("field")),
-            Expr::String("table-value".to_owned()),
-        )])
-    );
-    assert!(!calc.current_is_volatile(&path("/table")));
-    let table_revision = calc.cell_revision(&path("/table")).unwrap();
-    calc.set_cell(path("/table"), table_source);
-    calc.verify_cell(&path("/table")).unwrap();
-    assert_eq!(
-        calc.cell_revision(&path("/table")).unwrap(),
-        table_revision,
-        "a canonical Table result must stop an unchanged branch"
-    );
-    let callable = calc.verify_cell(&path("/callable")).unwrap();
-    assert!(callable.object().as_callable().is_some());
-    assert!(calc.current_is_volatile(&path("/callable")));
-    let dir = calc.verify_cell(&path("/dir")).unwrap();
-    assert!(dir.object().as_dir().is_some());
-    assert!(calc.current_is_volatile(&path("/dir")));
-    let opaque = calc.verify_cell(&path("/opaque")).unwrap();
-    assert!(opaque.object().downcast_ref::<OpaqueMarker>().is_some());
-    assert!(calc.current_is_volatile(&path("/opaque")));
-
-    let old_revision = calc.cell_revision(&path("/opaque")).unwrap();
-    calc.set_cell(path("/opaque"), call("return-opaque", vec![]));
-    calc.verify_cell(&path("/opaque")).unwrap();
-    assert!(
-        calc.cell_revision(&path("/opaque")).unwrap() > old_revision,
-        "a valid noncanonical value must conservatively count as changed"
-    );
-}
-
-#[test]
-fn verify_failure_memo_retains_labelled_last_good_and_recovers() {
-    let runtime = TestRuntime::default();
-    let mut calc = runtime_calc(runtime.clone());
-    let source = call("fallible", vec![]);
-    calc.set_cell(path("/unstable"), source.clone());
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/unstable")).unwrap()),
-        Expr::String("good".to_owned())
-    );
-
-    runtime.fail.store(true, Ordering::Release);
-    calc.set_cell(path("/unstable"), source.clone());
-    let error = calc.verify_cell(&path("/unstable")).unwrap_err();
-    assert!(matches!(
-        error,
-        CalcError::Cell(CellFailure::Evaluation { .. })
-    ));
-    assert_eq!(calc.current_cell(&path("/unstable")).unwrap_err(), error);
-    let retained = calc.last_good_cell(&path("/unstable")).unwrap();
-    assert_eq!(retained.label(), "last-good");
-    assert_eq!(
-        value_expr(retained.value().clone()),
-        Expr::String("good".to_owned())
-    );
-
-    let attempts = runtime.fail_attempts.load(Ordering::Acquire);
-    assert_eq!(calc.verify_cell(&path("/unstable")).unwrap_err(), error);
-    assert_eq!(
-        runtime.fail_attempts.load(Ordering::Acquire),
-        attempts,
-        "a current failure memo must not rerun user evaluation"
-    );
-
-    runtime.fail.store(false, Ordering::Release);
-    calc.set_cell(path("/unstable"), source);
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/unstable")).unwrap()),
-        Expr::String("good".to_owned())
-    );
-    assert!(calc.current_cell(&path("/unstable")).is_ok());
-}
-
-#[test]
-fn verify_cancellation_fails_current_read_and_preserves_last_good() {
-    let mut calc = ExprTreeCalc::new();
-    calc.set_cell(path("/cell"), Expr::String("old".to_owned()));
-    calc.verify_cell(&path("/cell")).unwrap();
-    calc.set_cell(path("/cell"), Expr::String("new".to_owned()));
-    calc.request_cancellation();
-    assert_eq!(
-        calc.verify_cell(&path("/cell")),
-        Err(CalcError::Incremental(IncrementalError::Cancelled))
-    );
-    assert_eq!(
-        calc.current_cell(&path("/cell")),
-        Err(CalcError::Incremental(IncrementalError::Cancelled))
-    );
-    assert_eq!(
-        value_expr(calc.last_good_cell(&path("/cell")).unwrap().value().clone()),
-        Expr::String("old".to_owned())
-    );
-    let recovered = value_expr(calc.verify_cell(&path("/cell")).unwrap());
-    let mut full = ExprTreeCalc::new();
-    full.set_cell(path("/cell"), Expr::String("new".to_owned()));
-    assert_eq!(
-        value_expr(full.verify_cell(&path("/cell")).unwrap()),
-        recovered
-    );
-}
-
-#[test]
-fn verify_no_calc_state_lock_spans_context_creation_or_sim_evaluation() {
-    let mut calc = ExprTreeCalc::new();
-    let state = calc.state_for_lock_probe();
-    let factory_state = Arc::clone(&state);
-    calc.replace_context_factory(move || {
-        let guard = factory_state
-            .try_write()
-            .expect("calculator state lock spanned SIM context creation");
-        drop(guard);
-        lock_probe_context(Arc::clone(&factory_state))
-    });
-    calc.set_cell(path("/cell"), call("lock-probe", vec![]));
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/cell")).unwrap()),
-        Expr::String("unlocked".to_owned())
-    );
-}
-
-#[test]
-fn verify_namespace_mount_policy_codec_and_authority_observations_invalidate() {
-    let mut calc = ExprTreeCalc::new();
-    calc.set_effective_policy("strict");
-    calc.set_codec_registry_revision(7);
-    calc.set_authority_ceiling("tenant");
-    calc.mount(
-        path("/remote"),
-        MountResource::Dir,
-        BackendKind::Database,
-        MountEpoch::new(1),
-    );
-    calc.set_cell(path("/remote/value"), Expr::String("old".to_owned()));
-    calc.set_cell(path("/sheet/use-remote"), explicit_ref("/remote/value"));
-    calc.verify_cell(&path("/sheet/use-remote")).unwrap();
-    let deps = dependencies(&mut calc, "/sheet/use-remote");
-    assert!(deps.contains(&(CalcQuery::EffectivePolicy, ObservationKind::Policy)));
-    assert!(deps.contains(&(
-        CalcQuery::CodecRegistry,
-        ObservationKind::Custom("codec-registry"),
-    )));
-    assert!(deps.contains(&(CalcQuery::AuthorityCeiling, ObservationKind::Policy)));
-    assert!(deps.contains(&(
-        CalcQuery::MountEpoch("/remote".to_owned()),
-        ObservationKind::Epoch,
-    )));
-
-    calc.move_cell(&path("/remote/value"), path("/remote/moved"));
-    assert_eq!(
-        value_expr(calc.verify_cell(&path("/sheet/use-remote")).unwrap()),
-        Expr::String("missing:/remote/value".to_owned())
-    );
-}
-
-#[test]
-fn eval_policy_wrapper_delegates_and_reserves_reference_calls() {
-    let policy = ExprTreeRefPolicy::new(StrictNames(EagerPolicy));
-    let mut cx = Cx::new(Arc::new(policy), Arc::new(DefaultFactory));
-    let value = cx.resolve_unbound_call(
-        Symbol::new(EXPR_TREE_REF),
-        vec![Expr::String("/sheet/a".to_owned())],
-    );
-    assert_eq!(
-        value.unwrap().object().display(&mut cx).unwrap(),
-        "expr-tree/ref:/sheet/a"
-    );
-    let raw = RawArgs::new(vec![Expr::String("kept".to_owned())]);
-    let eval_policy = cx.eval_policy_ref();
-    let prepared = eval_policy.prepare_call_args(&mut cx, raw, &[]).unwrap();
-    assert_eq!(prepared.values().len(), 1);
-}
+mod verification;
 ```
 
 ### `feature/sim-expr-tree/mixed-backend-storage`

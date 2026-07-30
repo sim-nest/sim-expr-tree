@@ -189,6 +189,7 @@ dependencies = [
  "sim-expr-tree-core",
  "sim-incremental-core",
  "sim-kernel",
+ "sim-lib-stream-core",
  "sim-table-core",
 ]
 
