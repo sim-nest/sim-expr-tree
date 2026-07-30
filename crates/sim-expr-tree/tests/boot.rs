@@ -2,10 +2,12 @@ use std::{
     fs,
     path::PathBuf,
     process::Command,
-    time::{SystemTime, UNIX_EPOCH},
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 // conformance: bootloader-owned expression-tree executable envelope
+
+static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
 #[test]
 fn product_binary_reports_standard_bootloader_help() {
@@ -58,10 +60,7 @@ fn product_binary_boots_configured_backend_and_shuts_down() {
 }
 
 fn temp_config_path() -> PathBuf {
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("system clock after epoch")
-        .as_nanos();
+    let nonce = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
     std::env::temp_dir().join(format!(
         "sim-expr-tree-product-{}-{nonce}.toml",
         std::process::id()

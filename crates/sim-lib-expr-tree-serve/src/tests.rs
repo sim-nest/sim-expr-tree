@@ -1,11 +1,15 @@
 use std::{
     fs,
     path::PathBuf,
-    sync::Arc,
-    time::{SystemTime, UNIX_EPOCH},
+    sync::{
+        Arc,
+        atomic::{AtomicU64, Ordering},
+    },
 };
 
 // conformance: default expression-tree product composition and boot behavior
+
+static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
 use sim_config::{ConfigDir, ConfigLayer, ConfigSource};
 use sim_kernel::{CapabilityName, Expr, Lib, Symbol};
@@ -231,10 +235,7 @@ fn product_callable_owns_help_and_rejects_unknown_arguments() {
 }
 
 fn temp_config_path(label: &str) -> PathBuf {
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
+    let nonce = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
     std::env::temp_dir().join(format!(
         "sim-expr-tree-serve-{label}-{}-{nonce}.toml",
         std::process::id()
