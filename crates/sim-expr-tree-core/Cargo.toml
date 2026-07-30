@@ -6,8 +6,8 @@ license.workspace = true
 readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
-publish = false
-description = "Scaffold for SIM expression-tree core records."
+publish = true
+description = "Finite namespace, policy, and storage records for SIM expression trees."
 
 [dependencies]
 sim-codec = { version = "0.1.6" }

@@ -106,7 +106,7 @@
       "group": "workspace",
       "manifest": "crates/sim-expr-tree-calc/Cargo.toml",
       "name": "sim-expr-tree-calc",
-      "publish": "false",
+      "publish": "true",
       "root": "crates/sim-expr-tree-calc",
       "rustdoc_summary": "Bounded incremental calculation for ordinary expression-tree values.",
       "target_kinds": [
@@ -128,12 +128,12 @@
     {
       "crate_name": "sim_expr_tree_core",
       "dependencies": [],
-      "description": "Scaffold for SIM expression-tree core records.",
+      "description": "Finite namespace, policy, and storage records for SIM expression trees.",
       "features": [],
       "group": "workspace",
       "manifest": "crates/sim-expr-tree-core/Cargo.toml",
       "name": "sim-expr-tree-core",
-      "publish": "false",
+      "publish": "true",
       "root": "crates/sim-expr-tree-core",
       "rustdoc_summary": "Backend-neutral expression-tree namespace records.",
       "target_kinds": [
@@ -175,7 +175,7 @@
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree/Cargo.toml",
       "name": "sim-lib-expr-tree",
-      "publish": "false",
+      "publish": "true",
       "root": "crates/sim-lib-expr-tree",
       "rustdoc_summary": "Loadable expression-tree runtime and Lisp surface.",
       "target_kinds": [
@@ -350,10 +350,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "b5e757b82401f84f47df6fe594c6940a55df1bdf",
+    "git_commit": "275f093e7971aec941382b0448b26bd5c13ac908",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "b5e757b82401f84f47df6fe594c6940a55df1bdf",
+    "source_commit": "275f093e7971aec941382b0448b26bd5c13ac908",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -366,7 +366,7 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "08ba6e971a944c7d",
+    "workspace_hash": "e379aeb84e45b693",
     "workspace_hash_algorithm": "fnv1a64",
     "workspace_hash_input_count": 79,
     "workspace_hash_inputs": [

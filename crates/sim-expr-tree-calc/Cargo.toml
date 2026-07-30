@@ -6,13 +6,13 @@ license.workspace = true
 readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
-publish = false
+publish = true
 description = "Bounded incremental calculation of ordinary SIM expressions and values."
 
 [dependencies]
 sim-codec = { version = "0.1.6" }
 sim-incremental-core = { version = "0.1.0" }
-sim-expr-tree-core = { path = "../sim-expr-tree-core" }
+sim-expr-tree-core = { version = "0.1.0", path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.1.2" }
 sim-lib-stream-core = { version = "0.1.3" }
 sim-table-core = { version = "0.1.2" }
