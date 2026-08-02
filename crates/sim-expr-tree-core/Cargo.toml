@@ -10,8 +10,8 @@ publish = true
 description = "Finite namespace, policy, and storage records for SIM expression trees."
 
 [dependencies]
-sim-codec = { version = "0.1.6" }
-sim-kernel = { version = "0.1.5" }
+sim-codec = { version = "0.1.7" }
+sim-kernel = { version = "0.2.0" }
 sim-table-core = { version = "0.1.2" }
 
 [lints]
