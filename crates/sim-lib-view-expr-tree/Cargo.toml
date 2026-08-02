@@ -13,9 +13,9 @@ description = "Bounded reversible SurfaceCodec for SIM expression-tree outlines.
 sim-expr-tree-calc = { version = "0.1.0", path = "../sim-expr-tree-calc" }
 sim-kernel = { version = "0.1.5" }
 sim-lib-expr-tree = { version = "0.1.0", path = "../sim-lib-expr-tree" }
-sim-lib-intent = { version = "0.1.3" }
-sim-lib-scene = { version = "0.1.6" }
-sim-lib-view = { version = "0.1.4" }
+sim-lib-intent = { version = "0.2.0" }
+sim-lib-scene = { version = "0.2.0" }
+sim-lib-view = { version = "0.2.0" }
 sim-value = { version = "0.1.2" }
 
 [dev-dependencies]
