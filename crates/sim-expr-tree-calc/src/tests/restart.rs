@@ -5,6 +5,8 @@ use crate::{
     DERIVED_SNAPSHOT_KEY, DerivedRestoreDisposition, DerivedTableAdapter, GRAPH_SCHEMA_VERSION,
 };
 
+// conformance: mixed authored, control, and derived stores survive bounded restart and recovery.
+
 fn persist(calc: &mut ExprTreeCalc, table: &AssocTable) -> crate::DerivedPersistReport {
     let mut cx = strict_context();
     let mut derived = DerivedTableAdapter::new(table, &mut cx);
