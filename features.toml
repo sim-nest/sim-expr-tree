@@ -19,6 +19,37 @@ major_entrypoints = "advisory"
 frameworks = "advisory"
 
 [[feature]]
+id = "feature/sim-expr-tree/generated-docs"
+title = "Repository documentation surface"
+summary = "Publish generated package, card, recipe, rustdoc, and Index facts for the expression-tree framework."
+owner = "crate/xtask"
+audiences = ["code"]
+guidance = "Use this row when checking the generated documentation and Index lane for the expression-tree repository."
+claims_anchors = [
+  "anchor/cli/xtask",
+  "anchor/crate/xtask",
+  "anchor/doc/generated/card-index",
+  "anchor/doc/generated/feature-map",
+  "anchor/doc/generated/provenance",
+  "anchor/doc/generated/repo-contract",
+  "anchor/doc/generated/rustdoc-index",
+  "anchor/doc/generated/sim-index-fragment",
+  "anchor/repo/sim-expr-tree",
+]
+claims_surfaces = [
+  "cli/xtask",
+  "docs/sim-expr-tree/generated",
+]
+
+[[route]]
+id = "route/refresh-expression-tree-docs"
+task = "Refresh expression-tree documentation"
+audiences = ["code"]
+steps = [
+  { feature = "feature/sim-expr-tree/generated-docs", why = "The repository emitter owns generated package, recipe, rustdoc, and Index evidence." },
+]
+
+[[feature]]
 id = "feature/sim-expr-tree/expression-tree"
 title = "Loadable expression-tree framework"
 summary = "Build finite named source trees over mixed Table/Dir storage and calculate them through a capability-gated runtime library with Shape and Card contracts, durable Citizens, bounded receipts, and standard streams."
@@ -32,6 +63,7 @@ supports = [
   "feature/sim-expr-tree/codec-policy",
 ]
 claims_anchors = [
+  "anchor/crate/sim-expr-tree",
   "anchor/crate/sim-lib-expr-tree",
   "anchor/runtime-lib/sim-lib-expr-tree/expr-tree-lib",
   "anchor/rustdoc/sim-lib-expr-tree/crate-root",
@@ -55,12 +87,9 @@ supports = [
 claims_anchors = [
   "anchor/crate/sim-expr-tree-calc",
   "anchor/rustdoc/sim-expr-tree-calc/crate-root",
-  "anchor/crate/sim-expr-tree-core",
-  "anchor/rustdoc/sim-expr-tree-core/crate-root",
 ]
 claims_specimens = [
-  "spec-test/sim-expr-tree/crates/sim-expr-tree-core/src/tests",
-  "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
+  "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests/face_budget",
 ]
 
 [[feature]]
@@ -76,6 +105,7 @@ supports = [
 ]
 claims_anchors = [
   "anchor/crate/sim-lib-view-expr-tree",
+  "anchor/export/sim-lib-view-expr-tree/surface-expression-tree",
   "anchor/rustdoc/sim-lib-view-expr-tree/crate-root",
 ]
 claims_surfaces = [
@@ -98,10 +128,13 @@ supports = [
 ]
 claims_anchors = [
   "anchor/crate/sim-lib-expr-tree-server",
+  "anchor/export/sim-lib-expr-tree-server/site/sim-lib-expr-tree-server",
+  "anchor/runtime-lib/sim-lib-expr-tree-server/expression-tree-server-lib",
   "anchor/rustdoc/sim-lib-expr-tree-server/crate-root",
 ]
 claims_surfaces = [
   "site/sim-lib-expr-tree-server",
+  "view/sim-lib-expr-tree-server",
 ]
 claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests",
@@ -128,7 +161,6 @@ supports = [
   "feature/sim-expr-tree/expression-tree-view",
 ]
 claims_anchors = [
-  "anchor/crate/sim-lib-expr-tree-server",
   "anchor/rustdoc/sim-lib-expr-tree-server/expression-tree-web-surface",
   "anchor/rustdoc/sim-lib-expr-tree-server/expression-tree-web-surface-factory",
 ]
@@ -159,13 +191,18 @@ supports = [
   "feature/sim-expr-tree/server-backed-web-ui",
 ]
 claims_anchors = [
+  "anchor/card/cookbook/sim-expr-tree-server",
+  "anchor/cli/expr-tree",
   "anchor/crate/sim-lib-expr-tree-serve",
+  "anchor/export/sim-lib-expr-tree-serve/codec/lisp",
+  "anchor/runtime-lib/sim-lib-expr-tree-serve/expr-tree-serve-lib",
   "anchor/rustdoc/sim-lib-expr-tree-serve/expression-tree-recipe",
   "anchor/rustdoc/sim-lib-expr-tree-serve/expression-tree-product",
   "anchor/export/sim-lib-expr-tree-serve/cli/main/expr-tree",
   "anchor/cli/sim-expr-tree",
 ]
 claims_surfaces = [
+  "cli/expr-tree",
   "cli/sim-expr-tree",
 ]
 claims_specimens = [
@@ -231,10 +268,6 @@ supports = [
   "feature/sim-expr-tree/finite-namespace",
   "feature/sim-expr-tree/mixed-backend-storage",
 ]
-claims_anchors = [
-  "anchor/crate/sim-expr-tree-calc",
-  "anchor/rustdoc/sim-expr-tree-calc/crate-root",
-]
 claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
 ]
@@ -249,11 +282,6 @@ guidance = "Use this row when an expression tree needs one root Dir with indepen
 supports = [
   "feature/sim-expr-tree/finite-namespace",
 ]
-claims_anchors = [
-  "anchor/crate/sim-expr-tree-core",
-  "anchor/rustdoc/sim-expr-tree-core/crate-root",
-]
 claims_specimens = [
-  "spec-test/sim-expr-tree/crates/sim-expr-tree-core/src/tests",
-  "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests",
+  "spec-test/sim-expr-tree/crates/sim-expr-tree-calc/src/tests/restart",
 ]

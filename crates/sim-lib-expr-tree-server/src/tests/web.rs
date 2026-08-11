@@ -168,12 +168,15 @@ fn fixture_path(name: &str) -> PathBuf {
 }
 
 fn check_fixture(name: &str, profile: &str, title: &str, scene: &Expr) {
-    let value = serde_json::json!({
+    let mut value = serde_json::json!({
         "schema": "sim.browser-scene-fixture/v1",
         "profile": profile,
         "title": title,
         "scene": scene_json(scene),
     });
+    // Keep golden files invariant when workspace feature unification enables
+    // serde_json's insertion-order map representation.
+    value.sort_all_objects();
     let rendered = format!("{}\n", serde_json::to_string_pretty(&value).unwrap());
     let path = fixture_path(name);
     if std::env::var_os("SIM_UPDATE_EXPR_TREE_WEB_FIXTURES").is_some() {

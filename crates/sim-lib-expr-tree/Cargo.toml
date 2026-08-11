@@ -1,6 +1,6 @@
 [package]
 name = "sim-lib-expr-tree"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
@@ -13,11 +13,11 @@ description = "Loadable, Shape-checked SIM expression-tree runtime library."
 sim-citizen = { version = "0.2.0" }
 sim-citizen-derive = { version = "0.2.0" }
 sim-cookbook = { version = "0.2.0" }
-sim-expr-tree-calc = { version = "0.1.0", path = "../sim-expr-tree-calc" }
+sim-expr-tree-calc = { version = "0.2.0", path = "../sim-expr-tree-calc" }
 sim-expr-tree-core = { version = "0.1.0", path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.2.0" }
 sim-lib-stream-core = { version = "0.1.4" }
-sim-shape = { version = "0.2.0" }
+sim-shape = { version = "0.2.1" }
 sim-table-core = { version = "0.1.2" }
 
 [build-dependencies]

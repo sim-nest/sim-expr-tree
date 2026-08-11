@@ -14,6 +14,8 @@ use super::{
     support::{path, strict_context},
 };
 
+// conformance: codec-backed source and result faces enforce independent hard budgets.
+
 fn face_text(face: &EncodedFace) -> &str {
     match face.content() {
         Some(FaceContent::Text(text)) => text,
