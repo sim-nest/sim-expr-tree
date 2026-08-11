@@ -1,6 +1,6 @@
 [package]
 name = "sim-lib-view-expr-tree"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
@@ -10,9 +10,9 @@ publish = true
 description = "Bounded reversible SurfaceCodec for SIM expression-tree outlines."
 
 [dependencies]
-sim-expr-tree-calc = { version = "0.1.0", path = "../sim-expr-tree-calc" }
+sim-expr-tree-calc = { version = "0.2.0", path = "../sim-expr-tree-calc" }
 sim-kernel = { version = "0.2.0" }
-sim-lib-expr-tree = { version = "0.1.0", path = "../sim-lib-expr-tree" }
+sim-lib-expr-tree = { version = "0.2.0", path = "../sim-lib-expr-tree" }
 sim-lib-intent = { version = "0.2.0" }
 sim-lib-scene = { version = "0.2.0" }
 sim-lib-view = { version = "0.2.0" }

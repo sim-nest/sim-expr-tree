@@ -1,6 +1,6 @@
 [package]
 name = "sim-expr-tree-calc"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
@@ -10,7 +10,7 @@ publish = true
 description = "Bounded incremental calculation of ordinary SIM expressions and values."
 
 [dependencies]
-sim-codec = { version = "0.1.7" }
+sim-codec = { version = "0.1.8" }
 sim-incremental-core = { version = "0.1.0" }
 sim-expr-tree-core = { version = "0.1.0", path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.2.0" }

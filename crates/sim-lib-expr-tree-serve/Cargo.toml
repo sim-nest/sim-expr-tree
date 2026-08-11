@@ -1,6 +1,6 @@
 [package]
 name = "sim-lib-expr-tree-serve"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
@@ -10,14 +10,14 @@ publish = true
 description = "Bootloader-loaded product recipe for SIM expression-tree sessions."
 
 [dependencies]
-sim-codec-lisp = { version = "0.2.0" }
+sim-codec-lisp = { version = "0.2.1" }
 sim-config = { version = "0.1.2" }
 sim-kernel = { version = "0.2.0" }
-sim-lib-expr-tree = { version = "0.1.0", path = "../sim-lib-expr-tree" }
-sim-lib-expr-tree-server = { version = "0.1.0", path = "../sim-lib-expr-tree-server" }
-sim-lib-server = { version = "0.1.10" }
-sim-run-core = { version = "0.2.0" }
-sim-web-shell = { version = "0.1.11" }
+sim-lib-expr-tree = { version = "0.2.0", path = "../sim-lib-expr-tree" }
+sim-lib-expr-tree-server = { version = "0.2.0", path = "../sim-lib-expr-tree-server" }
+sim-lib-server = { version = "0.1.11" }
+sim-run-core = { version = "0.3.0" }
+sim-web-shell = { version = "0.1.12" }
 
 [dev-dependencies]
 sim-kernel = { version = "0.2.0", features = ["test-support"] }
