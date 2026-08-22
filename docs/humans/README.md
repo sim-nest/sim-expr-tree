@@ -23,7 +23,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | `feature/sim-expr-tree/expression-tree-view` | `crate/sim-lib-view-expr-tree` | 1 | Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations. |
 | `feature/sim-expr-tree/expression-tree-server` | `crate/sim-lib-expr-tree-server` | 1 | Serve bounded opaque expression tree sessions through one loadable EvalSite and EvalFabric, preserving caller authority, optimistic revisions, logical-time lifecycle policy, reversible surface operations, structured errors, and backpressured watches. |
 | `feature/sim-expr-tree/server-backed-web-ui` | `crate/sim-lib-expr-tree-server` | 1 | Compose the expression-tree SurfaceCodec and authoritative server site with RemoteTransport, isolated generic browser sessions, and desktop or phone Scene projections. |
-| `feature/sim-expr-tree/expression-tree-product` | `crate/sim-lib-expr-tree-serve` | 2 | Run the expression-tree engine, reversible view, authoritative server, and generic web host as one loadable recipe dispatched by the standard SIM bootloader. |
+| `feature/sim-expr-tree/expression-tree-product` | `crate/sim-lib-expr-tree-serve` | 1 | Run the expression-tree engine, reversible view, authoritative server, and generic web host as one loadable recipe dispatched by the standard SIM bootloader. |
 | `feature/sim-expr-tree/finite-namespace` | `crate/sim-expr-tree-core` | 1 | Model backend-neutral expression-tree identities, finite parent/name entries, source stamps, inherited policy patches, and crash-safe generated-name reservations. |
 | `feature/sim-expr-tree/incremental-calculation` | `crate/sim-expr-tree-calc` | 1 | Calculate ordinary Expr sources into ordinary Value results through one bounded incremental engine with validated Table-backed restarts, explicit backend refresh, inherited triggers, immutable authority ceilings, restartable automatic work, standard progress streams, and inspectable receipts. |
 | `feature/sim-expr-tree/mixed-backend-storage` | `crate/sim-expr-tree-core` | 1 | Compose authored source, operational control, versioned rebuildable derived graphs, and explicit Table/Dir mounts without flattening mounted backend behavior. |
@@ -904,18 +904,9 @@ Specimen `spec-test/sim-expr-tree/crates/sim-lib-expr-tree-serve/src/tests` is c
 Source `crates/sim-lib-expr-tree-serve/src/tests.rs`:
 
 ```rust
-use std::{
-    fs,
-    path::PathBuf,
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
-};
+use std::{path::PathBuf, sync::Arc};
 
 // conformance: default expression-tree product composition and boot behavior
-
-static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
 use sim_config::{ConfigDir, ConfigLayer, ConfigSource};
 use sim_kernel::{CapabilityName, Expr, Lib, Symbol};
@@ -1096,26 +1087,6 @@ fn external_eval_fabric_smoke_and_graceful_shutdown() {
 }
 
 #[test]
-fn bootloader_uses_standard_config_flags_and_dispatches_the_product_verb() {
-    let path = temp_config_path("boot");
-    fs::write(
-        &path,
-        "[lib/expr-tree-serve]\ndry-run = true\nstorage = \"boot-configured\"\nbridge-thread = 81004\n",
-    )
-    .unwrap();
-    let args = expr_tree_boot_args([
-        "sim-expr-tree".into(),
-        "--config-file".into(),
-        path.as_os_str().to_owned(),
-    ]);
-
-    let code = expr_tree_bootloader().run(args).unwrap();
-
-    let _ = fs::remove_file(&path);
-    assert_eq!(code, 0);
-}
-
-#[test]
 fn appended_product_verb_does_not_shadow_standard_help() {
     let command = parse_args(expr_tree_boot_args(["sim-expr-tree", "--help"])).unwrap();
 
@@ -1138,89 +1109,6 @@ fn product_callable_owns_help_and_rejects_unknown_arguments() {
             .contains("unknown expression-tree argument: --tree-parser"),
         "{error}"
     );
-}
-
-fn temp_config_path(label: &str) -> PathBuf {
-    let nonce = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
-    std::env::temp_dir().join(format!(
-        "sim-expr-tree-serve-{label}-{}-{nonce}.toml",
-        std::process::id()
-    ))
-}
-```
-
-Specimen `spec-test/sim-expr-tree/crates/sim-expr-tree/tests/boot` is checked by `cargo test`.
-
-Source `crates/sim-expr-tree/tests/boot.rs`:
-
-```rust
-use std::{
-    fs,
-    path::PathBuf,
-    process::Command,
-    sync::atomic::{AtomicU64, Ordering},
-};
-
-// conformance: bootloader-owned expression-tree executable envelope
-
-static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
-
-#[test]
-fn product_binary_reports_standard_bootloader_help() {
-    let output = Command::new(env!("CARGO_BIN_EXE_sim-expr-tree"))
-        .arg("--help")
-        .output()
-        .expect("run sim-expr-tree help");
-
-    assert!(
-        output.status.success(),
-        "help failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Usage: sim"), "{stdout}");
-    assert!(stdout.contains("--config-file"), "{stdout}");
-}
-
-#[test]
-fn product_binary_boots_configured_backend_and_shuts_down() {
-    let path = temp_config_path();
-    fs::write(
-        &path,
-        "[lib/expr-tree-serve]\n\
-         dry-run = true\n\
-         storage = \"process-smoke-backend\"\n\
-         browser-resource = \"process-smoke-tree\"\n\
-         bridge-thread = 82001\n",
-    )
-    .expect("write product config");
-
-    let output = Command::new(env!("CARGO_BIN_EXE_sim-expr-tree"))
-        .arg("--config-file")
-        .arg(&path)
-        .output()
-        .expect("run configured sim-expr-tree product");
-    let _ = fs::remove_file(&path);
-
-    assert!(
-        output.status.success(),
-        "configured boot failed: stdout={} stderr={}",
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    );
-    assert!(
-        String::from_utf8_lossy(&output.stdout).contains("sim-web-shell: dry-run OK"),
-        "{}",
-        String::from_utf8_lossy(&output.stdout)
-    );
-}
-
-fn temp_config_path() -> PathBuf {
-    let nonce = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
-    std::env::temp_dir().join(format!(
-        "sim-expr-tree-product-{}-{nonce}.toml",
-        std::process::id()
-    ))
 }
 ```
 

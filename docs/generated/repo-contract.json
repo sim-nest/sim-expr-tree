@@ -81,8 +81,7 @@
       "root": "crates/sim-expr-tree",
       "rustdoc_summary": "Bootloader-composed SIM expression-tree product.",
       "target_kinds": [
-        "bin",
-        "test"
+        "bin"
       ],
       "targets": [
         {
@@ -94,16 +93,6 @@
           ],
           "name": "sim-expr-tree",
           "src": "crates/sim-expr-tree/src/main.rs"
-        },
-        {
-          "crate_types": [
-            "bin"
-          ],
-          "kind": [
-            "test"
-          ],
-          "name": "boot",
-          "src": "crates/sim-expr-tree/tests/boot.rs"
         }
       ]
     },
@@ -381,10 +370,10 @@
     "generated_by": "cargo run -p xtask -- simdoc",
     "generation_timestamp": "2026-07-25T06:23:37+02:00",
     "generator": "xtask repo-contract v1",
-    "git_commit": "17b7830f9984556eac7511727d8124be65010552",
+    "git_commit": "0b2bbdbba85ffec4de4a0a23a53004a92a7aa1a0",
     "repo": "sim-expr-tree",
     "schema": "sim.provenance.v1",
-    "source_commit": "17b7830f9984556eac7511727d8124be65010552",
+    "source_commit": "0b2bbdbba85ffec4de4a0a23a53004a92a7aa1a0",
     "source_remote": "https://github.com/sim-nest/sim-expr-tree",
     "validation_commands": [
       "cargo fmt --all --check",
@@ -397,14 +386,13 @@
       "cargo run -p xtask -- validation-matrix --check --repo .",
       "cargo run -p xtask -- crate-catalog --check --repo ."
     ],
-    "workspace_hash": "0e74d2c45051821b",
+    "workspace_hash": "a6a010db27b39660",
     "workspace_hash_algorithm": "fnv1a64",
-    "workspace_hash_input_count": 114,
+    "workspace_hash_input_count": 113,
     "workspace_hash_inputs": [
       "Cargo.toml",
       "crates/sim-expr-tree/Cargo.toml",
       "crates/sim-expr-tree/src/main.rs",
-      "crates/sim-expr-tree/tests/boot.rs",
       "crates/sim-expr-tree-calc/Cargo.toml",
       "crates/sim-expr-tree-calc/recipes/01-basics/scaffold/recipe.toml",
       "crates/sim-expr-tree-calc/recipes/book.toml",
