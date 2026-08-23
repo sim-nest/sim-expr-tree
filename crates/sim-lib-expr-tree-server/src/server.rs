@@ -8,9 +8,10 @@ use std::{
     },
 };
 
+use sim_host_core::{SystemWallClock, WallClock};
 use sim_kernel::{Cx, Env, Error, Expr, Symbol, Value};
 use sim_lib_expr_tree::TreeHandle;
-use sim_lib_server::{ServerAddress, SystemWallClock, WallClock};
+use sim_lib_server::ServerAddress;
 use sim_lib_view::SurfaceCodec;
 use sim_lib_view_expr_tree::ExpressionTreeSurfaceCodec;
 use sim_value::access;
@@ -154,8 +155,7 @@ impl ExpressionTreeServer {
                     "expr-tree/open did not return a live TreeHandle",
                 )
             })?;
-        let clock = Arc::clone(&self.clock);
-        tree.set_wall_clock(move || clock.now().ok().map(|time| time.unix_millis()))
+        tree.set_wall_clock(self.clock.clone())
             .map_err(classify_kernel_error)?;
 
         let mut registry = self.lock_registry()?;

@@ -3,10 +3,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use sim_host_core::{WallClock, WallTimestamp};
 use sim_kernel::{
     CapabilityName, Consistency, Cx, EvalFabric, EvalMode, EvalRequest, Expr, Symbol,
 };
-use sim_lib_server::{ServerAddress, WallClock, WallTimestamp};
+use sim_lib_server::ServerAddress;
 use sim_value::{access, build};
 
 use crate::{ExpressionTreeServer, ExpressionTreeServerLimits, SessionId};

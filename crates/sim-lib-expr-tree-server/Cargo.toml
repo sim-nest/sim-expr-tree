@@ -11,6 +11,7 @@ description = "Authoritative bounded EvalSite server for SIM expression-tree ses
 
 [dependencies]
 sim-kernel = { version = "0.2.0" }
+sim-host-core = { version = "0.1.0" }
 sim-lib-expr-tree = { version = "0.2.0", path = "../sim-lib-expr-tree" }
 sim-lib-server = { version = "0.1.11" }
 sim-lib-view = { version = "0.2.0" }

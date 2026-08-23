@@ -16,6 +16,7 @@ sim-cookbook = { version = "0.2.0" }
 sim-expr-tree-calc = { version = "0.2.0", path = "../sim-expr-tree-calc" }
 sim-expr-tree-core = { version = "0.1.0", path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.2.0" }
+sim-host-core = { version = "0.1.0" }
 sim-lib-stream-core = { version = "0.1.4" }
 sim-shape = { version = "0.2.1" }
 sim-table-core = { version = "0.1.2" }

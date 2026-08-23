@@ -3,6 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use sim_host_core::{WallClock, WallTimestamp};
 use sim_incremental_core::ValueFingerprint;
 
 use crate::CalcStatus;
@@ -10,25 +11,27 @@ use crate::CalcStatus;
 use super::support::*;
 use super::*;
 
+struct ScriptWallClock(Mutex<VecDeque<Option<u64>>>);
+
+impl WallClock for ScriptWallClock {
+    fn now(&self) -> sim_kernel::Result<WallTimestamp> {
+        self.0
+            .lock()
+            .expect("clock observations poisoned")
+            .pop_front()
+            .flatten()
+            .map(WallTimestamp::from_unix_millis)
+            .ok_or_else(|| sim_kernel::Error::Eval("wall observation unavailable".into()))
+    }
+}
+
 #[test]
 fn receipt_commits_bounded_revision_authority_dependency_and_wall_clock_evidence() {
     let mut calc = ExprTreeCalc::new();
     calc.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     calc.set_cell(path("/root"), explicit_ref("/leaf"));
-    let observations = Arc::new(Mutex::new(VecDeque::from([
-        Some(1_000),
-        Some(1_100),
-        Some(1_050),
-        Some(900),
-    ])));
-    let clock_observations = Arc::clone(&observations);
-    calc.set_wall_clock(move || {
-        clock_observations
-            .lock()
-            .expect("clock observations poisoned")
-            .pop_front()
-            .flatten()
-    });
+    let observations = VecDeque::from([Some(1_000), Some(1_100), Some(1_050), Some(900)]);
+    calc.set_wall_clock(Arc::new(ScriptWallClock(Mutex::new(observations))));
     calc.verify_cell(&path("/root")).unwrap();
 
     let receipt = calc.receipt(&path("/root")).expect("root receipt");

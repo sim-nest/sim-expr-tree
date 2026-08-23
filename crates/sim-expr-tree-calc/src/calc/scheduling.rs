@@ -179,7 +179,7 @@ impl ExprTreeCalc {
             .read()
             .expect("wall clock lock poisoned")
             .clone();
-        clock()
+        clock.and_then(|clock| clock.now_ms().ok())
     }
 
     pub(super) fn emit_change(&self, kind: &'static str, cell: &str) {

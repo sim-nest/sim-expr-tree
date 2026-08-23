@@ -5,6 +5,7 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
 };
 
+use sim_host_core::SystemWallClock;
 use sim_kernel::{
     Consistency, Cx, Error, EvalFabric, EvalMode, EvalReply, EvalRequest, Expr, Result, Symbol,
     Value,
@@ -14,7 +15,7 @@ use sim_lib_expr_tree_server::{
     ExpressionTreeWebSurfaceFactory,
 };
 use sim_lib_server::{
-    EvalSite, FrameKind, LoopbackTransportEndpoint, ServerAddress, ServerFrame, SystemWallClock,
+    EvalSite, FrameKind, LoopbackTransportEndpoint, ServerAddress, ServerFrame,
     eval_request_from_frame, register_loopback_transport_endpoint, server_frame_from_reply,
 };
 use sim_web_shell::{ServeConfig, serve_with_surface_factory};

@@ -14,10 +14,7 @@ use crate::TreeCellInspection;
 use crate::{DurablePolicyRecord, DurableSourceRecord, runtime_support::trigger_name};
 
 impl TreeState {
-    pub(crate) fn set_wall_clock<F>(&mut self, clock: F)
-    where
-        F: Fn() -> Option<u64> + Send + Sync + 'static,
-    {
+    pub(crate) fn set_wall_clock(&mut self, clock: Arc<dyn sim_host_core::WallClock>) {
         self.calc.set_wall_clock(clock);
     }
 

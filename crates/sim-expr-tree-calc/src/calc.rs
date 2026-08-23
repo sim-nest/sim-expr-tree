@@ -71,7 +71,7 @@ const MAX_RECEIPT_DEPENDENCIES: usize = 64;
 const MAX_RECEIPT_GRAPH_NODES: usize = 4_096;
 const MAX_RECEIPT_GRAPH_EDGES: usize = 65_536;
 
-type WallClock = dyn Fn() -> Option<u64> + Send + Sync + 'static;
+use sim_host_core::WallClock;
 
 /// Incremental calculator for ordinary SIM [`Expr`] sources and [`Value`]
 /// results.
@@ -81,7 +81,7 @@ pub struct ExprTreeCalc {
     context_factory: Arc<ContextFactory>,
     cancel_requested: Arc<AtomicBool>,
     next_volatile: Arc<AtomicU64>,
-    wall_clock: Arc<RwLock<Arc<WallClock>>>,
+    wall_clock: Arc<RwLock<Option<Arc<dyn WallClock>>>>,
     next_request_id: u64,
     automatic_queue: BTreeMap<String, QueuedCalculation>,
     automatic_generation: u64,
@@ -186,7 +186,7 @@ impl ExprTreeCalc {
             context_factory,
             cancel_requested: Arc::new(AtomicBool::new(false)),
             next_volatile: Arc::new(AtomicU64::new(1)),
-            wall_clock: Arc::new(RwLock::new(Arc::new(|| None))),
+            wall_clock: Arc::new(RwLock::new(None)),
             next_request_id: 1,
             automatic_queue: BTreeMap::new(),
             automatic_generation: 1,
@@ -202,11 +202,8 @@ impl ExprTreeCalc {
     /// Replaces the optional human wall-clock observation source.
     ///
     /// Logical ticks and revisions remain the only freshness authority.
-    pub fn set_wall_clock<F>(&mut self, clock: F)
-    where
-        F: Fn() -> Option<u64> + Send + Sync + 'static,
-    {
-        *self.wall_clock.write().expect("wall clock lock poisoned") = Arc::new(clock);
+    pub fn set_wall_clock(&mut self, clock: Arc<dyn WallClock>) {
+        *self.wall_clock.write().expect("wall clock lock poisoned") = Some(clock);
     }
 
     /// Returns the immutable capability ceiling captured when this tree opened.
