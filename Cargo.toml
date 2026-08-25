@@ -5,6 +5,7 @@ members = [
   "crates/sim-expr-tree-calc",
   "crates/sim-expr-tree-core",
   "crates/sim-lib-expr-tree",
+  "crates/sim-lib-expedition-book",
   "crates/sim-lib-expr-tree-serve",
   "crates/sim-lib-expr-tree-server",
   "crates/sim-lib-view-expr-tree",

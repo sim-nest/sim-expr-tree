@@ -589,6 +589,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-lib-expedition-book"
+version = "0.1.0"
+dependencies = [
+ "sim-citizen",
+ "sim-citizen-derive",
+ "sim-kernel",
+]
+
+[[package]]
 name = "sim-lib-expr-tree"
 version = "0.1.0"
 dependencies = [

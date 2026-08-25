@@ -1,0 +1,8 @@
+{
+  (expedition-book/branch "root" "ridge" "Take the ridge")
+  (expedition-book/object "ridge" "weather" "Forecast refuses ridge travel")
+  (expedition-book/choose "valley")
+  (expedition-book/seal "ridge")
+  (expedition-book/reopen "ridge")
+  (expedition-book/replay "decision")
+}

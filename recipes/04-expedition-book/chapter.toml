@@ -1,0 +1,4 @@
+title = "Expedition Book"
+summary = "Edit and replay decisions over immutable evidence references."
+order = 40
+recipes = ["decision-book"]

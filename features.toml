@@ -50,6 +50,28 @@ steps = [
 ]
 
 [[feature]]
+id = "feature/sim-expr-tree/expedition-book"
+title = "Editable semantic expedition book"
+summary = "Branch, compare, object, choose, seal, reopen, retain, export, project, delete projections, and replay editorial meaning while immutable run, claim, source, and artifact evidence remains external and content-addressed."
+audience = ["framework", "runtime", "application"]
+framework = true
+guidance = "Extend sim-lib-expedition-book when an expression-tree application needs revisioned editorial decisions over external evidence. Use the ExpeditionBook Citizen and generated Shape for durable identity, the explicit expedition-book/v1 codec for canonical export, and EvidenceResolver only to report referenced identity availability during replay. Stale revisions, sealed edits, invalid retention, and missing evidence are typed outcomes. Do not put evidence content, journal delivery, pack loading, or agent state in the book."
+requires = ["feature/sim-expr-tree/expression-tree"]
+claims_anchors = [
+  "anchor/package/sim-lib-expedition-book",
+  "anchor/rustdoc/sim-lib-expedition-book/expedition-book",
+]
+claims_specimens = ["specimen/sim-lib-expedition-book/tests"]
+
+[[route]]
+id = "route/edit-expedition-book"
+task = "Edit and replay an expedition decision book"
+steps = [
+  { feature = "feature/sim-expr-tree/expression-tree", why = "The existing framework supplies the durable expression-tree organ rather than a new graph engine." },
+  { feature = "feature/sim-expr-tree/expedition-book", why = "The book adds optimistic semantic edits, canonical export, disposable projections, and exact external evidence references." },
+]
+
+[[feature]]
 id = "feature/sim-expr-tree/expression-tree"
 title = "Loadable expression-tree framework"
 summary = "Build finite named source trees over mixed Table/Dir storage and calculate them through a capability-gated runtime library with Shape and Card contracts, durable Citizens, bounded receipts, and standard streams."

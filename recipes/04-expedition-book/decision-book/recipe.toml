@@ -1,0 +1,12 @@
+id = "decision-book"
+title = "Branch, object, choose, and replay a decision"
+codec = "lisp"
+setup = "setup.siml"
+purpose = "purpose.md"
+order = 10
+tags = ["expedition-book", "branch", "objection", "replay", "failure"]
+requires = ["codec/lisp", "lib/expedition-book"]
+harness = "cargo-test"
+package = "sim-lib-expedition-book"
+test = "tests::specimen_covers_success_failure_refusal_objection_choice_and_next_play"
+expected = "expected.txt"
