@@ -154,7 +154,8 @@ fn in_process_recipe_opens_configured_storage_and_injects_the_web_surface() {
 #[test]
 fn external_eval_fabric_smoke_and_graceful_shutdown() {
     let mut cx = product_cx();
-    sim_lib_expr_tree::install_expr_tree_lib(&mut cx).unwrap();
+    sim_lib_expr_tree::install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5402))
+        .unwrap();
     let external = Arc::new(ExpressionTreeServer::local());
     cx.load_lib(&ExpressionTreeServerLib::new(external.clone()))
         .unwrap();

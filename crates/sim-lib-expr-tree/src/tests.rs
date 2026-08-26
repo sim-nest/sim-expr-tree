@@ -263,7 +263,11 @@ fn capabilities_fail_closed_and_errors_are_bounded() {
 fn durable_records_are_conformant_citizens_but_live_handles_are_opaque() {
     let registry = expr_tree_citizen_registry().unwrap();
     registry.ensure_contains_symbols(&CITIZENS).unwrap();
-    let mut conformance_cx = Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory));
+    let mut conformance_cx = Cx::new(
+        Arc::new(EagerPolicy),
+        Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x1cec_f798_0129_b762),
+    );
     run_registry_conformance_expecting(&mut conformance_cx, &registry, &CITIZENS).unwrap();
 
     let mut cx = runtime_cx(&all_capabilities());
@@ -338,10 +342,14 @@ fn recipe_automatic_and_directed_runs_checked_lisp_surface() {
 }
 
 fn runtime_cx(capabilities: &[CapabilityName]) -> Cx {
-    let mut cx = Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory));
+    let mut cx = Cx::new(
+        Arc::new(EagerPolicy),
+        Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x2ce5_cf14_9757_33d2),
+    );
     let codec = LispCodecLib::new(cx.registry_mut().fresh_codec_id()).unwrap();
     cx.load_lib(&codec).unwrap();
-    install_expr_tree_lib(&mut cx).unwrap();
+    install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5401)).unwrap();
     for capability in capabilities {
         cx.grant(capability.clone());
     }

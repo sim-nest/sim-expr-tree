@@ -27,7 +27,7 @@ impl WallClock for ScriptWallClock {
 
 #[test]
 fn receipt_commits_bounded_revision_authority_dependency_and_wall_clock_evidence() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     calc.set_cell(path("/root"), explicit_ref("/leaf"));
     let observations = VecDeque::from([Some(1_000), Some(1_100), Some(1_050), Some(900)]);
@@ -71,7 +71,7 @@ fn receipt_commits_bounded_revision_authority_dependency_and_wall_clock_evidence
             .any(|reason| reason.contains("matches all observed revisions"))
     );
 
-    let mut bounded = ExprTreeCalc::new();
+    let mut bounded = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     bounded.set_cell(
         path("/many"),
         Expr::Vector(

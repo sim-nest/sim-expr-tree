@@ -33,7 +33,8 @@ fn runtime_cx(capabilities: &[CapabilityName]) -> Cx {
     for capability in capabilities {
         cx.grant(capability.clone());
     }
-    sim_lib_expr_tree::install_expr_tree_lib(&mut cx).unwrap();
+    sim_lib_expr_tree::install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5403))
+        .unwrap();
     cx
 }
 

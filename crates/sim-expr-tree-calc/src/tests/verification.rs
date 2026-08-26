@@ -3,7 +3,7 @@ use super::*;
 
 #[test]
 fn verify_ordinary_expr_returns_ordinary_value_and_tracks_runtime_references() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/sheet/a"), Expr::String("A".to_owned()));
     calc.set_cell(path("/sheet/b"), explicit_ref("a"));
     calc.set_cell(path("/sheet/c"), Expr::Symbol(Symbol::new("a")));
@@ -45,7 +45,7 @@ fn verify_ordinary_expr_returns_ordinary_value_and_tracks_runtime_references() {
 
 #[test]
 fn verify_lexical_binding_invalidates_prior_tree_fallback() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/sheet/value"), Expr::String("tree".to_owned()));
     calc.set_cell(path("/sheet/use-value"), Expr::Symbol(Symbol::new("value")));
     assert_eq!(
@@ -83,6 +83,7 @@ fn verify_macro_created_reference_is_observed_after_expansion() {
         let (mut cx, seat) = Cx::new_seated(
             Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
             Arc::new(DefaultFactory),
+            sim_kernel::HandleSeed::new(0x4558_5405),
         );
         seat.grant(&mut cx, macro_expansion_capability_for_phase(Phase::Eval))
             .unwrap();
@@ -163,7 +164,7 @@ fn verify_diamond_changing_and_unchanged_branches_match_full_recomputation() {
 
 #[test]
 fn cycle_dynamic_path_is_deterministic_and_recovers() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/a"), explicit_ref("/b"));
     calc.set_cell(path("/b"), Expr::String("ready".to_owned()));
     assert_eq!(
@@ -192,7 +193,7 @@ fn cycle_dynamic_path_is_deterministic_and_recovers() {
 
 #[test]
 fn cycle_hard_depth_and_output_limits_override_requested_policy() {
-    let mut deep = ExprTreeCalc::new();
+    let mut deep = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     for index in 0..=HARD_MAX_QUERY_DEPTH {
         let source = if index == HARD_MAX_QUERY_DEPTH {
             Expr::String("bottom".to_owned())
@@ -211,7 +212,7 @@ fn cycle_hard_depth_and_output_limits_override_requested_policy() {
         }))
     ));
 
-    let mut output = ExprTreeCalc::new();
+    let mut output = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     output.set_cell(
         path("/large"),
         Expr::String("x".repeat(HARD_MAX_OUTPUT + 1)),
@@ -229,7 +230,7 @@ fn cycle_hard_depth_and_output_limits_override_requested_policy() {
     for _ in 0..=HARD_MAX_EXPR_DEPTH {
         nested = Expr::List(vec![nested]);
     }
-    let mut recursion = ExprTreeCalc::new();
+    let mut recursion = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     recursion.set_cell(path("/nested"), nested);
     assert_eq!(
         recursion.verify_cell_with_limits(&path("/nested"), generous),
@@ -254,7 +255,7 @@ fn verify_deep_chain_matches_full_recomputation() {
         }
     }
 
-    let mut incremental = ExprTreeCalc::new();
+    let mut incremental = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     install_chain(&mut incremental, "before");
     assert_eq!(
         value_expr(incremental.verify_cell(&path("/chain/0")).unwrap()),
@@ -266,7 +267,7 @@ fn verify_deep_chain_matches_full_recomputation() {
     );
     let changed = value_expr(incremental.verify_cell(&path("/chain/0")).unwrap());
 
-    let mut full = ExprTreeCalc::new();
+    let mut full = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     install_chain(&mut full, "after");
     assert_eq!(
         value_expr(full.verify_cell(&path("/chain/0")).unwrap()),
@@ -380,7 +381,7 @@ fn verify_failure_memo_retains_labelled_last_good_and_recovers() {
 
 #[test]
 fn verify_cancellation_fails_current_read_and_preserves_last_good() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/cell"), Expr::String("old".to_owned()));
     calc.verify_cell(&path("/cell")).unwrap();
     calc.set_cell(path("/cell"), Expr::String("new".to_owned()));
@@ -398,7 +399,7 @@ fn verify_cancellation_fails_current_read_and_preserves_last_good() {
         Expr::String("old".to_owned())
     );
     let recovered = value_expr(calc.verify_cell(&path("/cell")).unwrap());
-    let mut full = ExprTreeCalc::new();
+    let mut full = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     full.set_cell(path("/cell"), Expr::String("new".to_owned()));
     assert_eq!(
         value_expr(full.verify_cell(&path("/cell")).unwrap()),
@@ -408,7 +409,7 @@ fn verify_cancellation_fails_current_read_and_preserves_last_good() {
 
 #[test]
 fn verify_no_calc_state_lock_spans_context_creation_or_sim_evaluation() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     let state = calc.state_for_lock_probe();
     let factory_state = Arc::clone(&state);
     calc.replace_context_factory(move || {
@@ -427,7 +428,7 @@ fn verify_no_calc_state_lock_spans_context_creation_or_sim_evaluation() {
 
 #[test]
 fn verify_namespace_mount_policy_codec_and_authority_observations_invalidate() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_tree_calc_policy(CalcPolicyPatch {
         priority: Some(7),
         ..CalcPolicyPatch::default()
@@ -472,7 +473,11 @@ fn verify_namespace_mount_policy_codec_and_authority_observations_invalidate() {
 #[test]
 fn eval_policy_wrapper_delegates_and_reserves_reference_calls() {
     let policy = ExprTreeRefPolicy::new(StrictNames(EagerPolicy));
-    let mut cx = Cx::new(Arc::new(policy), Arc::new(DefaultFactory));
+    let mut cx = Cx::new(
+        Arc::new(policy),
+        Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x5bce_8910_6a02_d173),
+    );
     let value = cx.resolve_unbound_call(
         Symbol::new(EXPR_TREE_REF),
         vec![Expr::String("/sheet/a".to_owned())],

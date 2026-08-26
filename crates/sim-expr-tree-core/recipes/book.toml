@@ -1,1 +1,5 @@
+book = "expr-tree/core"
 title = "sim-expr-tree-core Recipes"
+summary = "Build and inspect expression-tree namespaces and stores."
+order = 10
+chapters = ["01-basics"]

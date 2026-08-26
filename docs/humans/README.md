@@ -18,6 +18,7 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 | Feature | Subject | Specimens | Summary |
 | --- | --- | ---: | --- |
 | `feature/sim-expr-tree/generated-docs` | `crate/xtask` | 0 | Publish generated package, card, recipe, rustdoc, and Index facts for the expression-tree framework. |
+| `feature/sim-expr-tree/expedition-book` | `crate/sim-lib-expedition-book` | 1 | Branch, compare, object, choose, seal, reopen, retain, export, project, delete projections, and replay editorial meaning while immutable run, claim, source, and artifact evidence remains external and content-addressed. |
 | `feature/sim-expr-tree/expression-tree` | `crate/sim-lib-expr-tree` | 3 | Build finite named source trees over mixed Table/Dir storage and calculate them through a capability-gated runtime library with Shape and Card contracts, durable Citizens, bounded receipts, and standard streams. |
 | `feature/sim-expr-tree/codec-policy` | `crate/sim-expr-tree-calc` | 1 | Decode edited source and encode source/result faces through installed codecs with field-wise tree/directory/cell policy, explicit positions, trusted diminished read policy, and independent hard-clamped byte/depth/item budgets. |
 | `feature/sim-expr-tree/expression-tree-view` | `crate/sim-lib-view-expr-tree` | 1 | Project revisioned expression-tree snapshots into a Mathematica-like expandable Scene and decode standard Intents back into capability-declared expression-tree operations. |
@@ -75,9 +76,168 @@ This generated lane consumes `docs/generated/sim-index-fragment.sx`. Global inde
 - `recipes/03-server/web-session/screenshots/desktop.png`
 - `recipes/03-server/web-session/screenshots/phone.png`
 - `recipes/03-server/web-session/setup.siml`
+- `recipes/04-expedition-book/chapter.toml`
+- `recipes/04-expedition-book/decision-book/expected.txt`
+- `recipes/04-expedition-book/decision-book/purpose.md`
+- `recipes/04-expedition-book/decision-book/recipe.toml`
+- `recipes/04-expedition-book/decision-book/setup.siml`
 - `recipes/book.toml`
 
 ## Worked Examples
+
+### `feature/sim-expr-tree/expedition-book`
+
+Specimen `spec-test/sim-expr-tree/crates/sim-lib-expedition-book/src/tests` is checked by `cargo test`.
+
+Source `crates/sim-lib-expedition-book/src/tests.rs`:
+
+```rust
+use crate::*;
+use std::collections::BTreeSet;
+
+struct Resolver(BTreeSet<EvidenceRef>);
+impl EvidenceResolver for Resolver {
+    fn exists(&self, reference: &EvidenceRef) -> bool {
+        self.0.contains(reference)
+    }
+}
+
+fn reference(kind: &str, key: &str) -> EvidenceRef {
+    EvidenceRef::new(kind, key).unwrap()
+}
+
+#[test]
+fn specimen_covers_success_failure_refusal_objection_choice_and_next_play() {
+    let run = reference("run", "sha256:run");
+    let claim = reference("claim", "sha256:claim");
+    let mut book = ExpeditionBook::new("north", "Find the durable route");
+    book.reference(0, "root", [run.clone()]).unwrap();
+    book.branch(1, "root", "ridge", "Take the ridge").unwrap();
+    book.branch(2, "root", "valley", "Take the valley").unwrap();
+    book.object(
+        3,
+        "ridge",
+        Objection {
+            id: "weather".into(),
+            statement: "Forecast refuses ridge travel".into(),
+            evidence: vec![claim.clone()],
+        },
+    )
+    .unwrap();
+    book.set_next_play(4, "valley", "Inspect the ford").unwrap();
+    book.choose(5, "valley").unwrap();
+    assert_eq!(
+        book.choose(5, "ridge"),
+        Err(EditError::StaleRevision {
+            expected: 5,
+            actual: 6
+        })
+    );
+    book.seal(6, "ridge").unwrap();
+    assert_eq!(
+        book.reference(7, "ridge", [claim.clone()]),
+        Err(EditError::SealedBranch("ridge".into()))
+    );
+    assert_eq!(
+        book.compare("missing", "valley"),
+        Err(EditError::MissingBranch("missing".into()))
+    );
+    assert_eq!(
+        book.branches["valley"].next_play.as_deref(),
+        Some("Inspect the ford")
+    );
+}
+
+#[test]
+fn deleting_projections_and_reopening_two_branches_reproduces_exact_identities() {
+    let run = reference("run", "sha256:run-7");
+    let artifact = reference("artifact", "sha256:artifact-9");
+    let mut book = ExpeditionBook::new("expedition-7", "Choose carefully");
+    book.reference(0, "root", [run.clone(), artifact.clone()])
+        .unwrap();
+    book.branch(1, "root", "a", "A").unwrap();
+    book.branch(2, "root", "b", "B").unwrap();
+    book.object(
+        3,
+        "a",
+        Objection {
+            id: "o1".into(),
+            statement: "counterexample".into(),
+            evidence: vec![artifact.clone()],
+        },
+    )
+    .unwrap();
+    book.choose(4, "b").unwrap();
+    book.seal(5, "a").unwrap();
+    book.seal(6, "b").unwrap();
+    book.reopen(7, "a").unwrap();
+    book.reopen(8, "b").unwrap();
+    let original = book.clone();
+    let mut archive = Archive::default();
+    archive.export("decision", &book, format!("{:?}", project(&book, 20)));
+    assert!(archive.delete_projection("decision"));
+    assert!(!archive.has_projection("decision"));
+    let all = Resolver(BTreeSet::from([run.clone(), artifact.clone()]));
+    assert_eq!(
+        archive.replay("decision", &all).unwrap(),
+        ReplayOutcome::Reproduced(original.clone())
+    );
+    let missing = archive
+        .replay("decision", &Resolver(BTreeSet::from([run])))
+        .unwrap();
+    assert_eq!(
+        missing,
+        ReplayOutcome::MissingEvidence {
+            book: original,
+            missing: vec![artifact]
+        }
+    );
+}
+
+#[test]
+fn codec_is_canonical_and_first_version_policy_is_explicit() {
+    let book = ExpeditionBook::new("utf8", "rätt väg");
+    let encoded = encode(&book);
+    assert_eq!(decode(&encoded).unwrap(), book);
+    assert!(matches!(
+        decode("legacy payload"),
+        Err(CodecError::UnsupportedVersion(_))
+    ));
+    assert!(matches!(
+        decode("expedition-book/v2"),
+        Err(CodecError::UnsupportedVersion(_))
+    ));
+}
+
+#[test]
+fn citizen_shape_and_lisp_inventory_are_stable() {
+    assert_eq!(
+        expedition_book_class_symbol().to_string(),
+        "expedition-book/Snapshot"
+    );
+    let registry = expedition_book_citizen_registry().unwrap();
+    registry
+        .ensure_contains_symbols(&["expedition-book/Snapshot"])
+        .unwrap();
+    assert_eq!(lisp_operation_symbols().len(), 10);
+}
+
+#[test]
+fn selective_retention_preserves_root_and_choice() {
+    let mut book = ExpeditionBook::new("retain", "root");
+    book.branch(0, "root", "a", "A").unwrap();
+    book.branch(1, "root", "b", "B").unwrap();
+    book.choose(2, "a").unwrap();
+    assert!(matches!(
+        book.retain(3, &BTreeSet::from(["root".into()])),
+        Err(EditError::InvalidRetention(_))
+    ));
+    book.retain(3, &BTreeSet::from(["root".into(), "a".into()]))
+        .unwrap();
+    assert!(!book.branches.contains_key("b"));
+}
+// conformance: expedition-book tests prove revision, sealing, replay, and evidence semantics.
+```
 
 ### `feature/sim-expr-tree/expression-tree`
 
@@ -351,7 +511,11 @@ fn capabilities_fail_closed_and_errors_are_bounded() {
 fn durable_records_are_conformant_citizens_but_live_handles_are_opaque() {
     let registry = expr_tree_citizen_registry().unwrap();
     registry.ensure_contains_symbols(&CITIZENS).unwrap();
-    let mut conformance_cx = Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory));
+    let mut conformance_cx = Cx::new(
+        Arc::new(EagerPolicy),
+        Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x1cec_f798_0129_b762),
+    );
     run_registry_conformance_expecting(&mut conformance_cx, &registry, &CITIZENS).unwrap();
 
     let mut cx = runtime_cx(&all_capabilities());
@@ -426,10 +590,14 @@ fn recipe_automatic_and_directed_runs_checked_lisp_surface() {
 }
 
 fn runtime_cx(capabilities: &[CapabilityName]) -> Cx {
-    let mut cx = Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory));
+    let mut cx = Cx::new(
+        Arc::new(EagerPolicy),
+        Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x2ce5_cf14_9757_33d2),
+    );
     let codec = LispCodecLib::new(cx.registry_mut().fresh_codec_id()).unwrap();
     cx.load_lib(&codec).unwrap();
-    install_expr_tree_lib(&mut cx).unwrap();
+    install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5401)).unwrap();
     for capability in capabilities {
         cx.grant(capability.clone());
     }
@@ -1060,7 +1228,8 @@ fn in_process_recipe_opens_configured_storage_and_injects_the_web_surface() {
 #[test]
 fn external_eval_fabric_smoke_and_graceful_shutdown() {
     let mut cx = product_cx();
-    sim_lib_expr_tree::install_expr_tree_lib(&mut cx).unwrap();
+    sim_lib_expr_tree::install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5402))
+        .unwrap();
     let external = Arc::new(ExpressionTreeServer::local());
     cx.load_lib(&ExpressionTreeServerLib::new(external.clone()))
         .unwrap();
@@ -1673,7 +1842,7 @@ fn codec_policy_inherits_tree_directory_and_cell_fields() {
     use sim_codec::{DecodeLimits, DecodePosition};
     use sim_kernel::EncodePosition;
 
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_tree_codec_policy(CodecPolicyPatch {
         source_codec: Some(Some("codec/lisp".to_owned())),
         source_position: Some(DecodePosition::Data),
@@ -1721,6 +1890,7 @@ fn codec_context(grant_read_eval: bool) -> Cx {
     let (mut cx, seat) = Cx::new_seated(
         Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
         Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x4558_5403),
     );
     if grant_read_eval {
         seat.grant(&mut cx, read_eval_capability()).unwrap();
@@ -1858,7 +2028,7 @@ mod face_budget;
 
 #[test]
 fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_tree_calc_policy(CalcPolicyPatch {
         trigger: Some(CalcTrigger::OnDemand),
         error_mode: Some(ErrorMode::FailFast),
@@ -1916,7 +2086,7 @@ fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {
         Err(CalcError::Cell(CellFailure::Blocked { .. }))
     ));
 
-    let mut automatic = ExprTreeCalc::new();
+    let mut automatic = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     automatic.set_cell(path("/auto"), Expr::String("queued".to_owned()));
     assert_eq!(
         automatic.automatic_queue_snapshot().entries[0].cell,
@@ -1968,7 +2138,7 @@ fn policy_request_modes_verify_force_roots_force_recursive_and_block_dependencie
         "force-recursive must force the reachable calculated closure"
     );
 
-    let mut blocked = ExprTreeCalc::new();
+    let mut blocked = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     blocked.set_cell_calc_policy(
         path("/manual"),
         CalcPolicyPatch {
@@ -2015,6 +2185,7 @@ fn authority_open_ceiling_is_immutable_and_cell_policy_only_diminishes() {
         let (mut cx, seat) = Cx::new_seated(
             Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
             Arc::new(DefaultFactory),
+            sim_kernel::HandleSeed::new(0x4558_5404),
         );
         seat.grant(&mut cx, alpha_for_factory.clone()).unwrap();
         if factory_calls.fetch_add(1, Ordering::AcqRel) > 0 {
@@ -2121,7 +2292,7 @@ fn authority_effect_ledger_evidence_is_preserved_in_receipt() {
 
 #[test]
 fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restart() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell_calc_policy(
         path("/low"),
         CalcPolicyPatch {
@@ -2204,7 +2375,7 @@ fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restar
 
     calc.set_cell(path("/restart"), Expr::String("restored".to_owned()));
     let snapshot = calc.automatic_queue_snapshot();
-    let mut restored = ExprTreeCalc::new();
+    let mut restored = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     restored.set_cell(path("/restart"), Expr::String("restored".to_owned()));
     restored.restore_automatic_queue(snapshot.clone()).unwrap();
     assert_eq!(restored.automatic_queue_snapshot(), snapshot);
@@ -2217,7 +2388,7 @@ fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restar
 
 #[test]
 fn automatic_budget_exhaustion_returns_and_resumes_explicit_continuation() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell_calc_policy(
         path("/root"),
         CalcPolicyPatch {
@@ -2246,7 +2417,7 @@ fn automatic_budget_exhaustion_returns_and_resumes_explicit_continuation() {
 
 #[test]
 fn stream_progress_changes_are_bounded_observable_and_cancellable() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     let events = calc
         .watch(BufferPolicy::bounded_with_overflow(32, BufferOverflowPolicy::DropNewest).unwrap());
     let overflow = calc
@@ -2453,11 +2624,12 @@ fn restart_corruption_schema_mismatch_and_generation_mismatch_rebuild_safely() {
     );
 
     let identity_table = AssocTable::new();
-    let mut identity_original = ExprTreeCalc::new();
+    let mut identity_original = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     identity_original.set_cell(path("/value"), Expr::String("old".to_owned()));
     identity_original.verify_cell(&path("/value")).unwrap();
     persist(&mut identity_original, &identity_table);
-    let mut same_generation_different_source = ExprTreeCalc::new();
+    let mut same_generation_different_source =
+        ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     same_generation_different_source.set_cell(path("/value"), Expr::String("new".to_owned()));
     assert_eq!(
         restore(&mut same_generation_different_source, &identity_table).disposition,
@@ -2477,7 +2649,7 @@ fn restart_corruption_schema_mismatch_and_generation_mismatch_rebuild_safely() {
 #[test]
 fn restart_missing_or_deleted_derived_store_loses_only_performance() {
     let table = AssocTable::new();
-    let mut missing = ExprTreeCalc::new();
+    let mut missing = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     missing.set_cell(path("/value"), Expr::String("source".to_owned()));
     assert_eq!(
         restore(&mut missing, &table).disposition,
@@ -2494,7 +2666,7 @@ fn restart_missing_or_deleted_derived_store_loses_only_performance() {
         let mut derived = DerivedTableAdapter::new(&table, &mut cx);
         derived.delete().unwrap();
     }
-    let mut reopened = ExprTreeCalc::new();
+    let mut reopened = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     reopened.set_cell(path("/value"), Expr::String("source".to_owned()));
     assert_eq!(
         restore(&mut reopened, &table).disposition,
@@ -2509,14 +2681,14 @@ fn restart_missing_or_deleted_derived_store_loses_only_performance() {
 #[test]
 fn restart_interrupted_automatic_continuation_resumes_after_reopen() {
     let table = AssocTable::new();
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     calc.set_cell(path("/root"), explicit_ref("/leaf"));
     let stopped = calc.run_automatic(AutomaticBudget::new(1, CalcLimits::new(1, 100, 10, 100)), 0);
     assert_eq!(stopped.budget_exhausted.len(), 1);
     assert_eq!(persist(&mut calc, &table).pending_continuations, 1);
 
-    let mut reopened = ExprTreeCalc::new();
+    let mut reopened = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     reopened.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     reopened.set_cell(path("/root"), explicit_ref("/leaf"));
     let report = restore(&mut reopened, &table);

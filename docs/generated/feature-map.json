@@ -19,6 +19,11 @@
     {
       "features": [],
       "group": "workspace",
+      "package": "sim-lib-expedition-book"
+    },
+    {
+      "features": [],
+      "group": "workspace",
       "package": "sim-lib-expr-tree"
     },
     {

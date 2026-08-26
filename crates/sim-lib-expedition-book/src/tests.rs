@@ -142,3 +142,4 @@ fn selective_retention_preserves_root_and_choice() {
         .unwrap();
     assert!(!book.branches.contains_key("b"));
 }
+// conformance: expedition-book tests prove revision, sealing, replay, and evidence semantics.

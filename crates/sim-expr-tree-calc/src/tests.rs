@@ -35,7 +35,7 @@ fn codec_policy_inherits_tree_directory_and_cell_fields() {
     use sim_codec::{DecodeLimits, DecodePosition};
     use sim_kernel::EncodePosition;
 
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_tree_codec_policy(CodecPolicyPatch {
         source_codec: Some(Some("codec/lisp".to_owned())),
         source_position: Some(DecodePosition::Data),
@@ -83,6 +83,7 @@ fn codec_context(grant_read_eval: bool) -> Cx {
     let (mut cx, seat) = Cx::new_seated(
         Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
         Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x4558_5403),
     );
     if grant_read_eval {
         seat.grant(&mut cx, read_eval_capability()).unwrap();
@@ -220,7 +221,7 @@ mod face_budget;
 
 #[test]
 fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_tree_calc_policy(CalcPolicyPatch {
         trigger: Some(CalcTrigger::OnDemand),
         error_mode: Some(ErrorMode::FailFast),
@@ -278,7 +279,7 @@ fn policy_inherits_field_by_field_and_enforces_all_trigger_modes() {
         Err(CalcError::Cell(CellFailure::Blocked { .. }))
     ));
 
-    let mut automatic = ExprTreeCalc::new();
+    let mut automatic = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     automatic.set_cell(path("/auto"), Expr::String("queued".to_owned()));
     assert_eq!(
         automatic.automatic_queue_snapshot().entries[0].cell,
@@ -330,7 +331,7 @@ fn policy_request_modes_verify_force_roots_force_recursive_and_block_dependencie
         "force-recursive must force the reachable calculated closure"
     );
 
-    let mut blocked = ExprTreeCalc::new();
+    let mut blocked = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     blocked.set_cell_calc_policy(
         path("/manual"),
         CalcPolicyPatch {
@@ -377,6 +378,7 @@ fn authority_open_ceiling_is_immutable_and_cell_policy_only_diminishes() {
         let (mut cx, seat) = Cx::new_seated(
             Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
             Arc::new(DefaultFactory),
+            sim_kernel::HandleSeed::new(0x4558_5404),
         );
         seat.grant(&mut cx, alpha_for_factory.clone()).unwrap();
         if factory_calls.fetch_add(1, Ordering::AcqRel) > 0 {
@@ -483,7 +485,7 @@ fn authority_effect_ledger_evidence_is_preserved_in_receipt() {
 
 #[test]
 fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restart() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell_calc_policy(
         path("/low"),
         CalcPolicyPatch {
@@ -566,7 +568,7 @@ fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restar
 
     calc.set_cell(path("/restart"), Expr::String("restored".to_owned()));
     let snapshot = calc.automatic_queue_snapshot();
-    let mut restored = ExprTreeCalc::new();
+    let mut restored = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     restored.set_cell(path("/restart"), Expr::String("restored".to_owned()));
     restored.restore_automatic_queue(snapshot.clone()).unwrap();
     assert_eq!(restored.automatic_queue_snapshot(), snapshot);
@@ -579,7 +581,7 @@ fn automatic_scheduler_honors_debounce_priority_fairness_cancellation_and_restar
 
 #[test]
 fn automatic_budget_exhaustion_returns_and_resumes_explicit_continuation() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell_calc_policy(
         path("/root"),
         CalcPolicyPatch {
@@ -608,7 +610,7 @@ fn automatic_budget_exhaustion_returns_and_resumes_explicit_continuation() {
 
 #[test]
 fn stream_progress_changes_are_bounded_observable_and_cancellable() {
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     let events = calc
         .watch(BufferPolicy::bounded_with_overflow(32, BufferOverflowPolicy::DropNewest).unwrap());
     let overflow = calc

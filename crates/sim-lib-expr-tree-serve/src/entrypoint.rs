@@ -16,9 +16,10 @@ pub fn expr_tree_entrypoint_symbol() -> Symbol {
 }
 
 /// Loadable library exporting the expression-tree product entrypoint.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ExprTreeServeLib {
     config: std::result::Result<ExpressionTreeServeConfig, String>,
+    services: Option<Arc<dyn sim_web_shell::ShellServices>>,
 }
 
 impl ExprTreeServeLib {
@@ -26,12 +27,27 @@ impl ExprTreeServeLib {
     pub fn from_runtime_config(state: &RuntimeConfigState) -> Self {
         Self {
             config: ExpressionTreeServeConfig::from_runtime_config(state),
+            services: None,
         }
     }
 
     /// Builds the serve library around an explicit checked recipe config.
     pub fn new(config: ExpressionTreeServeConfig) -> Self {
-        Self { config: Ok(config) }
+        Self {
+            config: Ok(config),
+            services: None,
+        }
+    }
+
+    /// Builds the serve library over explicitly realized platform services.
+    pub fn with_services(
+        config: ExpressionTreeServeConfig,
+        services: Arc<dyn sim_web_shell::ShellServices>,
+    ) -> Self {
+        Self {
+            config: Ok(config),
+            services: Some(services),
+        }
     }
 }
 
@@ -65,6 +81,7 @@ impl Lib for ExprTreeServeLib {
             expr_tree_entrypoint_symbol(),
             cx.factory().opaque(Arc::new(ExprTreeEntrypoint {
                 config: self.config.clone(),
+                services: self.services.clone(),
             }))?,
         )?;
         Ok(())
@@ -74,6 +91,7 @@ impl Lib for ExprTreeServeLib {
 #[derive(Clone)]
 struct ExprTreeEntrypoint {
     config: std::result::Result<ExpressionTreeServeConfig, String>,
+    services: Option<Arc<dyn sim_web_shell::ShellServices>>,
 }
 
 impl Object for ExprTreeEntrypoint {
@@ -108,7 +126,16 @@ impl Callable for ExprTreeEntrypoint {
             .config
             .clone()
             .map_err(|error| sim_kernel::Error::Eval(format!("expression-tree config: {error}")))?;
-        ExpressionTreeRecipe::new(config).start(cx)?.serve(cx)?;
+        let product = ExpressionTreeRecipe::new(config).start(cx)?;
+        match &self.services {
+            Some(services) => product.serve_with_services(cx, Arc::clone(services))?,
+            None if product.config().dry_run => product.serve_dry_run(cx)?,
+            None => {
+                return Err(sim_kernel::Error::Eval(
+                    "expression-tree serve requires platform shell services".to_owned(),
+                ));
+            }
+        }
         cx.factory().bool(true)
     }
 }

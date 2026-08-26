@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock, atomic::AtomicU64};
 
 use sim_expr_tree_core::MountResource;
 use sim_incremental_core::{IncrementalError, ObservationKind, QueryFrame};
-use sim_kernel::{CapabilitySet, Cx, Expr, Phase, Symbol};
+use sim_kernel::{CapabilitySet, Cx, DefaultFactory, Expr, Factory, Phase, Symbol};
 use sim_table_core::{TablePath, TablePathRef};
 
 use super::{

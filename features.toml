@@ -53,15 +53,15 @@ steps = [
 id = "feature/sim-expr-tree/expedition-book"
 title = "Editable semantic expedition book"
 summary = "Branch, compare, object, choose, seal, reopen, retain, export, project, delete projections, and replay editorial meaning while immutable run, claim, source, and artifact evidence remains external and content-addressed."
-audience = ["framework", "runtime", "application"]
-framework = true
+owner = "crate/sim-lib-expedition-book"
+audiences = ["code", "framework", "user"]
 guidance = "Extend sim-lib-expedition-book when an expression-tree application needs revisioned editorial decisions over external evidence. Use the ExpeditionBook Citizen and generated Shape for durable identity, the explicit expedition-book/v1 codec for canonical export, and EvidenceResolver only to report referenced identity availability during replay. Stale revisions, sealed edits, invalid retention, and missing evidence are typed outcomes. Do not put evidence content, journal delivery, pack loading, or agent state in the book."
-requires = ["feature/sim-expr-tree/expression-tree"]
+depends_on = ["feature/sim-expr-tree/expression-tree"]
 claims_anchors = [
-  "anchor/package/sim-lib-expedition-book",
+  "anchor/crate/sim-lib-expedition-book",
   "anchor/rustdoc/sim-lib-expedition-book/expedition-book",
 ]
-claims_specimens = ["specimen/sim-lib-expedition-book/tests"]
+claims_specimens = ["spec-test/sim-expr-tree/crates/sim-lib-expedition-book/src/tests"]
 
 [[route]]
 id = "route/edit-expedition-book"

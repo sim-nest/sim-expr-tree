@@ -128,7 +128,7 @@ fn refresh_compares_epochs_listings_and_stamps_without_polling_watch_mounts() {
         external_sample(3, 5, 6),
     ]));
     let watched = Arc::new(TestRefreshSource::watch_managed());
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.mount(
         path("/external"),
         MountResource::Dir,

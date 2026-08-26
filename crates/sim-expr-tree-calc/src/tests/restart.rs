@@ -147,11 +147,12 @@ fn restart_corruption_schema_mismatch_and_generation_mismatch_rebuild_safely() {
     );
 
     let identity_table = AssocTable::new();
-    let mut identity_original = ExprTreeCalc::new();
+    let mut identity_original = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     identity_original.set_cell(path("/value"), Expr::String("old".to_owned()));
     identity_original.verify_cell(&path("/value")).unwrap();
     persist(&mut identity_original, &identity_table);
-    let mut same_generation_different_source = ExprTreeCalc::new();
+    let mut same_generation_different_source =
+        ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     same_generation_different_source.set_cell(path("/value"), Expr::String("new".to_owned()));
     assert_eq!(
         restore(&mut same_generation_different_source, &identity_table).disposition,
@@ -171,7 +172,7 @@ fn restart_corruption_schema_mismatch_and_generation_mismatch_rebuild_safely() {
 #[test]
 fn restart_missing_or_deleted_derived_store_loses_only_performance() {
     let table = AssocTable::new();
-    let mut missing = ExprTreeCalc::new();
+    let mut missing = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     missing.set_cell(path("/value"), Expr::String("source".to_owned()));
     assert_eq!(
         restore(&mut missing, &table).disposition,
@@ -188,7 +189,7 @@ fn restart_missing_or_deleted_derived_store_loses_only_performance() {
         let mut derived = DerivedTableAdapter::new(&table, &mut cx);
         derived.delete().unwrap();
     }
-    let mut reopened = ExprTreeCalc::new();
+    let mut reopened = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     reopened.set_cell(path("/value"), Expr::String("source".to_owned()));
     assert_eq!(
         restore(&mut reopened, &table).disposition,
@@ -203,14 +204,14 @@ fn restart_missing_or_deleted_derived_store_loses_only_performance() {
 #[test]
 fn restart_interrupted_automatic_continuation_resumes_after_reopen() {
     let table = AssocTable::new();
-    let mut calc = ExprTreeCalc::new();
+    let mut calc = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     calc.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     calc.set_cell(path("/root"), explicit_ref("/leaf"));
     let stopped = calc.run_automatic(AutomaticBudget::new(1, CalcLimits::new(1, 100, 10, 100)), 0);
     assert_eq!(stopped.budget_exhausted.len(), 1);
     assert_eq!(persist(&mut calc, &table).pending_continuations, 1);
 
-    let mut reopened = ExprTreeCalc::new();
+    let mut reopened = ExprTreeCalc::new(sim_kernel::HandleSeed::new(0x4558_5052));
     reopened.set_cell(path("/leaf"), Expr::String("leaf".to_owned()));
     reopened.set_cell(path("/root"), explicit_ref("/leaf"));
     let report = restore(&mut reopened, &table);

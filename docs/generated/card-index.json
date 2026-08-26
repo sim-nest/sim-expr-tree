@@ -8,22 +8,22 @@
       "summary": "root browse catalog"
     },
     {
+      "id": "cookbook/expr-tree/calc",
+      "kind": "cookbook-recipe",
+      "owner": "sim-expr-tree-calc",
+      "summary": "Evaluate bounded incremental expression trees."
+    },
+    {
+      "id": "cookbook/expr-tree/core",
+      "kind": "cookbook-recipe",
+      "owner": "sim-expr-tree-core",
+      "summary": "Build and inspect expression-tree namespaces and stores."
+    },
+    {
       "id": "cookbook/sim-expr-tree",
       "kind": "cookbook-recipe",
       "owner": "sim-lib-expr-tree",
       "summary": "Build finite live calculation trees from ordinary SIM operations."
-    },
-    {
-      "id": "cookbook/sim-expr-tree-calc",
-      "kind": "cookbook-recipe",
-      "owner": "sim-expr-tree-calc",
-      "summary": ""
-    },
-    {
-      "id": "cookbook/sim-expr-tree-core",
-      "kind": "cookbook-recipe",
-      "owner": "sim-expr-tree-core",
-      "summary": ""
     },
     {
       "id": "cookbook/sim-expr-tree-server",
