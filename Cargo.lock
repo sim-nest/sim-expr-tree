@@ -15,6 +15,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b588b76d00fde79687d7646a9b5bdf3cc0f655e0bbd080335a95d7e96f3587da"
 
 [[package]]
+name = "block-buffer"
+version = "0.10.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
+dependencies = [
+ "generic-array",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -27,10 +36,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "cpufeatures"
+version = "0.2.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59ed5838eebb26a2bb2e58f6d5b5316989ae9d08bab10e0e6d103e656d1b0280"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "crunchy"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
+
+[[package]]
+name = "crypto-common"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78c8292055d1c1df0cce5d180393dc8cce0abec0a7102adb6c7b1eef6016d60a"
+dependencies = [
+ "generic-array",
+ "typenum",
+]
+
+[[package]]
+name = "digest"
+version = "0.10.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
+dependencies = [
+ "block-buffer",
+ "crypto-common",
+]
 
 [[package]]
 name = "equivalent"
@@ -43,6 +81,16 @@ name = "foldhash"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
+
+[[package]]
+name = "generic-array"
+version = "0.14.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
+dependencies = [
+ "typenum",
+ "version_check",
+]
 
 [[package]]
 name = "half"
@@ -102,6 +150,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
+name = "libc"
+version = "0.2.189"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+
+[[package]]
+name = "libloading"
+version = "0.8.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
+dependencies = [
+ "cfg-if",
+ "windows-link",
+]
+
+[[package]]
 name = "libm"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -147,7 +211,7 @@ version = "3.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f"
 dependencies = [
- "toml_edit",
+ "toml_edit 0.25.13+spec-1.1.0",
 ]
 
 [[package]]
@@ -210,6 +274,7 @@ version = "1.0.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
 dependencies = [
+ "indexmap",
  "itoa",
  "memchr",
  "serde",
@@ -218,10 +283,36 @@ dependencies = [
 ]
 
 [[package]]
-name = "sim-citizen"
-version = "0.2.0"
+name = "serde_spanned"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be0642ec328afcbb0ac615a0f7550846bd1df9f79820de624f45ea640a4a5e5e"
+checksum = "bf41e0cfaf7226dca15e8197172c295a782857fcb97fad1808a166870dee75a3"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "sha2"
+version = "0.10.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
+]
+
+[[package]]
+name = "sim-cancel"
+version = "0.1.0"
+dependencies = [
+ "sim-cookbook",
+ "sim-cookbook-build",
+]
+
+[[package]]
+name = "sim-citizen"
+version = "0.3.0"
 dependencies = [
  "inventory",
  "sim-kernel",
@@ -230,9 +321,7 @@ dependencies = [
 
 [[package]]
 name = "sim-citizen-derive"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a1d8410aba0b26fb2e41555aa65ee953c9fdbe6c1c0f3ad9aaefc0542b97dfe"
+version = "0.3.0"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -242,13 +331,12 @@ dependencies = [
 
 [[package]]
 name = "sim-codec"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2977de1bc156c1666cd77f774d0956b7f61c48cb41828485df43c26230064e4c"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-net-core",
  "sim-shape",
@@ -256,54 +344,50 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-algol"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd0202adc24cbfb8645ed66d01d11f72ad04eda63936b29b70181c40b048417e"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-codec-lisp",
  "sim-codec-pratt",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
 ]
 
 [[package]]
 name = "sim-codec-binary"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a20f099878f5d87ed375eff879d2a39e811e8f2263710819c240be09ab1b505b"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-value",
 ]
 
 [[package]]
 name = "sim-codec-binary-base64"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7332b2c6755a2403485fff888a2472267e6d78c5fe42e3590cd7a3f5b23fd1d"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-codec-binary",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-value",
 ]
 
 [[package]]
 name = "sim-codec-chat"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7cf8e2064514f55bc40eca9407dad11ae1c314c9b7da9c2c0a2d6266f9e1fba"
+version = "0.3.0"
 dependencies = [
  "serde_json",
  "sim-codec",
  "sim-codec-binary-base64",
  "sim-codec-json",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -311,59 +395,54 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-config"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f6aa92205cb89d8d81582c1af7ed36cd6675b5682428e9bf4a2c09f1387c1ec"
+version = "0.1.3"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-codec-json"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "663e55078251b34fde9d4cbdc8deba5e44a0d2ba7c2939d79e58e3fa9678b939"
+version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
+ "sha2",
  "sim-codec",
  "sim-codec-binary-base64",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
 ]
 
 [[package]]
 name = "sim-codec-lisp"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1860005902ce13e1d42b7bcc2419a5d4b1a7747109583983a78b15985a99e853"
+version = "0.3.0"
 dependencies = [
  "proc-macro2",
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
 ]
 
 [[package]]
 name = "sim-codec-pratt"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b50df6fc521f31866a800c238fa36dfb967e0171725bf2532bd031259b5c70b5"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-config"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87e9c061d40550c99467a766a9ffe743c34645472ea1e35c6a8fb3ae3267c2df"
+version = "0.2.0"
 dependencies = [
  "sim-kernel",
  "sim-table-core",
@@ -372,9 +451,7 @@ dependencies = [
 
 [[package]]
 name = "sim-cookbook"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "209a43be7311949b2ffe382acb7fe185464ab55536823c78b15da8e1386675a4"
+version = "0.3.0"
 dependencies = [
  "sim-config",
  "sim-kernel",
@@ -382,20 +459,28 @@ dependencies = [
 ]
 
 [[package]]
-name = "sim-expr-tree"
+name = "sim-cookbook-build"
 version = "0.1.0"
+dependencies = [
+ "sim-cookbook",
+]
+
+[[package]]
+name = "sim-expr-tree"
+version = "0.1.1"
 dependencies = [
  "sim-lib-expr-tree-serve",
 ]
 
 [[package]]
 name = "sim-expr-tree-calc"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-codec-json",
  "sim-codec-lisp",
  "sim-expr-tree-core",
+ "sim-host-core",
  "sim-incremental-core",
  "sim-kernel",
  "sim-lib-stream-core",
@@ -404,7 +489,7 @@ dependencies = [
 
 [[package]]
 name = "sim-expr-tree-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-kernel",
@@ -412,28 +497,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "sim-incremental-core"
+name = "sim-host-core"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da579e192f90f482bfef89d1fd617015fd25a63481dd75ce6943208dc6287423"
+dependencies = [
+ "sim-kernel",
+]
+
+[[package]]
+name = "sim-incremental-core"
+version = "0.2.0"
 
 [[package]]
 name = "sim-kernel"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fb22a716eaf2000f9dbb6948d7654712c6c9b4d60cecf7816259c4d4ab494c1"
+version = "0.3.0"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-agent-runner-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec-chat",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -441,30 +530,29 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-binding"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd4d8804afef681336094eb88309f8073b9aade08bbd17f135878f9befc470b5"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-lib-control"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d76d59e01becd41ef8f85fc1ac13b3893aef0cf4046cc11abfd8f949d4c6830"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-core",
+ "sim-lib-mutation",
 ]
 
 [[package]]
 name = "sim-lib-cookbook"
-version = "0.1.15"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -474,6 +562,7 @@ dependencies = [
  "sim-codec-lisp",
  "sim-config",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-agent-runner-core",
  "sim-lib-binding",
@@ -505,12 +594,11 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-core"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc5974911c23b9e0ee652c24b5c8e2a797917ca013c55073e2cc996351687557"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -518,12 +606,11 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8945fff4e87aa94d59fb22b2cfd7be60e65470b41b5fca9250592a748e62b763"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-core",
  "sim-lib-discrete-algebra",
@@ -535,55 +622,50 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete-algebra"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "078fba5cff142be2c40cc2ecb3fa31f1d1e2909cfce2594b67d2769f8da13b2f"
+version = "0.3.0"
 dependencies = [
  "num-bigint",
  "sim-cookbook",
+ "sim-cookbook-build",
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-discrete-comb"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe2bb5bcfb88385e0c367e267335f4b8e472e9512e334979c0b00dd130fd48b5"
+version = "0.3.0"
 dependencies = [
  "num-bigint",
  "sim-cookbook",
+ "sim-cookbook-build",
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-discrete-graph"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dbf9879f2ff9b11ff11a47327d909a787edf3e3ea098e52b148cdb3ababba3b"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-lib-discrete-algebra",
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-discrete-spectral"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b54f9db747d49c9622023e486c37360f05440430bde94f8d2cb24d7c752fd535"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-lib-discrete-algebra",
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-dispatch"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69b960083b31a3733ca173dc4ebae0b767f2527891fa84a0c6448c4c3b71be2a"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
 ]
@@ -599,15 +681,17 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-codec-lisp",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-expr-tree-calc",
  "sim-expr-tree-core",
+ "sim-host-core",
  "sim-kernel",
  "sim-lib-stream-core",
  "sim-shape",
@@ -616,25 +700,28 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree-serve"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-codec-lisp",
  "sim-config",
+ "sim-host-core",
  "sim-kernel",
  "sim-lib-expr-tree",
  "sim-lib-expr-tree-server",
  "sim-lib-server",
  "sim-run-core",
+ "sim-transport-ports",
  "sim-web-shell",
 ]
 
 [[package]]
 name = "sim-lib-expr-tree-server"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "serde_json",
  "sim-codec-json",
  "sim-codec-lisp",
+ "sim-host-core",
  "sim-kernel",
  "sim-lib-expr-tree",
  "sim-lib-intent",
@@ -649,12 +736,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-intent"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -662,12 +750,11 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-lang-scheme"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "599170c531b52690a9d23145f74395f39b667b4ce17b7d9bc6cb07c9ed20c90a"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-binding",
  "sim-lib-control",
@@ -679,11 +766,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-midi-core"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5d478489dd84e02cbfff31d4fd10f9da339408e2875d90ba87e130795528448"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-core",
  "sim-lib-stream-clock",
@@ -692,11 +778,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-midi-live"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "199fbff10c0a0ac92ac89ef3551cc05dcbf6a0a3bf82ce3cdfacbb3e1958d0c1"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-core",
  "sim-lib-midi-core",
@@ -704,21 +789,39 @@ dependencies = [
 ]
 
 [[package]]
-name = "sim-lib-net-core"
+name = "sim-lib-mutation"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb052dce08de1678dfe18c21866d01619561eb15e474d40f0bbead55c9059331"
+dependencies = [
+ "sim-citizen",
+ "sim-citizen-derive",
+ "sim-cookbook",
+ "sim-cookbook-build",
+ "sim-kernel",
+]
+
+[[package]]
+name = "sim-lib-net-core"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
+]
+
+[[package]]
+name = "sim-lib-net-http"
+version = "0.1.0"
+dependencies = [
+ "sim-cookbook",
+ "sim-cookbook-build",
+ "sim-lib-net-core",
 ]
 
 [[package]]
 name = "sim-lib-numbers-arith"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9066429d637aac9cd6a4c332765dfadc7dc234a2ff14aa8868a74a1818793a50"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -726,14 +829,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-bigint"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bf95d724c7280572c32f2c759323d5a59991eb617ec6856d6f116f084680779"
+version = "0.4.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -741,13 +843,12 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-bool"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "825894b00cc0c4a503ba2597e628560780f1f884f804595d190020168420c790"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -755,14 +856,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-cas"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bbd24368ec192d4723a8acd91aba5f3a261e18e8bd574111be0fc8408e8aa40"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -770,11 +870,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-cas-eval"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f46f50c31f1720f5e3bd57c829a946842b753bfd102e847d2d5dace91182833"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-cas",
  "sim-lib-numbers-core",
@@ -782,13 +881,12 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-complex"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c63fc8332161821a8ff11d8864fd856ad8dce5ba2c36fa77b2b1e053fae4f680"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -796,24 +894,22 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-core"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26705718353004693b7443f4413f6d54142f2a3594787f7c2d92e0c65060f19c"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
 ]
 
 [[package]]
 name = "sim-lib-numbers-f64"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2da98cac85f425e5a131198efe9473af61970ff75d93c33b93935a810d85a7d"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -821,13 +917,12 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-func"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8548e0a1767feeebe3e4912d66fdc2e0717969be93e5aca47905d75eaf9ffb01"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-cas",
  "sim-lib-numbers-cas-eval",
@@ -837,14 +932,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-i64"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b914fdba45963944e7a1fd78948c990dea3cfd68580980eb50fce8c8825d5a5"
+version = "0.4.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -852,14 +946,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-rational"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ee48b328acb8d9041a6c1f8dd67015fcb2ee25747ab662a195112619d35fc13"
+version = "0.4.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -867,14 +960,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c74a10369ab1b163ef76e9e4c8a27a488e7546fee62c358ae1b65c08c59e10af"
+version = "0.3.0"
 dependencies = [
  "half",
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-shape",
@@ -882,11 +974,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor-bcast"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c86f6c322046f522afc778211d8da6a4f0ae06e143c98c42150b6c04fb8ff58"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-core",
  "sim-lib-numbers-tensor",
@@ -894,47 +985,46 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor-cmplxf"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28a6026f2fa966492f0f7cca3e63db3cad8228d6aea74fcdcbf395fb9f1334cf"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-tensor",
 ]
 
 [[package]]
 name = "sim-lib-numbers-tensor-rat64"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2678d8a2e76147d010b0230b68e9318ad3e58625514822ffce6a31b067b8dc0e"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-numbers-tensor",
 ]
 
 [[package]]
 name = "sim-lib-pattern"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e588ee09830ff147f0e530ba8a06d0a3ad473e4fd18ab89dfce891da3033037"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
+ "sim-text",
 ]
 
 [[package]]
 name = "sim-lib-scene"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -942,45 +1032,48 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-sequence"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45bfb9fb24ac50c5b9a13351c2395b795811b6153508bde7419cbbd2566dc172"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-lib-server"
-version = "0.1.10"
+version = "0.2.0"
 dependencies = [
+ "sim-cancel",
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-codec-binary",
  "sim-codec-binary-base64",
  "sim-cookbook",
+ "sim-cookbook-build",
+ "sim-host-core",
  "sim-kernel",
  "sim-lib-cookbook",
  "sim-lib-core",
  "sim-lib-net-core",
+ "sim-lib-net-http",
  "sim-lib-stream-core",
  "sim-shape",
+ "sim-transport-ports",
  "sim-value",
  "sim-wasm-abi",
 ]
 
 [[package]]
 name = "sim-lib-standard-core"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ed2179d1102d79c0df3cdcd8fef50ebffb8880c1ba51c4077cf258c0ab6f258"
+version = "0.2.0"
 dependencies = [
  "indexmap",
  "sim-citizen",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-core",
  "sim-value",
@@ -988,13 +1081,12 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-clock"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "432e03516f8aa7093626c4e06b76db5909514bfa120ec3ecd78611ef3c37fd74"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-stream-core",
  "sim-value",
@@ -1002,13 +1094,12 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-core"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4c46d25e67770bf27e6fffc44751efea9f676c01febb1fe45c32e2e90576b45"
+version = "0.2.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-shape",
  "sim-value",
@@ -1016,10 +1107,11 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-fabric"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec-binary",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-server",
  "sim-lib-stream-core",
@@ -1029,9 +1121,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-host"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1224f8636950448b362d365c7d5794cc2ffe238f8d055526fa19ccdb93fa846d"
+version = "0.2.0"
 dependencies = [
  "sim-config",
  "sim-kernel",
@@ -1044,12 +1134,13 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
  "sim-codec",
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-intent",
  "sim-lib-scene",
@@ -1059,9 +1150,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-device"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-scene",
  "sim-lib-view",
@@ -1070,7 +1162,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-expr-tree"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "sim-expr-tree-calc",
  "sim-kernel",
@@ -1083,9 +1175,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-spatial"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-intent",
  "sim-lib-scene",
@@ -1097,9 +1190,10 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-web-bridge"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
+ "sim-cookbook-build",
  "sim-kernel",
  "sim-lib-intent",
  "sim-lib-scene",
@@ -1113,30 +1207,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-platform-bootstrap"
+version = "0.1.0"
+dependencies = [
+ "sha2",
+ "sim-kernel",
+ "sim-platform-core",
+ "sim-run-loaders",
+]
+
+[[package]]
+name = "sim-platform-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "toml",
+]
+
+[[package]]
 name = "sim-run-core"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "sim-codec-config",
  "sim-config",
  "sim-kernel",
- "sim-lib-net-core",
+ "sim-lib-net-http",
  "sim-lib-stream-host",
+ "sim-platform-bootstrap",
+ "sim-platform-core",
  "sim-run-loaders",
 ]
 
 [[package]]
 name = "sim-run-loaders"
-version = "0.1.5"
+version = "0.3.0"
 dependencies = [
+ "libloading",
+ "sim-codec",
+ "sim-codec-binary",
  "sim-kernel",
  "sim-value",
 ]
 
 [[package]]
 name = "sim-shape"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e1939c6c78fd8294ea37337a455dd2b3fca89142499466f804971c8e680ad2b"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1145,28 +1261,33 @@ dependencies = [
 
 [[package]]
 name = "sim-table-core"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eebc79391094d5a02711ca4d7bbb8ff5525574cae9d8e305ed1ce11257a12098"
+version = "0.2.0"
 dependencies = [
  "sim-kernel",
  "sim-value",
 ]
 
 [[package]]
-name = "sim-value"
+name = "sim-text"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5a3ca34efc2b8cd76bf8a99164b12984adffac302f910989acbb0378f20e04f"
+dependencies = [
+ "sim-kernel",
+]
+
+[[package]]
+name = "sim-transport-ports"
+version = "0.1.0"
+
+[[package]]
+name = "sim-value"
+version = "0.3.0"
 dependencies = [
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-wasm-abi"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9815d039d1d1bc06a180a2615ddee1d288ad7c9b3fe95e480504fadfae19e454"
+version = "0.4.0"
 dependencies = [
  "sim-codec-binary",
  "sim-kernel",
@@ -1175,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "sim-web-shell"
-version = "0.1.11"
+version = "0.2.0"
 dependencies = [
  "serde_json",
  "sim-codec-algol",
@@ -1190,6 +1311,7 @@ dependencies = [
  "sim-lib-view",
  "sim-lib-web-bridge",
  "sim-run-core",
+ "sim-transport-ports",
 ]
 
 [[package]]
@@ -1251,6 +1373,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.8.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc1beb996b9d83529a9e75c17a1686767d148d70663143c7854d8b4a09ced362"
+dependencies = [
+ "serde",
+ "serde_spanned",
+ "toml_datetime 0.6.11",
+ "toml_edit 0.22.27",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.6.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22cddaf88f4fbc13c51aebbf5f8eceb5c7c5a9da2ac40a13519eb5b0a0e8f11c"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "toml_datetime"
 version = "1.1.1+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1261,14 +1404,28 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
+version = "0.22.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41fe8c660ae4257887cf66394862d21dbca4a6ddd26f04a3560410406a2f819a"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_spanned",
+ "toml_datetime 0.6.11",
+ "toml_write",
+ "winnow 0.7.15",
+]
+
+[[package]]
+name = "toml_edit"
 version = "0.25.13+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6975367e4d2ef766d86af01ffad14b622fecc8d4357a998fbc4deb6e9bacaf9b"
 dependencies = [
  "indexmap",
- "toml_datetime",
+ "toml_datetime 1.1.1+spec-1.1.0",
  "toml_parser",
- "winnow",
+ "winnow 1.0.4",
 ]
 
 [[package]]
@@ -1277,8 +1434,20 @@ version = "1.1.3+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d38ac1cf9b95face32296c0a3ede1fdc270627c9d9c02a7274dd6d960dc4d56"
 dependencies = [
- "winnow",
+ "winnow 1.0.4",
 ]
+
+[[package]]
+name = "toml_write"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
+
+[[package]]
+name = "typenum"
+version = "1.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 
 [[package]]
 name = "unicode-ident"
@@ -1291,6 +1460,12 @@ name = "unicode-width"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
+
+[[package]]
+name = "version_check"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "wasm-encoder"
@@ -1383,6 +1558,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7127f7f9b8f127c879991cecd35f494e4628bae1b0874c681414d8d8831e952c"
 dependencies = [
  "wast",
+]
+
+[[package]]
+name = "windows-link"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+
+[[package]]
+name = "winnow"
+version = "0.7.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df79d97927682d2fd8adb29682d1140b343be4ac0f08fd68b7765d9c059d3945"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]

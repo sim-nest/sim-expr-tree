@@ -9,9 +9,9 @@ publish = true
 description = "Editable semantic expedition books over immutable SIM evidence references."
 
 [dependencies]
-sim-citizen = { version = "0.2.0" }
-sim-citizen-derive = { version = "0.2.0" }
-sim-kernel = { version = "0.2.0" }
+sim-citizen = { version = "0.3.0" }
+sim-citizen-derive = { version = "0.3.0" }
+sim-kernel = { version = "0.3.0" }
 
 [lints]
 workspace = true

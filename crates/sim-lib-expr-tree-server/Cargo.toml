@@ -1,6 +1,6 @@
 [package]
 name = "sim-lib-expr-tree-server"
-version = "0.2.0"
+version = "0.3.0"
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
@@ -10,23 +10,23 @@ publish = true
 description = "Authoritative bounded EvalSite server for SIM expression-tree sessions."
 
 [dependencies]
-sim-kernel = { version = "0.2.0" }
+sim-kernel = { version = "0.3.0" }
 sim-host-core = { version = "0.1.0" }
-sim-lib-expr-tree = { version = "0.2.0", path = "../sim-lib-expr-tree" }
-sim-lib-server = { version = "0.1.11" }
-sim-lib-view = { version = "0.2.0" }
-sim-lib-view-expr-tree = { version = "0.2.0", path = "../sim-lib-view-expr-tree" }
-sim-lib-web-bridge = { version = "0.1.3" }
-sim-web-shell = { version = "0.1.12" }
-sim-value = { version = "0.2.0" }
+sim-lib-expr-tree = { version = "0.3.0", path = "../sim-lib-expr-tree" }
+sim-lib-server = { version = "0.2.0" }
+sim-lib-view = { version = "0.3.0" }
+sim-lib-view-expr-tree = { version = "0.3.0", path = "../sim-lib-view-expr-tree" }
+sim-lib-web-bridge = { version = "0.2.0" }
+sim-web-shell = { version = "0.2.0" }
+sim-value = { version = "0.3.0" }
 
 [dev-dependencies]
 serde_json = "1"
-sim-codec-lisp = { version = "0.2.0" }
-sim-codec-json = { version = "0.2.0" }
-sim-kernel = { version = "0.2.0", features = ["test-support"] }
-sim-lib-intent = { version = "0.2.0" }
-sim-lib-scene = { version = "0.2.0" }
+sim-codec-lisp = { version = "0.3.0" }
+sim-codec-json = { version = "0.3.0" }
+sim-kernel = { version = "0.3.0", features = ["test-support"] }
+sim-lib-intent = { version = "0.3.0" }
+sim-lib-scene = { version = "0.3.0" }
 
 [lints]
 workspace = true
