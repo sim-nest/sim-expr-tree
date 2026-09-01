@@ -8,7 +8,8 @@ Generated from Cargo metadata by `xtask crate-catalog v1`.
 | --- | --- | --- | --- |
 | `sim-expr-tree-calc` | `true` | `lib` | Bounded incremental calculation of ordinary SIM expressions and values. |
 | `sim-expr-tree-core` | `true` | `lib` | Finite namespace, policy, and storage records for SIM expression trees. |
-| `sim-expr-tree` | `true` | `bin, test` | Bootloader-composed SIM expression-tree product. |
+| `sim-expr-tree` | `true` | `bin` | Bootloader-composed SIM expression-tree product. |
+| `sim-lib-expedition-book` | `true` | `lib` | Editable semantic expedition books over immutable SIM evidence references. |
 | `sim-lib-expr-tree-serve` | `true` | `lib` | Bootloader-loaded product recipe for SIM expression-tree sessions. |
 | `sim-lib-expr-tree-server` | `true` | `lib` | Authoritative bounded EvalSite server for SIM expression-tree sessions. |
 | `sim-lib-expr-tree` | `true` | `custom-build, lib` | Loadable, Shape-checked SIM expression-tree runtime library. |
