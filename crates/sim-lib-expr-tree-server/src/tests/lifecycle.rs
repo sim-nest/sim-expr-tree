@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
+use sim_host_core::DeterministicTime as DeterministicWallClock;
 use sim_kernel::Expr;
-use sim_lib_server::DeterministicWallClock;
 
 use crate::{ExpressionTreeServerLimits, WatchId};
 

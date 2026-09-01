@@ -7,6 +7,7 @@
 | `sim-expr-tree` | `workspace` | 0 | 0 |
 | `sim-expr-tree-calc` | `workspace` | 0 | 0 |
 | `sim-expr-tree-core` | `workspace` | 0 | 0 |
+| `sim-lib-expedition-book` | `workspace` | 0 | 0 |
 | `sim-lib-expr-tree` | `workspace` | 0 | 0 |
 | `sim-lib-expr-tree-serve` | `workspace` | 0 | 0 |
 | `sim-lib-expr-tree-server` | `workspace` | 0 | 0 |

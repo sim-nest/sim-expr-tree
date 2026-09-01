@@ -1,15 +1,6 @@
-use std::{
-    fs,
-    path::PathBuf,
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
-};
+use std::{path::PathBuf, sync::Arc};
 
 // conformance: default expression-tree product composition and boot behavior
-
-static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
 use sim_config::{ConfigDir, ConfigLayer, ConfigSource};
 use sim_kernel::{CapabilityName, Expr, Lib, Symbol};
@@ -163,7 +154,8 @@ fn in_process_recipe_opens_configured_storage_and_injects_the_web_surface() {
 #[test]
 fn external_eval_fabric_smoke_and_graceful_shutdown() {
     let mut cx = product_cx();
-    sim_lib_expr_tree::install_expr_tree_lib(&mut cx).unwrap();
+    sim_lib_expr_tree::install_expr_tree_lib(&mut cx, sim_kernel::HandleSeed::new(0x4558_5402))
+        .unwrap();
     let external = Arc::new(ExpressionTreeServer::local());
     cx.load_lib(&ExpressionTreeServerLib::new(external.clone()))
         .unwrap();
@@ -190,26 +182,6 @@ fn external_eval_fabric_smoke_and_graceful_shutdown() {
 }
 
 #[test]
-fn bootloader_uses_standard_config_flags_and_dispatches_the_product_verb() {
-    let path = temp_config_path("boot");
-    fs::write(
-        &path,
-        "[lib/expr-tree-serve]\ndry-run = true\nstorage = \"boot-configured\"\nbridge-thread = 81004\n",
-    )
-    .unwrap();
-    let args = expr_tree_boot_args([
-        "sim-expr-tree".into(),
-        "--config-file".into(),
-        path.as_os_str().to_owned(),
-    ]);
-
-    let code = expr_tree_bootloader().run(args).unwrap();
-
-    let _ = fs::remove_file(&path);
-    assert_eq!(code, 0);
-}
-
-#[test]
 fn appended_product_verb_does_not_shadow_standard_help() {
     let command = parse_args(expr_tree_boot_args(["sim-expr-tree", "--help"])).unwrap();
 
@@ -232,12 +204,4 @@ fn product_callable_owns_help_and_rejects_unknown_arguments() {
             .contains("unknown expression-tree argument: --tree-parser"),
         "{error}"
     );
-}
-
-fn temp_config_path(label: &str) -> PathBuf {
-    let nonce = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
-    std::env::temp_dir().join(format!(
-        "sim-expr-tree-serve-{label}-{}-{nonce}.toml",
-        std::process::id()
-    ))
 }

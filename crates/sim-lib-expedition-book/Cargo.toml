@@ -1,0 +1,17 @@
+[package]
+name = "sim-lib-expedition-book"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = true
+description = "Editable semantic expedition books over immutable SIM evidence references."
+
+[dependencies]
+sim-citizen = { version = "0.3.0" }
+sim-citizen-derive = { version = "0.3.0" }
+sim-kernel = { version = "0.3.0" }
+
+[lints]
+workspace = true

@@ -7,6 +7,7 @@
 | `sim-expr-tree` | `workspace` | Bootloader-composed SIM expression-tree product. |
 | `sim-expr-tree-calc` | `workspace` | Bounded incremental calculation for ordinary expression-tree values. |
 | `sim-expr-tree-core` | `workspace` | Backend-neutral expression-tree namespace records. |
+| `sim-lib-expedition-book` | `workspace` | Editable expedition books which retain immutable evidence by reference. |
 | `sim-lib-expr-tree` | `workspace` | Loadable expression-tree runtime and Lisp surface. |
 | `sim-lib-expr-tree-serve` | `workspace` | Bootloader-loaded expression-tree product recipe. |
 | `sim-lib-expr-tree-server` | `workspace` | Authoritative expression-tree sessions over SIM's standard server surfaces. |

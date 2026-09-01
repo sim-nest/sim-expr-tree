@@ -1,3 +1,3 @@
 fn main() {
-    sim_cookbook::write_embed("recipes").expect("embed expression-tree recipes");
+    sim_cookbook_build::write_embed("recipes").expect("embed expression-tree recipes");
 }

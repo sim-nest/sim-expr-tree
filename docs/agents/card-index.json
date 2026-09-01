@@ -32,6 +32,11 @@
     "recipes/03-server/web-session/screenshots/desktop.png",
     "recipes/03-server/web-session/screenshots/phone.png",
     "recipes/03-server/web-session/setup.siml",
+    "recipes/04-expedition-book/chapter.toml",
+    "recipes/04-expedition-book/decision-book/expected.txt",
+    "recipes/04-expedition-book/decision-book/purpose.md",
+    "recipes/04-expedition-book/decision-book/recipe.toml",
+    "recipes/04-expedition-book/decision-book/setup.siml",
     "recipes/book.toml"
   ]
 }

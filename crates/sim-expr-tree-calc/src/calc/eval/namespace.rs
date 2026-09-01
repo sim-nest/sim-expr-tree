@@ -44,9 +44,7 @@ pub(super) fn resolve_bare_symbol(
         }
         frame.observe_missing(CalcQuery::NameSlot(path_key(&candidate)))?;
         if dir.is_root() {
-            let cx = default_value_context();
-            let value = cx
-                .factory()
+            let value = DefaultFactory
                 .string(format!("missing:{name}"))
                 .map_err(|error| CellFailure::Evaluation {
                     message: error.to_string(),
@@ -75,13 +73,12 @@ pub(super) fn resolve_target(
     } else {
         frame.observe_missing(CalcQuery::NameSlot(path_key(target)))?;
         let text = format!("missing:{}", path_key(target));
-        let cx = default_value_context();
-        let value = cx
-            .factory()
-            .string(text.clone())
-            .map_err(|error| CellFailure::Evaluation {
-                message: error.to_string(),
-            })?;
+        let value =
+            DefaultFactory
+                .string(text.clone())
+                .map_err(|error| CellFailure::Evaluation {
+                    message: error.to_string(),
+                })?;
         Ok(MemoValue::canonical(
             value,
             Expr::String(text).canonical_key(),
@@ -197,10 +194,4 @@ pub(super) fn parse_absolute(path: &str) -> TablePath {
 
 pub(in crate::calc) fn path_key(path: &TablePath) -> String {
     path.to_absolute_reference()
-}
-
-pub(super) fn default_value_context() -> Cx {
-    use sim_kernel::{DefaultFactory, EagerPolicy};
-
-    Cx::new(Arc::new(EagerPolicy), Arc::new(DefaultFactory))
 }

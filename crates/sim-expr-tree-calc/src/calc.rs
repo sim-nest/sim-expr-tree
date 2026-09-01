@@ -14,7 +14,7 @@ use sim_incremental_core::{
     ValueFingerprint,
 };
 use sim_kernel::{
-    CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, StrictNames, Symbol, Value,
+    CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, HandleSeed, StrictNames, Symbol, Value,
 };
 use sim_lib_stream_core::BufferPolicy;
 use sim_table_core::TablePath;
@@ -71,7 +71,7 @@ const MAX_RECEIPT_DEPENDENCIES: usize = 64;
 const MAX_RECEIPT_GRAPH_NODES: usize = 4_096;
 const MAX_RECEIPT_GRAPH_EDGES: usize = 65_536;
 
-type WallClock = dyn Fn() -> Option<u64> + Send + Sync + 'static;
+use sim_host_core::WallClock;
 
 /// Incremental calculator for ordinary SIM [`Expr`] sources and [`Value`]
 /// results.
@@ -81,7 +81,7 @@ pub struct ExprTreeCalc {
     context_factory: Arc<ContextFactory>,
     cancel_requested: Arc<AtomicBool>,
     next_volatile: Arc<AtomicU64>,
-    wall_clock: Arc<RwLock<Arc<WallClock>>>,
+    wall_clock: Arc<RwLock<Option<Arc<dyn WallClock>>>>,
     next_request_id: u64,
     automatic_queue: BTreeMap<String, QueuedCalculation>,
     automatic_generation: u64,
@@ -155,11 +155,18 @@ struct MountState {
 impl ExprTreeCalc {
     /// Creates a calculator using strict eager ordinary SIM evaluation.
     #[must_use]
-    pub fn new() -> Self {
-        Self::with_context_factory(|| {
+    pub fn new(first_handle_seed: HandleSeed) -> Self {
+        let next_handle_seed = Arc::new(AtomicU64::new(first_handle_seed.0));
+        Self::with_context_factory(move || {
+            let seed = next_handle_seed
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |seed| {
+                    seed.checked_add(1)
+                })
+                .expect("expression-tree handle seed space exhausted");
             Cx::new(
                 Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
                 Arc::new(DefaultFactory),
+                HandleSeed::new(seed),
             )
         })
     }
@@ -186,7 +193,7 @@ impl ExprTreeCalc {
             context_factory,
             cancel_requested: Arc::new(AtomicBool::new(false)),
             next_volatile: Arc::new(AtomicU64::new(1)),
-            wall_clock: Arc::new(RwLock::new(Arc::new(|| None))),
+            wall_clock: Arc::new(RwLock::new(None)),
             next_request_id: 1,
             automatic_queue: BTreeMap::new(),
             automatic_generation: 1,
@@ -202,11 +209,8 @@ impl ExprTreeCalc {
     /// Replaces the optional human wall-clock observation source.
     ///
     /// Logical ticks and revisions remain the only freshness authority.
-    pub fn set_wall_clock<F>(&mut self, clock: F)
-    where
-        F: Fn() -> Option<u64> + Send + Sync + 'static,
-    {
-        *self.wall_clock.write().expect("wall clock lock poisoned") = Arc::new(clock);
+    pub fn set_wall_clock(&mut self, clock: Arc<dyn WallClock>) {
+        *self.wall_clock.write().expect("wall clock lock poisoned") = Some(clock);
     }
 
     /// Returns the immutable capability ceiling captured when this tree opened.
@@ -348,12 +352,6 @@ impl ExprTreeCalc {
     #[cfg(test)]
     pub(crate) fn state_for_lock_probe(&self) -> Arc<RwLock<CalcState>> {
         Arc::clone(&self.state)
-    }
-}
-
-impl Default for ExprTreeCalc {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

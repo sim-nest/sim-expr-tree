@@ -14,6 +14,8 @@ The repository contains:
   incremental engine and retains ordinary `Expr` sources and `Value` results;
 - `sim-lib-expr-tree`, which exports the capability-gated `expr-tree/*`
   operation family as a host-registered runtime library;
+- `sim-lib-expedition-book`, which edits branchable decisions while retaining
+  run, claim, source, and artifact evidence exclusively by content reference;
 - view, server, serve, and bootloader crates that compose the framework into
   user-facing surfaces without duplicating its engine.
 

@@ -5,8 +5,8 @@
 | Card | Kind | Owner | Summary |
 | --- | --- | --- | --- |
 | `browse/catalog` | `browse-root` | `workspace` | root browse catalog |
+| `cookbook/expr-tree/calc` | `cookbook-recipe` | `sim-expr-tree-calc` | Evaluate bounded incremental expression trees. |
+| `cookbook/expr-tree/core` | `cookbook-recipe` | `sim-expr-tree-core` | Build and inspect expression-tree namespaces and stores. |
 | `cookbook/sim-expr-tree` | `cookbook-recipe` | `sim-lib-expr-tree` | Build finite live calculation trees from ordinary SIM operations. |
-| `cookbook/sim-expr-tree-calc` | `cookbook-recipe` | `sim-expr-tree-calc` |  |
-| `cookbook/sim-expr-tree-core` | `cookbook-recipe` | `sim-expr-tree-core` |  |
 | `cookbook/sim-expr-tree-server` | `cookbook-recipe` | `sim-expr-tree` | Open authoritative expression trees through standard SIM server and browser surfaces. |
 | `registry/catalog` | `browse-registry` | `workspace` | registry catalog browse card |

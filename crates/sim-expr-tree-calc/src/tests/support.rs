@@ -141,6 +141,7 @@ pub(super) fn strict_context() -> Cx {
     Cx::new(
         Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
         Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x4558_5401),
     )
 }
 
@@ -148,6 +149,7 @@ pub(super) fn effect_context(capability: CapabilityName) -> Cx {
     let (mut cx, seat) = Cx::new_seated(
         Arc::new(ExprTreeRefPolicy::new(StrictNames(EagerPolicy))),
         Arc::new(DefaultFactory),
+        sim_kernel::HandleSeed::new(0x4558_5402),
     );
     seat.grant(&mut cx, capability.clone()).unwrap();
     bind_callable(&mut cx, "effectful", EffectfulCallable { capability });
@@ -303,6 +305,7 @@ struct EffectfulCallable {
 impl Callable for EffectfulCallable {
     fn call(&self, cx: &mut Cx, _args: Args) -> sim_kernel::Result<Value> {
         let effect = Effect::new(
+            cx.fresh_handle(),
             Symbol::qualified("expr-tree", "test-effect"),
             Ref::Symbol(Symbol::qualified("expr-tree", "test-subject")),
             Ref::Symbol(Symbol::qualified("expr-tree", "test-input")),

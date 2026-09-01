@@ -1,9 +1,12 @@
 use std::{
     collections::BTreeMap,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
+    },
 };
 
-use sim_kernel::{Cx, Object, ObjectCompat, Result};
+use sim_kernel::{Cx, HandleSeed, Object, ObjectCompat, Result};
 
 use crate::runtime::TreeState;
 
@@ -43,12 +46,14 @@ impl ObjectCompat for TreeHandle {}
 
 pub(crate) struct TreeRuntime {
     stores: Mutex<BTreeMap<String, Arc<Mutex<TreeState>>>>,
+    next_handle_seed: Arc<AtomicU64>,
 }
 
 impl TreeRuntime {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(first_handle_seed: HandleSeed) -> Self {
         Self {
             stores: Mutex::new(BTreeMap::new()),
+            next_handle_seed: Arc::new(AtomicU64::new(first_handle_seed.0)),
         }
     }
 
@@ -69,11 +74,24 @@ impl TreeRuntime {
         let state = match stores.get(storage_name) {
             Some(state) => Arc::clone(state),
             None => {
-                let state = Arc::new(Mutex::new(TreeState::new(cx, storage_name.to_owned())?));
+                let state = Arc::new(Mutex::new(TreeState::new(
+                    cx,
+                    storage_name.to_owned(),
+                    Arc::clone(&self.next_handle_seed),
+                )?));
                 stores.insert(storage_name.to_owned(), Arc::clone(&state));
                 state
             }
         };
         Ok(TreeHandle::new(state))
     }
+}
+
+pub(crate) fn next_handle_seed(sequence: &AtomicU64) -> HandleSeed {
+    let seed = sequence
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |seed| {
+            seed.checked_add(1)
+        })
+        .expect("expression-tree handle seed space exhausted");
+    HandleSeed::new(seed)
 }

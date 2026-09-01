@@ -23,6 +23,13 @@
       "summary": "Backend-neutral expression-tree namespace records."
     },
     {
+      "crate_name": "sim_lib_expedition_book",
+      "group": "workspace",
+      "manifest": "crates/sim-lib-expedition-book/Cargo.toml",
+      "package": "sim-lib-expedition-book",
+      "summary": "Editable expedition books which retain immutable evidence by reference."
+    },
+    {
       "crate_name": "sim_lib_expr_tree",
       "group": "workspace",
       "manifest": "crates/sim-lib-expr-tree/Cargo.toml",

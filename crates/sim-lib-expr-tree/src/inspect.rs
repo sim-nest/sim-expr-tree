@@ -1,5 +1,7 @@
 //! Bounded, read-only inspection of a live expression-tree handle.
 
+use std::sync::Arc;
+
 use sim_expr_tree_calc::{CalcReceipt, CalcStatus, EncodedFace};
 use sim_kernel::{Error, Result};
 
@@ -67,10 +69,7 @@ impl TreeHandle {
     /// Injects optional human wall-clock observations into future receipts.
     ///
     /// Logical ticks and revisions remain the only freshness authority.
-    pub fn set_wall_clock<F>(&self, clock: F) -> Result<()>
-    where
-        F: Fn() -> Option<u64> + Send + Sync + 'static,
-    {
+    pub fn set_wall_clock(&self, clock: Arc<dyn sim_host_core::WallClock>) -> Result<()> {
         self.with_state(|state| {
             state.set_wall_clock(clock);
             Ok(())

@@ -1,0 +1,2 @@
+Two reopened branches reproduce the same choice, objection, next play, and
+external content identities after the disposable projection is deleted.

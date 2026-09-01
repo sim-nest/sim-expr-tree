@@ -95,7 +95,18 @@ impl OperationSpec {
 }
 
 /// Host-registered expression-tree runtime library.
-pub struct ExprTreeLib;
+pub struct ExprTreeLib {
+    first_handle_seed: sim_kernel::HandleSeed,
+}
+
+impl ExprTreeLib {
+    /// Creates the runtime library with the first namespace reserved for its
+    /// expression-tree contexts.
+    #[must_use]
+    pub fn new(first_handle_seed: sim_kernel::HandleSeed) -> Self {
+        Self { first_handle_seed }
+    }
+}
 
 impl Lib for ExprTreeLib {
     fn manifest(&self) -> LibManifest {
@@ -115,7 +126,7 @@ impl Lib for ExprTreeLib {
 
     fn load(&self, cx: &mut LoadCx, linker: &mut Linker<'_>) -> Result<()> {
         expr_tree_citizen_registry()?.install_all(linker)?;
-        let runtime = Arc::new(TreeRuntime::new());
+        let runtime = Arc::new(TreeRuntime::new(self.first_handle_seed));
         let mut contracts = Vec::new();
         for spec in operation_specs() {
             let args_shape =
@@ -146,10 +157,10 @@ impl Lib for ExprTreeLib {
     }
 }
 
-/// Installs [`ExprTreeLib`] exactly once.
-pub fn install_expr_tree_lib(cx: &mut Cx) -> Result<()> {
+/// Installs [`ExprTreeLib`] exactly once using the caller-owned handle namespace.
+pub fn install_expr_tree_lib(cx: &mut Cx, first_handle_seed: sim_kernel::HandleSeed) -> Result<()> {
     if cx.registry().lib(&expr_tree_lib_symbol()).is_none() {
-        cx.load_lib(&ExprTreeLib)?;
+        cx.load_lib(&ExprTreeLib::new(first_handle_seed))?;
     }
     Ok(())
 }

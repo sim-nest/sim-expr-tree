@@ -11,12 +11,12 @@ pub(super) struct AttemptStart {
 
 pub(super) fn begin_attempt(
     state: &Arc<RwLock<CalcState>>,
-    wall_clock: &Arc<RwLock<Arc<WallClock>>>,
+    wall_clock: &Arc<RwLock<Option<Arc<dyn WallClock>>>>,
     cell: &str,
 ) -> AttemptStart {
     let wall_started_ms = {
         let clock = wall_clock.read().expect("wall clock lock poisoned").clone();
-        clock()
+        clock.and_then(|clock| clock.now_ms().ok())
     };
     let mut state = state.write().expect("calc state poisoned");
     let request = state.active_request.clone().unwrap_or(ActiveRequest {
@@ -51,7 +51,7 @@ pub(super) fn begin_attempt(
 
 pub(super) fn finish_attempt(
     state: &Arc<RwLock<CalcState>>,
-    wall_clock: &Arc<RwLock<Arc<WallClock>>>,
+    wall_clock: &Arc<RwLock<Option<Arc<dyn WallClock>>>>,
     attempt: AttemptStart,
     outcome: CalcOutcome,
     effects: Vec<EffectStamp>,
@@ -59,7 +59,7 @@ pub(super) fn finish_attempt(
 ) {
     let wall_finished_ms = {
         let clock = wall_clock.read().expect("wall clock lock poisoned").clone();
-        clock()
+        clock.and_then(|clock| clock.now_ms().ok())
     };
     let mut state = state.write().expect("calc state poisoned");
     let finished_tick = allocate_logical_tick(&mut state);

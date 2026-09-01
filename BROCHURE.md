@@ -28,6 +28,9 @@ authority opaque.
 - Reopen a named tree and continue from its durable source and control state.
 - Discover the complete framework through checked Index claims and runnable
   Lisp recipes.
+- Build expedition books that branch and compare meaning, retain objections and
+  choices, delete disposable projections, and replay exact external evidence
+  identities without turning the book into an evidence store.
 
 ## Where it fits
 

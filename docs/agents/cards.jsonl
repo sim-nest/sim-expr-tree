@@ -29,4 +29,9 @@
 {"kind":"recipe","path":"recipes/03-server/web-session/screenshots/desktop.png"}
 {"kind":"recipe","path":"recipes/03-server/web-session/screenshots/phone.png"}
 {"kind":"recipe","path":"recipes/03-server/web-session/setup.siml"}
+{"kind":"recipe","path":"recipes/04-expedition-book/chapter.toml"}
+{"kind":"recipe","path":"recipes/04-expedition-book/decision-book/expected.txt"}
+{"kind":"recipe","path":"recipes/04-expedition-book/decision-book/purpose.md"}
+{"kind":"recipe","path":"recipes/04-expedition-book/decision-book/recipe.toml"}
+{"kind":"recipe","path":"recipes/04-expedition-book/decision-book/setup.siml"}
 {"kind":"recipe","path":"recipes/book.toml"}

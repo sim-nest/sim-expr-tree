@@ -1,9 +1,10 @@
 use std::{fs, path::PathBuf, sync::Arc};
 
 use sim_codec_json::{JsonProjectionMode, project_expr_to_json};
+use sim_host_core::DeterministicTime as DeterministicWallClock;
 use sim_kernel::{Cx, Expr, Symbol};
 use sim_lib_intent::{Origin, intent};
-use sim_lib_server::{DeterministicWallClock, ServerAddress, register_loopback_transport_endpoint};
+use sim_lib_server::{ServerAddress, register_loopback_transport_endpoint};
 use sim_lib_view::{LensRegistry, surface};
 use sim_lib_view_expr_tree::{
     expression_tree_surface_codec_symbol, register_expression_tree_surface_codec,

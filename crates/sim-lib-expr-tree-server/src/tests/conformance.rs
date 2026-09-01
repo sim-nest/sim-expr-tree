@@ -186,7 +186,7 @@ fn server_frames_preserve_correlation_and_use_existing_adapters() {
     let server = ExpressionTreeServer::new(
         ServerAddress::Local,
         vec![Symbol::qualified("codec", "lisp")],
-        Arc::new(sim_lib_server::DeterministicWallClock::new(10, 1)),
+        Arc::new(sim_host_core::DeterministicTime::new(10, 1)),
         Default::default(),
     )
     .unwrap();

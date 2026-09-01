@@ -1,1 +1,5 @@
+book = "expr-tree/calc"
 title = "sim-expr-tree-calc Recipes"
+summary = "Evaluate bounded incremental expression trees."
+order = 10
+chapters = ["01-basics"]

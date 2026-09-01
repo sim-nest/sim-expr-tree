@@ -5,6 +5,7 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
 };
 
+use sim_host_core::SystemWallClock;
 use sim_kernel::{
     Consistency, Cx, Error, EvalFabric, EvalMode, EvalReply, EvalRequest, Expr, Result, Symbol,
     Value,
@@ -14,10 +15,10 @@ use sim_lib_expr_tree_server::{
     ExpressionTreeWebSurfaceFactory,
 };
 use sim_lib_server::{
-    EvalSite, FrameKind, LoopbackTransportEndpoint, ServerAddress, ServerFrame, SystemWallClock,
+    EvalSite, FrameKind, LoopbackTransportEndpoint, ServerAddress, ServerFrame,
     eval_request_from_frame, register_loopback_transport_endpoint, server_frame_from_reply,
 };
-use sim_web_shell::{ServeConfig, serve_with_surface_factory};
+use sim_web_shell::{ModelShellServices, ServeConfig, ShellServices, serve_with_surface_factory};
 
 use crate::{ExpressionTreeServeConfig, ServerPlacement};
 
@@ -38,7 +39,7 @@ impl ExpressionTreeRecipe {
     /// Composes the configured product inside the bootloader-provided context.
     pub fn start(self, cx: &mut Cx) -> Result<ExpressionTreeProduct> {
         sim_lib_server::install_server_lib(cx)?;
-        sim_lib_expr_tree::install_expr_tree_lib(cx)?;
+        sim_lib_expr_tree::install_expr_tree_lib(cx, sim_kernel::HandleSeed::new(0x4558_5301))?;
 
         let bridge_thread = self
             .config
@@ -85,7 +86,10 @@ impl ExpressionTreeRecipe {
         ));
         let endpoint = register_loopback_transport_endpoint(bridge_address.clone(), bridge_site)?;
         let resource = create_session(fabric.as_ref(), cx, &self.config.storage)?;
-        let seed = Arc::new(Mutex::new(cx.fork_from_seed()));
+        let seed = Arc::new(Mutex::new(
+            cx.fork_from_seed(sim_kernel::HandleSeed::new(0x4558_5302)),
+        ));
+        let next_handle_seed = Arc::new(AtomicU64::new(0x4558_5303));
 
         Ok(ExpressionTreeProduct {
             config: self.config,
@@ -93,6 +97,7 @@ impl ExpressionTreeRecipe {
             resource,
             fabric,
             seed,
+            next_handle_seed,
             endpoint: Some(endpoint),
             local_server,
             shutdown: false,
@@ -107,6 +112,7 @@ pub struct ExpressionTreeProduct {
     resource: Symbol,
     fabric: Arc<dyn EvalFabric>,
     seed: Arc<Mutex<Cx>>,
+    next_handle_seed: Arc<AtomicU64>,
     endpoint: Option<LoopbackTransportEndpoint>,
     local_server: Option<Arc<ExpressionTreeServer>>,
     shutdown: bool,
@@ -131,6 +137,7 @@ impl ExpressionTreeProduct {
     /// Builds the injected generic-web-host surface factory.
     pub fn surface_factory(&self) -> ExpressionTreeWebSurfaceFactory {
         let seed = self.seed.clone();
+        let next_handle_seed = Arc::clone(&self.next_handle_seed);
         ExpressionTreeWebSurfaceFactory::new(
             format!("in-process:{}", bridge_thread(&self.bridge_address)),
             self.bridge_address.clone(),
@@ -139,21 +146,49 @@ impl ExpressionTreeProduct {
             move || {
                 seed.lock()
                     .map_err(|_| Error::PoisonedLock("expression-tree browser context seed"))
-                    .map(|seed| seed.fork_from_seed())
+                    .map(|seed| {
+                        let value = next_handle_seed
+                            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                                value.checked_add(1)
+                            })
+                            .expect("expression-tree browser handle seed space exhausted");
+                        seed.fork_from_seed(sim_kernel::HandleSeed::new(value))
+                    })
             },
         )
     }
 
-    /// Runs the generic web host and closes the authoritative session on exit.
-    pub fn serve(mut self, cx: &mut Cx) -> Result<()> {
+    /// Validates the generic web-host composition without opening a listener.
+    pub fn serve_dry_run(self, cx: &mut Cx) -> Result<()> {
+        if !self.config.dry_run {
+            return Err(Error::Eval(
+                "expression-tree dry-run service requires dry-run configuration".to_owned(),
+            ));
+        }
+        let transport = Arc::new(sim_transport_ports::model::ScriptedStreamPort::new([]));
+        let services = Arc::new(ModelShellServices::new(
+            transport.services(),
+            Default::default(),
+        ));
+        self.serve_with_services(cx, services)
+    }
+
+    /// Runs the generic web host through caller-realized platform services and
+    /// closes the authoritative session on exit.
+    pub fn serve_with_services(
+        mut self,
+        cx: &mut Cx,
+        services: Arc<dyn ShellServices>,
+    ) -> Result<()> {
         let web = ServeConfig {
             addr: self.config.web_addr.clone(),
             atelier_root: self.config.atelier_root.clone(),
             dry_run: self.config.dry_run,
             cookbook: None,
         };
-        let serve_result = serve_with_surface_factory(cx, &web, Box::new(self.surface_factory()))
-            .map_err(|error| Error::HostError(format!("expression-tree web host: {error}")));
+        let serve_result =
+            serve_with_surface_factory(cx, &web, Box::new(self.surface_factory()), services)
+                .map_err(|error| Error::HostError(format!("expression-tree web host: {error}")));
         let shutdown_result = self.shutdown(cx);
         match (serve_result, shutdown_result) {
             (Err(error), _) => Err(error),
