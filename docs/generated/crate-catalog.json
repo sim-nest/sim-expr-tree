@@ -1,6 +1,6 @@
 {
   "generator": "xtask crate-catalog v1",
-  "package_count": 8,
+  "package_count": 9,
   "packages": [
     {
       "description": "Bounded incremental calculation of ordinary SIM expressions and values.",
@@ -35,8 +35,19 @@
       "readme": "crates/sim-expr-tree/README.md",
       "root": "crates/sim-expr-tree",
       "target_kinds": [
-        "bin",
-        "test"
+        "bin"
+      ]
+    },
+    {
+      "description": "Editable semantic expedition books over immutable SIM evidence references.",
+      "generated_readme": false,
+      "manifest": "crates/sim-lib-expedition-book/Cargo.toml",
+      "name": "sim-lib-expedition-book",
+      "publish": "true",
+      "readme": "crates/sim-lib-expedition-book/README.md",
+      "root": "crates/sim-lib-expedition-book",
+      "target_kinds": [
+        "lib"
       ]
     },
     {
