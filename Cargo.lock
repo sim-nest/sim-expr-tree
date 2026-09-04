@@ -304,7 +304,7 @@ dependencies = [
 
 [[package]]
 name = "sim-cancel"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -312,7 +312,7 @@ dependencies = [
 
 [[package]]
 name = "sim-citizen"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "inventory",
  "sim-kernel",
@@ -321,7 +321,7 @@ dependencies = [
 
 [[package]]
 name = "sim-citizen-derive"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -331,7 +331,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -344,7 +344,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-algol"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-codec-lisp",
@@ -357,7 +357,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-binary"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -368,7 +368,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-binary-base64"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-codec-binary",
@@ -380,7 +380,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-chat"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde_json",
  "sim-codec",
@@ -395,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-config"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -405,7 +405,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-json"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -420,7 +420,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-lisp"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "proc-macro2",
  "sim-codec",
@@ -432,7 +432,7 @@ dependencies = [
 
 [[package]]
 name = "sim-codec-pratt"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -442,7 +442,7 @@ dependencies = [
 
 [[package]]
 name = "sim-config"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-kernel",
  "sim-table-core",
@@ -451,7 +451,7 @@ dependencies = [
 
 [[package]]
 name = "sim-cookbook"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-config",
  "sim-kernel",
@@ -460,21 +460,21 @@ dependencies = [
 
 [[package]]
 name = "sim-cookbook-build"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
 ]
 
 [[package]]
 name = "sim-expr-tree"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sim-lib-expr-tree-serve",
 ]
 
 [[package]]
 name = "sim-expr-tree-calc"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-codec",
  "sim-codec-json",
@@ -489,7 +489,7 @@ dependencies = [
 
 [[package]]
 name = "sim-expr-tree-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-kernel",
@@ -498,25 +498,25 @@ dependencies = [
 
 [[package]]
 name = "sim-host-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-kernel",
 ]
 
 [[package]]
 name = "sim-incremental-core"
-version = "0.2.0"
+version = "0.3.0"
 
 [[package]]
 name = "sim-kernel"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "sim-lib-agent-runner-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -530,7 +530,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-binding"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -539,7 +539,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-control"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -552,7 +552,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-cookbook"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -594,7 +594,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -606,7 +606,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -622,7 +622,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete-algebra"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "num-bigint",
  "sim-cookbook",
@@ -632,7 +632,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete-comb"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "num-bigint",
  "sim-cookbook",
@@ -642,7 +642,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete-graph"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-discrete-spectral"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -662,7 +662,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-dispatch"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expedition-book"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -700,7 +700,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree-serve"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec-lisp",
  "sim-config",
@@ -716,7 +716,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree-server"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde_json",
  "sim-codec-json",
@@ -736,7 +736,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-intent"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -750,7 +750,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-lang-scheme"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-codec",
  "sim-cookbook",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-midi-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -778,7 +778,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-midi-live"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -790,7 +790,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-mutation"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -801,7 +801,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-net-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -809,7 +809,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-net-http"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -818,7 +818,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-arith"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -829,7 +829,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-bigint"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
@@ -843,7 +843,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-bool"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -856,7 +856,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-cas"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -870,7 +870,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-cas-eval"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -881,7 +881,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-complex"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -894,7 +894,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -904,7 +904,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-f64"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -917,7 +917,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-func"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -932,7 +932,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-i64"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
@@ -946,7 +946,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-rational"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "num-bigint",
  "sim-citizen",
@@ -960,7 +960,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "half",
  "sim-citizen",
@@ -974,7 +974,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor-bcast"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -985,7 +985,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor-cmplxf"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -995,7 +995,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-numbers-tensor-rat64"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -1005,7 +1005,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-pattern"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1018,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-scene"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1032,7 +1032,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-sequence"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1043,7 +1043,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-server"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cancel",
  "sim-citizen",
@@ -1068,7 +1068,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-standard-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "indexmap",
  "sim-citizen",
@@ -1081,7 +1081,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-clock"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1094,7 +1094,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1107,7 +1107,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-fabric"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-codec-binary",
  "sim-cookbook",
@@ -1121,7 +1121,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-host"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-config",
  "sim-kernel",
@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1150,7 +1150,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-device"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -1162,7 +1162,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-expr-tree"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-expr-tree-calc",
  "sim-kernel",
@@ -1175,7 +1175,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-spatial"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -1190,7 +1190,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-web-bridge"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-cookbook",
  "sim-cookbook-build",
@@ -1208,7 +1208,7 @@ dependencies = [
 
 [[package]]
 name = "sim-platform-bootstrap"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sha2",
  "sim-kernel",
@@ -1218,7 +1218,7 @@ dependencies = [
 
 [[package]]
 name = "sim-platform-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1227,7 +1227,7 @@ dependencies = [
 
 [[package]]
 name = "sim-run-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "sim-codec-config",
  "sim-config",
@@ -1241,7 +1241,7 @@ dependencies = [
 
 [[package]]
 name = "sim-run-loaders"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "libloading",
  "sim-codec",
@@ -1252,7 +1252,7 @@ dependencies = [
 
 [[package]]
 name = "sim-shape"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1261,7 +1261,7 @@ dependencies = [
 
 [[package]]
 name = "sim-table-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "sim-kernel",
  "sim-value",
@@ -1269,25 +1269,25 @@ dependencies = [
 
 [[package]]
 name = "sim-text"
-version = "0.2.0"
-dependencies = [
- "sim-kernel",
-]
-
-[[package]]
-name = "sim-transport-ports"
-version = "0.1.0"
-
-[[package]]
-name = "sim-value"
 version = "0.3.0"
 dependencies = [
  "sim-kernel",
 ]
 
 [[package]]
-name = "sim-wasm-abi"
+name = "sim-transport-ports"
+version = "0.2.0"
+
+[[package]]
+name = "sim-value"
 version = "0.4.0"
+dependencies = [
+ "sim-kernel",
+]
+
+[[package]]
+name = "sim-wasm-abi"
+version = "0.5.0"
 dependencies = [
  "sim-codec-binary",
  "sim-kernel",
@@ -1296,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "sim-web-shell"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde_json",
  "sim-codec-algol",
