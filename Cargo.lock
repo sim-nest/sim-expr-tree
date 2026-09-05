@@ -474,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "sim-expr-tree-calc"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "sim-codec",
  "sim-codec-json",
@@ -1252,7 +1252,7 @@ dependencies = [
 
 [[package]]
 name = "sim-shape"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
