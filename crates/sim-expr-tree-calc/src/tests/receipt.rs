@@ -8,7 +8,6 @@ use sim_incremental_core::ValueFingerprint;
 
 use crate::CalcStatus;
 
-use super::support::*;
 use super::*;
 
 struct ScriptWallClock(Mutex<VecDeque<Option<u64>>>);
