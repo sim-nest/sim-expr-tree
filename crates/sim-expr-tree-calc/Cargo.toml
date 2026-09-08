@@ -11,7 +11,7 @@ description = "Bounded incremental calculation of ordinary SIM expressions and v
 
 [dependencies]
 sim-codec = { version = "0.3.0" }
-sim-incremental-core = { version = "0.3.0" }
+sim-incremental-core = { version = "0.5.1" }
 sim-expr-tree-core = { version = "0.3.0", path = "../sim-expr-tree-core" }
 sim-kernel = { version = "0.4.0" }
 sim-host-core = { version = "0.2.0" }

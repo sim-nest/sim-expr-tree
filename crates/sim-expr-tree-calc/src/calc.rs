@@ -11,7 +11,7 @@ use sim_expr_tree_core::{
 };
 use sim_incremental_core::{
     ContinuationToken, IncrementalEngine, IncrementalError, ObservationKind, SnapshotBudgets,
-    ValueFingerprint,
+    SnapshotObservation, ValueFingerprint,
 };
 use sim_kernel::{
     CapabilitySet, Cx, DefaultFactory, EagerPolicy, Expr, HandleSeed, StrictNames, Symbol, Value,
@@ -335,7 +335,7 @@ impl ExprTreeCalc {
             .map(|node| {
                 node.dependencies
                     .iter()
-                    .map(|observation| (observation.key().clone(), observation.kind().clone()))
+                    .map(|observation| (observation.key.clone(), observation.kind.clone()))
                     .collect()
             })
             .unwrap_or_default())

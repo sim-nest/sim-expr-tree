@@ -10,10 +10,6 @@ pub(super) fn encode_node(
         ("dirty", Expr::Bool(node.dirty)),
         ("value", encode_optional_memo(node.value.as_ref(), cx)?),
         (
-            "fingerprint",
-            optional_number(node.fingerprint.map(ValueFingerprint::get)),
-        ),
-        (
             "observations",
             Expr::Vector(node.dependencies.iter().map(encode_observation).collect()),
         ),
@@ -31,8 +27,6 @@ pub(super) fn decode_node(
         revision: Revision::new(parse_u64(required(&fields, "revision")?)?),
         dirty: parse_bool(required(&fields, "dirty")?)? || !reusable,
         value,
-        fingerprint: parse_optional_u64(required(&fields, "fingerprint")?)?
-            .map(ValueFingerprint::new),
         dependencies: vector(required(&fields, "observations")?)?
             .iter()
             .map(decode_observation)
@@ -135,26 +129,21 @@ pub(in crate::calc::persistence) fn restore_value(
     }
 }
 
-fn encode_observation(observation: &Observation<CalcQuery>) -> Expr {
+fn encode_observation(observation: &SnapshotObservation<CalcQuery>) -> Expr {
     record(vec![
-        ("key", encode_query(observation.key())),
-        ("kind", text(observation_kind_name(observation.kind()))),
-        ("revision", number(observation.revision().get())),
-        (
-            "fingerprint",
-            optional_number(observation.fingerprint().map(ValueFingerprint::get)),
-        ),
+        ("key", encode_query(&observation.key)),
+        ("kind", text(observation_kind_name(&observation.kind))),
+        ("revision", number(observation.revision.get())),
     ])
 }
 
-fn decode_observation(expr: &Expr) -> DecodeResult<Observation<CalcQuery>> {
+fn decode_observation(expr: &Expr) -> DecodeResult<SnapshotObservation<CalcQuery>> {
     let fields = record_fields(expr)?;
-    Ok(Observation::new(
-        decode_query(required(&fields, "key")?)?,
-        decode_observation_kind(parse_text(required(&fields, "kind")?)?)?,
-        Revision::new(parse_u64(required(&fields, "revision")?)?),
-        parse_optional_u64(required(&fields, "fingerprint")?)?.map(ValueFingerprint::new),
-    ))
+    Ok(SnapshotObservation {
+        key: decode_query(required(&fields, "key")?)?,
+        kind: decode_observation_kind(parse_text(required(&fields, "kind")?)?)?,
+        revision: Revision::new(parse_u64(required(&fields, "revision")?)?),
+    })
 }
 
 pub(super) fn observation_kind_name(kind: &ObservationKind) -> &'static str {

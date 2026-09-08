@@ -47,6 +47,13 @@ fn receipt_commits_bounded_revision_authority_dependency_and_wall_clock_evidence
         dependency.query == CalcQuery::Cell("/leaf".to_owned())
             && dependency.kind == ObservationKind::Read
     }));
+    assert!(
+        receipt
+            .dependencies
+            .iter()
+            .all(|dependency| dependency.fingerprint.is_none()),
+        "durable dependency evidence must not retain process-local fingerprints"
+    );
     assert_eq!(
         receipt.result_fingerprint,
         calc.cell_fingerprint(&path("/root"))

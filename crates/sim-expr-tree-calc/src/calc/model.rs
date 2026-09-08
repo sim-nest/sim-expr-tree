@@ -263,6 +263,14 @@ impl fmt::Debug for MemoValue {
     }
 }
 
+impl PartialEq for MemoValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.identity == other.identity
+    }
+}
+
+impl Eq for MemoValue {}
+
 impl Hash for MemoValue {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.identity.hash(state);
