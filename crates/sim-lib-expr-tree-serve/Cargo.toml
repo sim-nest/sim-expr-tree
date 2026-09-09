@@ -14,7 +14,7 @@ sim-codec-lisp = { version = "0.4.0" }
 sim-config = { version = "0.3.0" }
 sim-kernel = { version = "0.4.0" }
 sim-host-core = { version = "0.2.0" }
-sim-lib-expr-tree = { version = "0.4.0", path = "../sim-lib-expr-tree" }
+sim-lib-expr-tree = { version = "0.4.1", path = "../sim-lib-expr-tree" }
 sim-lib-expr-tree-server = { version = "0.4.0", path = "../sim-lib-expr-tree-server" }
 sim-lib-server = { version = "0.3.0" }
 sim-run-core = { version = "0.5.0" }

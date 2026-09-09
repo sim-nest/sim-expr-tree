@@ -740,7 +740,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "sim-citizen",
  "sim-citizen-derive",
@@ -1166,7 +1166,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-stream-fabric"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "sim-codec-binary",
  "sim-cookbook",
@@ -1221,7 +1221,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-view-expr-tree"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "sim-expr-tree-calc",
  "sim-kernel",
@@ -1286,7 +1286,7 @@ dependencies = [
 
 [[package]]
 name = "sim-run-core"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "sim-codec-config",
  "sim-config",
