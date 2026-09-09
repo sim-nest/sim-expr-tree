@@ -759,7 +759,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree-serve"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "sim-codec-lisp",
  "sim-config",
@@ -775,7 +775,7 @@ dependencies = [
 
 [[package]]
 name = "sim-lib-expr-tree-server"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "serde_json",
  "sim-codec-json",

@@ -10,7 +10,7 @@ publish = true
 description = "Bootloader-composed SIM expression-tree product."
 
 [dependencies]
-sim-lib-expr-tree-serve = { version = "0.3.0", path = "../sim-lib-expr-tree-serve" }
+sim-lib-expr-tree-serve = { version = "0.3.1", path = "../sim-lib-expr-tree-serve" }
 
 [lints]
 workspace = true
