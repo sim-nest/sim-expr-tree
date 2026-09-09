@@ -186,16 +186,15 @@ pub(super) const fn intersect_limits(left: CalcLimits, right: CalcLimits) -> Cal
 }
 
 pub(super) fn dependency_digest(
-    observations: &[sim_incremental_core::Observation<CalcQuery>],
+    observations: &[sim_incremental_core::SnapshotObservation<CalcQuery>],
 ) -> u64 {
     let mut digest = 0xcbf2_9ce4_8422_2325_u64;
     for observation in observations {
         for byte in format!(
-            "{:?}|{:?}|{}|{:?}",
-            observation.key(),
-            observation.kind(),
-            observation.revision().get(),
-            observation.fingerprint().map(ValueFingerprint::get)
+            "{:?}|{:?}|{}",
+            observation.key,
+            observation.kind,
+            observation.revision.get(),
         )
         .bytes()
         {

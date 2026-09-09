@@ -7,8 +7,7 @@ use std::{
 
 use sim_expr_tree_core::MountEpoch;
 use sim_incremental_core::{
-    ContinuationToken, GraphSnapshot, Observation, ObservationKind, Revision, SnapshotNode,
-    ValueFingerprint,
+    ContinuationToken, GraphSnapshot, ObservationKind, Revision, SnapshotNode,
 };
 use sim_kernel::{Cx, Expr, Symbol, Table, Value};
 
@@ -430,7 +429,7 @@ fn derive_reverse(
     for node in &graph.nodes {
         for observation in &node.dependencies {
             reverse
-                .entry(observation.key().clone())
+                .entry(observation.key.clone())
                 .or_insert_with(BTreeSet::new)
                 .insert(node.key.clone());
         }

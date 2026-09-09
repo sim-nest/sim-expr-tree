@@ -228,10 +228,10 @@ impl ExprTreeCalc {
                 .iter()
                 .take(MAX_RECEIPT_DEPENDENCIES)
                 .map(|observation| DependencyStamp {
-                    query: observation.key().clone(),
-                    kind: observation.kind().clone(),
-                    revision: observation.revision().get(),
-                    fingerprint: observation.fingerprint().map(ValueFingerprint::get),
+                    query: observation.key.clone(),
+                    kind: observation.kind.clone(),
+                    revision: observation.revision.get(),
+                    fingerprint: None,
                 })
                 .collect::<Vec<_>>();
             let succeeded = matches!(attempt.outcome, CalcOutcome::Succeeded);
@@ -256,7 +256,8 @@ impl ExprTreeCalc {
                 outcome: attempt.outcome,
                 result_fingerprint: succeeded
                     .then(|| {
-                        node.and_then(|node| node.fingerprint)
+                        self.engine
+                            .memo_fingerprint(&query)
                             .map(ValueFingerprint::get)
                     })
                     .flatten(),
