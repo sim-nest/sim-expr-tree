@@ -10,7 +10,7 @@ publish = true
 description = "Bootloader-loaded product recipe for SIM expression-tree sessions."
 
 [dependencies]
-sim-codec-lisp = { version = "0.4.0" }
+sim-codec-lisp = { version = "0.4.1" }
 sim-config = { version = "0.3.0" }
 sim-kernel = { version = "0.4.0" }
 sim-host-core = { version = "0.2.0" }
