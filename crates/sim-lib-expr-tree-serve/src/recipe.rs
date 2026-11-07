@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MPL-2.0
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Composition and lifecycle for the expression-tree product recipe.
 
 use std::sync::{
@@ -148,7 +153,7 @@ impl ExpressionTreeProduct {
                     .map_err(|_| Error::PoisonedLock("expression-tree browser context seed"))
                     .map(|seed| {
                         let value = next_handle_seed
-                            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
                                 value.checked_add(1)
                             })
                             .expect("expression-tree browser handle seed space exhausted");

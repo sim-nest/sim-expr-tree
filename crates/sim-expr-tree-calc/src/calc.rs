@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MPL-2.0
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 use std::{
     collections::{BTreeMap, BTreeSet},
     sync::{
@@ -159,7 +164,7 @@ impl ExprTreeCalc {
         let next_handle_seed = Arc::new(AtomicU64::new(first_handle_seed.0));
         Self::with_context_factory(move || {
             let seed = next_handle_seed
-                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |seed| {
+                .try_update(Ordering::Relaxed, Ordering::Relaxed, |seed| {
                     seed.checked_add(1)
                 })
                 .expect("expression-tree handle seed space exhausted");
