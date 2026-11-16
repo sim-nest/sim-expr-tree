@@ -92,8 +92,6 @@ claims_anchors = [
 ]
 claims_specimens = [
   "spec-test/sim-expr-tree/crates/sim-lib-expr-tree/src/tests",
-  "recipe/sim-expr-tree/crates/sim-lib-expr-tree/01-basics/finite-tree",
-  "recipe/sim-expr-tree/crates/sim-lib-expr-tree/02-calculation/automatic-and-directed",
 ]
 
 [[feature]]
@@ -177,7 +175,7 @@ title = "Server-backed expression-tree web UI"
 summary = "Compose the expression-tree SurfaceCodec and authoritative server site with RemoteTransport, isolated generic browser sessions, and desktop or phone Scene projections."
 owner = "crate/sim-lib-expr-tree-server"
 audiences = ["user", "code", "framework"]
-guidance = "Use ExpressionTreeWebSurfaceFactory when the generic SIM web shell should open one authoritative expression-tree resource. The factory maps one opaque browser alias to one server session, creates a fresh caller Cx and RemoteTransport for every browser id, registers the product SurfaceCodec, and injects that reversible surface through sim-web-shell's object-safe factory seam. The browser continues to run the one generic Scene interpreter and Intent emitter: there is no expression-tree JavaScript, transport, cache, or widget. Choose open SurfaceCaps for desktop or phone projection. Collapsed directories stay lazy, remote changes are scoped by resource, stale rendered revisions fail visibly, reconnect refreshes server state without widening caller authority, and the PWA cache remains shell-only. The checked recipe drives create, edit, automatic calculation, explanation, collapse, reconnect, stale failure, authority denial, session isolation, desktop and phone projection, generic browser painting, and deterministic review screenshots."
+guidance = "Use ExpressionTreeWebSurfaceFactory when the generic SIM web shell should open one authoritative expression-tree resource. The factory maps one opaque browser alias to one server session, creates a fresh caller Cx and RemoteTransport for every browser id, registers the product SurfaceCodec, and injects that reversible surface through sim-web-shell's object-safe factory seam. The browser continues to run the one generic Scene interpreter and Intent emitter: there is no expression-tree JavaScript, transport, cache, or widget. Choose open SurfaceCaps for desktop or phone projection. Collapsed directories stay lazy, remote changes are scoped by resource, stale rendered revisions fail visibly, reconnect refreshes server state without widening caller authority, and the PWA cache remains shell-only. The checked web specimen drives create, edit, automatic calculation, explanation, collapse, reconnect, stale failure, authority denial, session isolation, desktop and phone projection, generic browser painting, and deterministic review screenshots."
 supports = [
   "feature/sim-expr-tree/expression-tree-server",
   "feature/sim-expr-tree/expression-tree-view",
@@ -187,7 +185,7 @@ claims_anchors = [
   "anchor/rustdoc/sim-lib-expr-tree-server/expression-tree-web-surface-factory",
 ]
 claims_specimens = [
-  "recipe/sim-expr-tree/03-server/web-session",
+  "spec-test/sim-expr-tree/crates/sim-lib-expr-tree-server/src/tests/web",
 ]
 
 [[route]]

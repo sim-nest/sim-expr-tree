@@ -20,3 +20,6 @@ homepage = "https://github.com/sim-nest/sim-expr-tree"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+
+[workspace.metadata.sim]
+docs-command = "cargo run -p xtask -- simdoc"
